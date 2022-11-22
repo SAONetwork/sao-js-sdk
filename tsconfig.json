@@ -7,6 +7,8 @@
       "typeRoots": ["./node_modules/@types"],
       "paths": {
         "@js-sao-did/common": ["packages/common/src"],
+        "@js-sao-did/api-client": ["packages/api-client/src"],
+        "@js-sao-did/model": ["packages/model/src"],
         "@js-sao-did/sid": ["packages/sid/src"],
       }
     }

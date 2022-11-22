@@ -31,7 +31,10 @@
     "uint8arrays": "^3.0.0"
   },
   "jest": {
-    "moduleDirectories": ["node_modules", "src"],
+    "moduleDirectories": [
+      "node_modules",
+      "src"
+    ],
     "extensionsToTreatAsEsm": [
       ".ts"
     ],

@@ -1,7 +1,7 @@
 {
-  "name": "@js-sao-did/http-client",
+  "name": "@js-sao-did/api-client",
   "version": "0.0.0",
-  "description": "sao http client",
+  "description": "sao api client",
   "author": "Not@All <well@sao.network>",
   "homepage": "",
   "type": "module",
@@ -18,7 +18,8 @@
     "test": "yarn node --experimental-vm-modules $(yarn bin jest)"
   },
   "dependencies": {
-    "@js-sao-did/common": "^0.0.0"
+    "@js-sao-did/common": "^0.0.0",
+    "axios": "^1.1.3"
   },
   "jest": {
     "moduleDirectories": ["node_modules", "src"],
