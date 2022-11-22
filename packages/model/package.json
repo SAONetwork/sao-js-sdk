@@ -1,5 +1,5 @@
 {
-  "name": "@js-sao-model/model",
+  "name": "@js-sao-did/model",
   "version": "0.0.0",
   "description": "sao model management",
   "author": "Not@All <well@sao.network>",
@@ -18,10 +18,14 @@
     "test": "yarn node --experimental-vm-modules $(yarn bin jest)"
   },
   "dependencies": {
+    "@js-sao-did/api-client": "^0.0.0",
     "@js-sao-did/common": "^0.0.0"
   },
   "jest": {
-    "moduleDirectories": ["node_modules", "src"],
+    "moduleDirectories": [
+      "node_modules",
+      "src"
+    ],
     "extensionsToTreatAsEsm": [
       ".ts"
     ],

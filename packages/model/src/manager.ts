@@ -1,18 +1,64 @@
-import { Model, ModelProvider } from ".";
+import { GetNodeApiClient } from '@js-sao-did/api-client'
 
+import { ModelProvider } from ".";
+
+export type ModelProviderConfig = {
+    ownerDid: string;
+    chainApiUrl: string;
+    chainApiToken: string;
+    nodeApiUrl: string;
+    nodeApiToken: string;
+    platformId: string;
+}
 export class ModelManager {
-    private modelProvider: ModelProvider
+    private defaultModelProvider
+    private modelProviders: Record<string, ModelProvider>
 
-    private constructor(modelProvider: ModelProvider) {
-        this.modelProvider = modelProvider;
+    constructor(config: ModelProviderConfig) {
+        const nodeApiClient = GetNodeApiClient({
+            baseURL: config.nodeApiUrl,
+            headers: {
+                Authorization: 'Bearer ' + config.nodeApiToken,
+            }
+        });
+
+        this.defaultModelProvider = new ModelProvider(config.ownerDid, config.platformId, nodeApiClient);
+        this.modelProviders = {}
+        this.modelProviders[config.ownerDid] = this.defaultModelProvider;
     }
 
-    static async createManager(modelProvider: ModelProvider): Promise<ModelManager> {
-        const manager = new ModelManager(modelProvider);
-        return manager;
+    private getModelProvider(ownerDid: string): ModelProvider {
+        return this.modelProviders[ownerDid];
     }
 
-    public async loadModel(keyword: string): Promise<Model> {
-        return this.modelProvider.load(keyword);
+    addModelProvider(config: ModelProviderConfig) {
+        const nodeApiClient = GetNodeApiClient({
+            baseURL: config.nodeApiUrl,
+            headers: {
+                Authorization: 'Bearer ' + config.nodeApiToken,
+            }
+        });
+
+        const provider = new ModelProvider(config.ownerDid, config.platformId, nodeApiClient);
+        this.modelProviders[config.ownerDid] = provider;
+    }
+
+    async loadModel<T>(keyword: string, ownerDid?: string, commitId?: string, version?: string): Promise<T> {
+        var provider = this.defaultModelProvider
+        if (ownerDid !== undefined) {
+            provider = this.getModelProvider(ownerDid)
+        }
+
+        return new Promise((resolve, reject) => {
+            provider.load({
+                keyword,
+                commitId,
+                version,
+            }).then(model => {
+                resolve(model.cast())
+            }).catch(err => {
+                reject(err)
+            })
+        })
     }
 }
