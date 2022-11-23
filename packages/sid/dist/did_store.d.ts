@@ -1,7 +1,7 @@
-import { Account, BindingProof } from './index';
+import { BindingProof } from './index';
 import { JWE } from "did-jwt";
 export interface Binding {
-    account: Account;
+    accountId: string;
     did: string;
     proof: string;
 }
@@ -11,9 +11,12 @@ export interface AccountAuth {
     sidEncryptedAccount: JWE;
 }
 export interface DidStore {
-    addBinding(account: Account, sid: string, proof: BindingProof): Promise<void>;
-    getBinding(account: Account): Promise<Binding | null>;
-    addAccountAuth(accountAuth: AccountAuth): Promise<void>;
-    getAccountAuth(accountDid: string): Promise<AccountAuth | null>;
-    updateSidDocument(signingKey: string, encryptKey: string): Promise<string>;
+    addBinding(accountId: string, sid: string, proof: BindingProof): Promise<void>;
+    getBinding(accountId: string): Promise<Binding | null>;
+    addAccountAuth(did: string, accountAuth: AccountAuth): Promise<void>;
+    getAccountAuth(did: string, accountDid: string): Promise<AccountAuth | null>;
+    updateAccountAuths(did: string, update: Array<AccountAuth>, remove: Array<string>): Promise<void>;
+    getAllAccountAuth(did: string): Promise<Record<string, AccountAuth>>;
+    updateSidDocument(signingKey: string, encryptKey: string, rootDocId?: string): Promise<string>;
+    listSidDocumentVersions(rootDocId: string): Promise<Array<string>>;
 }
