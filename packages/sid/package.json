@@ -19,6 +19,7 @@
   },
   "dependencies": {
     "@ethersproject/hdnode": "^5.7.0",
+    "@js-sao-did/api-client": "^0.0.0",
     "@js-sao-did/common": "^0.0.0",
     "@stablelib/x25519": "^1.0.3",
     "did-jwt": "^6.9.0",

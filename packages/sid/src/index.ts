@@ -24,3 +24,5 @@ export interface BindingProof {
     timestamp: number
     did: string
 }
+
+export * from './manager'

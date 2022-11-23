@@ -1,4 +1,7 @@
-import { CreateRequestClient, SaoNodeAPISchema } from '@js-sao-did/api-client'
+import { JWS } from "@js-sao-did/common";
+import { BuildCreateReqParams, BuildLoadReqParams, BuildNodeAddressReqParams, BuildRenewReqParams, BuildUpdateReqParams, CreateRequestClient, SaoNodeAPISchema } from '@js-sao-did/api-client'
+import { ClientOrderProposal, LoadReq, Proposal } from './types'
+import { Uint8ArrayToString } from './utils';
 export class Model {
     dataId: string;
     alias: string;
@@ -21,32 +24,48 @@ export class Model {
     }
 }
 
-export type LoadModelRequest = {
-    keyword: string;
-    commitId: string | undefined;
-    version: string | undefined;
-}
-
 export class ModelProvider {
     private ownerSid: string
     private groupId: string
+    private nodeAddress: string
     private nodeApiClient: CreateRequestClient<SaoNodeAPISchema>
 
     public constructor(ownerSid: string, groupId: string, nodeApiClient: CreateRequestClient<SaoNodeAPISchema>) {
         this.ownerSid = ownerSid;
         this.groupId = groupId;
         this.nodeApiClient = nodeApiClient;
+
+        this.nodeAddress = ""
+        this.nodeApiClient.jsonRpcApi(BuildNodeAddressReqParams()).then((res: any) => {
+            this.nodeAddress = res.data
+        }).catch((err:Error) => {
+            console.error(err)
+        })
     }
 
-    async load(request: LoadModelRequest): Promise<Model> {
+    getOwnerSid(): string {
+        return this.ownerSid
+    }
+
+    getGroupId(): string {
+        return this.groupId
+    }
+
+    getNodeAddress(): string {
+        return this.nodeAddress
+    }
+
+    validate(proposal: Proposal): boolean {
+        return proposal.groupId === this.groupId && proposal.owner === this.ownerSid
+    }
+
+    async create(clientProposal: JWS, orderId: number, content: Uint8Array): Promise<Model> {
         return new Promise((resolve, reject) => {
-            this.nodeApiClient.load({
-                KeyWord: request.keyword,
-                PublicKey: this.ownerSid,
-                GroupId: this.groupId,
-                CommitId: request.commitId,
-                Version: request.version,
-            }).then((res: any) => {
+            this.nodeApiClient.jsonRpcApi(BuildCreateReqParams(
+                clientProposal,
+                orderId,
+                content
+            )).then((res: any) => {
                 try {
                     const model = JSON.parse(res)
                     resolve(new Model(model.dataId, model.alias, model.Content))
@@ -59,23 +78,59 @@ export class ModelProvider {
 
         });
     }
-}
 
-export const Uint8ArrayToString = (dataArray: Uint8Array) => {
-    var dataString = "";
-    for (var i = 0; i < dataArray.length; i++) {
-        dataString += String.fromCharCode(dataArray[i]);
+    async load(req: LoadReq): Promise<Model> {
+        return new Promise((resolve, reject) => {
+            this.nodeApiClient.jsonRpcApi(BuildLoadReqParams(req)).then((res: any) => {
+                try {
+                    const model = JSON.parse(res)
+                    resolve(new Model(model.dataId, model.alias, model.Content))
+                } catch {
+                    reject("not found");
+                }
+            }).catch((err: Error) => {
+                reject(err);
+            })
+
+        });
     }
 
-    return dataString
-}
+    async update(clientProposal: ClientOrderProposal, orderId: number, patch: Uint8Array): Promise<Model> {
+        return new Promise((resolve, reject) => {
+            this.nodeApiClient.jsonRpcApi(BuildUpdateReqParams(
+                clientProposal,
+                orderId,
+                patch
+            )).then((res: any) => {
+                try {
+                    const model = JSON.parse(res)
+                    resolve(new Model(model.dataId, model.alias, model.Content))
+                } catch {
+                    reject("not found");
+                }
+            }).catch((err: Error) => {
+                reject(err);
+            })
 
-export const stringToUint8Array = (dataString: string) => {
-    var dataArray = []
-    for (var i = 0, j = dataString.length; i < j; ++i) {
-        dataArray.push(dataString.charCodeAt(i));
+        });
     }
 
-    var tmpUint8Array = new Uint8Array(dataArray);
-    return tmpUint8Array
+    async renew(clientProposal: ClientOrderProposal, orderId: number): Promise<Model> {
+        return new Promise((resolve, reject) => {
+            this.nodeApiClient.jsonRpcApi(BuildRenewReqParams(
+                clientProposal,
+                orderId,
+            )).then((res: any) => {
+                try {
+                    const model = JSON.parse(res)
+                    resolve(new Model(model.dataId, model.alias, model.Content))
+                } catch {
+                    reject("not found");
+                }
+            }).catch((err: Error) => {
+                reject(err);
+            })
+
+        });
+    }
 }

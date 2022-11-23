@@ -7,7 +7,7 @@ export declare class Account {
 export interface AccountProvider {
     account(): Promise<Account>;
     sign(message: string): Promise<string>;
-    generateBindingProof(did: string): BindingProof;
+    generateBindingProof(did: string): Promise<BindingProof>;
 }
 export interface BindingProof {
     chainId: string;
@@ -15,3 +15,4 @@ export interface BindingProof {
     timestamp: number;
     did: string;
 }
+export * from './manager';
