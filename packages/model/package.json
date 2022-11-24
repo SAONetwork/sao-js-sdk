@@ -1,15 +1,12 @@
 {
-  "name": "@js-sao-did/sid",
+  "name": "@js-sao-did/model",
   "version": "0.0.0",
-  "description": "sao did that support binds multiple wallets",
-  "author": "LeoR <leo@sao.network>",
+  "description": "sao model management",
+  "author": "Not@All <well@sao.network>",
   "homepage": "",
+  "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
-  "type": "module",
-  "exports": {
-    ".": "./dist/index.js"
-  },
   "files": [
     "dist"
   ],
@@ -21,22 +18,10 @@
     "test": "yarn node --experimental-vm-modules $(yarn bin jest)"
   },
   "dependencies": {
-    "@cosmjs/proto-signing": "^0.29.4",
-    "@ethersproject/hdnode": "^5.7.0",
     "@js-sao-did/api-client": "^0.0.0",
     "@js-sao-did/common": "^0.0.0",
-    "@stablelib/x25519": "^1.0.3",
-    "SaoNetwork-sao-client-ts": "/home/leor/workspace/12ship/sao/sao-consensus/ts-client",
-    "axios": "0.27.2",
-    "caip": "^1.1.0",
-    "did-jwt": "^6.9.0",
-    "did-resolver": "^3.2.2",
-    "dids": "^3.4.0",
-    "ethers": "^5.7.2",
-    "fast-json-stable-stringify": "^2.1.0",
-    "key-did-provider-ed25519": "^2.0.0",
-    "key-did-resolver": "^2.0.0",
-    "uint8arrays": "^3.0.0"
+    "cids": "^1.1.9",
+    "multihashing-async": "^2.1.4"
   },
   "jest": {
     "moduleDirectories": [
@@ -49,9 +34,8 @@
     "moduleNameMapper": {
       "^(\\.{1,2}/.*)\\.js$": "$1"
     },
-    "transformIgnorePatterns": [],
     "transform": {
-      "^.+\\.tsx?$": [
+      "^.+\\.(t|j)s$": [
         "@swc/jest",
         {
           "root": "../.."
