@@ -10,6 +10,7 @@ import { JWE } from "did-jwt";
 import * as u8a from 'uint8arrays';
 import { MsgUpdateSidDocumentResponse } from "SaoNetwork-sao-client-ts/saonetwork.sao.did/types/sao/did/tx";
 import {TxMsgData} from "SaoNetwork-sao-client-ts/cosmos.tx.v1beta1/types/cosmos/base/abci/v1beta1/abci";
+import { hexConcat } from "ethers/lib/utils";
 
 export class CosmosDidStore implements DidStore {
     private signer: OfflineSigner
@@ -213,8 +214,8 @@ export class CosmosDidStore implements DidStore {
             console.log(`update sid document succeed. tx=${txResult.transactionHash}`);
             const r = await this.client.CosmosTxV1Beta1.query.serviceGetTx(txResult.transactionHash);
             if (r.status === 200) {
-                console.log(TxMsgData.decode(u8a.fromString(r.data.tx_response.data)));
-                return "";
+                const decoded = u8a.fromString(r.data.tx_response.data.toLowerCase(), 'base16');
+                return MsgUpdateSidDocumentResponse.decode(TxMsgData.decode(decoded).msgResponses[0].value).docId;
             } else {
                 throw new Error(`update sid document failed. ${r.statusText}`);
             }

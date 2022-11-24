@@ -78,7 +78,6 @@ describe('cosmos client', () => {
         const wallet = await DirectSecp256k1HdWallet.fromMnemonic(mnemonic);
         const didStore = new CosmosDidStore(wallet);
         const accountProvider = await SaoAccountProvider.newSaoAccountProvider(wallet);
-        const did = "did:sid:" + guid();
 
         const seed = randomBytes(32);
         const rootNode = HDNode.fromSeed(seed);
@@ -98,13 +97,5 @@ describe('cosmos client', () => {
         expect(versions.length).toBe(1);
         expect(versions[0]).toBe(docid);
     });
-
-    // it('test decode', async () => {
-    //     const writer = MsgUpdateSidDocumentResponse.encode({
-    //         docId: "eada341bd41aa65e565eed86229d49b39b86c21c77b7c3ac1e89ee5124cee8bd"
-    //     });
-    //     const b = writer.finish();
-    //     console.log(b);
-    // });
 
 });
