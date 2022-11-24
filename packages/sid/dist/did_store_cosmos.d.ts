@@ -1,30 +1,22 @@
-import { BindingProof } from './types';
-import { JWE } from "did-jwt";
-export interface AccountAuth {
-    accountDid: string;
-    accountEncryptedSeed: JWE;
-    sidEncryptedAccount: JWE;
-}
-export interface DidStore {
-    /**
-     *
-     * @param proof
-     */
+import { BindingProof } from "./types";
+import { DidStore, AccountAuth } from "./did_store";
+import { OfflineSigner } from "@cosmjs/proto-signing";
+export declare class CosmosDidStore implements DidStore {
+    private signer;
+    private client;
+    private didQueryClient;
+    constructor(signer: OfflineSigner, apiURL?: string, rpcURL?: string, prefix?: string);
     addBinding(proof: BindingProof): Promise<void>;
     /**
      *
      * @param accountId
-     * @return did
+     * @returns binded did
      */
     getBinding(accountId: string): Promise<string | null>;
-    /**
-     *
-     * @param accountId
-     */
     removeBinding(accountId: string): Promise<void>;
     addAccountAuth(did: string, accountAuth: AccountAuth): Promise<void>;
     getAccountAuth(did: string, accountDid: string): Promise<AccountAuth | null>;
-    updateAccountAuths(did: string, update: Array<AccountAuth>, remove: Array<string>): Promise<void>;
+    updateAccountAuths(did: string, update: AccountAuth[], remove: string[]): Promise<void>;
     getAllAccountAuth(did: string): Promise<AccountAuth[]>;
     updateSidDocument(signingKey: string, encryptKey: string, rootDocId?: string): Promise<string>;
     listSidDocumentVersions(rootDocId: string): Promise<Array<string>>;

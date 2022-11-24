@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment */
-import { AccountProvider } from './index';
+import { AccountProvider } from './account_provider';
 import * as u8a from 'uint8arrays';
 import {hash} from '@stablelib/sha256';
 import {fromString} from 'uint8arrays';
@@ -29,8 +29,9 @@ export function encodeKey(key: Uint8Array, keyType: string): string {
     return `z${u8a.toString(bytes, 'base58btc')}`
 }
 
-export async function generateAccountSecret(accountProvider: AccountProvider, accountId: string): Promise<Uint8Array> {
-    const message = " allows " + accountId + " to control the did";
+export async function generateAccountSecret(accountProvider: AccountProvider): Promise<Uint8Array> {
+    const account = await accountProvider.accountId();
+    const message = " allows " + account.toString() + " to control the did";
     const signedMessage = await accountProvider.sign(message);
     return hash(fromString(signedMessage.slice(2)));
 }
