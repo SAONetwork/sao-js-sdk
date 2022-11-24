@@ -21,5 +21,9 @@
     "build": "yarn build:clean && yarn build:types && yarn build:js"
   },
   "dependencies": {
+    "@cosmjs/proto-signing": "^0.29.4",
+    "axios": "0.27.2",
+    "caip": "^1.1.0",
+    "jest": "^29.3.1"
   }
 }

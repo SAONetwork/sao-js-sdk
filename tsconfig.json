@@ -7,7 +7,7 @@
       "typeRoots": ["./node_modules/@types"],
       "paths": {
         "@js-sao-did/common": ["packages/common/src"],
-        "@js-sao-did/sid": ["packages/sid/src"],
+        "@js-sao-did/sid": ["packages/sid/src"]
       }
     }
 }

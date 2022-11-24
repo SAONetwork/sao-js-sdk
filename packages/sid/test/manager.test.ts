@@ -1,4 +1,3 @@
-import { DidStore } from "../src/did_store";
 import { MockAccountProvider } from "./mock_accountprovider";
 import { SidManager } from '../src/manager';
 import { MockDidStore } from "./mock_didstore";

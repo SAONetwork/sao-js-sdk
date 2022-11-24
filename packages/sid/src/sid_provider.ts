@@ -1,34 +1,44 @@
 import { Keychain } from "./keychain";
-import { AccountProvider, Account } from "./index";
+import { AccountProvider } from "./account_provider";
 import { accountSecretToDid, generateAccountSecret, toJWS, toStableObject } from "./utils";
 import { createJWS } from 'did-jwt';
 import { AuthenticateParam, CreateJWSParam, JWS } from "@js-sao-did/common";
 import { DidStore } from "./did_store";
 
+/**
+ * sid provider
+ */
 export class SidProvider {
     keychain: Keychain
     sid: string
 
-    constructor(keychain: Keychain, Sid: string) {
+    private constructor(keychain: Keychain, sid: string) {
         this.keychain = keychain;
-        this.sid = Sid;
+        this.sid = sid;
     }
 
+    /**
+     * generate new sid for the given account.
+     * 
+     * @param didStore 
+     * @param accountProvider 
+     * @returns 
+     */
     static async newFromAccount(didStore: DidStore, accountProvider: AccountProvider): Promise<SidProvider> {
-        const account = await accountProvider.account()
-        const accountSecret = await generateAccountSecret(accountProvider, account.id());
+        const account = await accountProvider.accountId()
+        const accountSecret = await generateAccountSecret(accountProvider);
         const keychain = await Keychain.create(didStore);
-        await keychain.add(account.id(), accountSecret);
+        await keychain.add(account.toString(), accountSecret);
         const did = keychain.did;
-        const bindingProof = accountProvider.generateBindingProof(did);
-        await didStore.addBinding(account.id(), did, bindingProof);
+        const bindingProof = await accountProvider.generateBindingProof(did);
+        await didStore.addBinding(bindingProof);
 
         return new SidProvider(keychain, did);
     }
 
     static async recoverFromAccount(didStore: DidStore, accountProvider: AccountProvider, did: string): Promise<SidProvider> {
-        const account = await accountProvider.account()
-        const accountSecret = await generateAccountSecret(accountProvider, account.id());
+        const account = await accountProvider.accountId()
+        const accountSecret = await generateAccountSecret(accountProvider);
         const accountDid = await accountSecretToDid(accountSecret);
         const accountAuth = await didStore.getAccountAuth(did, accountDid.id);
         if (!accountAuth) {

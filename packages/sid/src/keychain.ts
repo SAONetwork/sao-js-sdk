@@ -2,7 +2,7 @@ import { HDNode } from '@ethersproject/hdnode';
 import * as u8a from 'uint8arrays';
 import { generateKeyPairFromSeed } from '@stablelib/x25519';
 import { randomBytes } from '@stablelib/random';
-import { ES256KSigner, Signer, createJWE, x25519Encrypter, JWE, x25519Decrypter, decryptJWE, Decrypter } from 'did-jwt';
+import { ES256KSigner, Signer, createJWE, x25519Encrypter, x25519Decrypter, decryptJWE } from 'did-jwt';
 import { accountSecretToDid, encodeKey, parseJWEKids } from './utils';
 import { DidStore } from './did_store';
 import { AccountAuth } from './did_store';
