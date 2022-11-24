@@ -38,6 +38,11 @@
     "key-did-resolver": "^2.0.0",
     "uint8arrays": "^3.0.0"
   },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:SaoNetwork/js-sao-did.git",
+    "directory": "packages/sid"
+  },
   "jest": {
     "moduleDirectories": [
       "node_modules",
