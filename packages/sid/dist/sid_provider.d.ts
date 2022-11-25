@@ -18,7 +18,7 @@ export declare class SidProvider {
      */
     static newFromAccount(didStore: DidStore, accountProvider: AccountProvider): Promise<SidProvider>;
     static recoverFromAccount(didStore: DidStore, accountProvider: AccountProvider, did: string): Promise<SidProvider>;
-    sign(payload: Record<string, any> | string, didWithFragment: string, protectedHeader?: Record<string, any>): Promise<JWS>;
+    private sign;
     authenticate(param: AuthenticateParam): Promise<JWS>;
     createJWS(param: CreateJWSParam): Promise<JWS>;
 }

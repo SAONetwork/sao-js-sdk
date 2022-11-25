@@ -1,44 +1,28 @@
 import { AccountId } from "caip";
-import { AccountProvider } from "./account_provider";
-import { BindingProof } from "./types";
-import { makeSignDoc, OfflineDirectSigner } from "@cosmjs/proto-signing"; 
+import { makeSignDoc } from "@cosmjs/proto-signing";
 import * as u8a from 'uint8arrays';
-
-export class SaoAccountProvider implements AccountProvider {
-    private address: string
-    private signer: OfflineDirectSigner
-
-    static async newSaoAccountProvider(signer: OfflineDirectSigner): Promise<SaoAccountProvider> {
+export class SaoAccountProvider {
+    static async newSaoAccountProvider(signer) {
         const account = await signer.getAccounts();
         const address = account[0].address;
         return new SaoAccountProvider(signer, address);
     }
-
-    private constructor(signer: OfflineDirectSigner, address: string) {
-        this.signer = signer;
-        this.address = address;
-    }
-
-    private namespace(): string {
+    namespace() {
         return "cosmos";
     }
-
-    private reference(): string {
+    reference() {
         return "sao";
     }
-
-    chainId(): string {
+    chainId() {
         return `${this.namespace()}:${this.reference()}`;
     }
-
-    async accountId(): Promise<AccountId> {
+    async accountId() {
         return new AccountId({
             address: this.address,
             chainId: this.chainId()
         });
     }
-
-    async sign(message: string): Promise<string> {
+    async sign(message) {
         // not a tx sign. default authinfo and account number.
         const signDoc = makeSignDoc(u8a.fromString(message), u8a.fromString(""), "sao", 0);
         console.log(`sign from address: ${this.address}`);
@@ -51,8 +35,7 @@ export class SaoAccountProvider implements AccountProvider {
             throw e;
         }
     }
-
-    async generateBindingProof(did: string): Promise<BindingProof> {
+    async generateBindingProof(did) {
         const timestamp = Date.now();
         const message = `Link this account to your did: ${did}\nTimestamp: ${timestamp}`;
         const signed = await this.sign(message);
@@ -65,5 +48,8 @@ export class SaoAccountProvider implements AccountProvider {
             accountId: accountId.toString()
         };
     }
-
+    constructor(signer, address){
+        this.signer = signer;
+        this.address = address;
+    }
 }

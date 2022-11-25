@@ -1,39 +1,23 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-argument */
-import { AccountProvider } from "./account_provider";
-import { SidProvider } from "./sid_provider";
-import { DidStore } from "./did_store";
+/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-argument */ import { SidProvider } from "./sid_provider";
 import { generateAccountSecret } from "./utils";
-
 export class SidManager {
-    private didStore: DidStore
-    private accountProvider: AccountProvider
-    private sidProviders: Record<string, SidProvider>
-
-    private constructor(accountProvider: AccountProvider, didStore: DidStore) {
-        this.accountProvider = accountProvider;
-        this.didStore = didStore;
-        this.sidProviders = {};
-    }
-
-    static async createManager(accountProvider: AccountProvider, didStore: DidStore, did?: string): Promise<SidManager> {
+    static async createManager(accountProvider, didStore, did) {
         const manager = new SidManager(accountProvider, didStore);
         await manager.prepareSidProvider(did);
         return manager;
     }
-
     // change to a new account provider.
-    async setAccountProvider(accountProvider: AccountProvider, did?: string) {
+    async setAccountProvider(accountProvider, did) {
         this.accountProvider = accountProvider;
         await this.prepareSidProvider(did);
     }
-
-    private async prepareSidProvider(did?: string): Promise<void> {
+    async prepareSidProvider(did) {
         const account = await this.accountProvider.accountId();
         const bindingDid = await this.didStore.getBinding(account.toString());
         console.log(`binding did for ${account.toString()}: ${bindingDid}`);
         if (bindingDid) {
             if (this.sidProviders[bindingDid]) {
-                return
+                return;
             }
             const sidProvider = await SidProvider.recoverFromAccount(this.didStore, this.accountProvider, bindingDid);
             this.sidProviders[sidProvider.sid] = sidProvider;
@@ -42,13 +26,12 @@ export class SidManager {
                 await this.bind(account.toString(), did);
             } else {
                 console.log("new did provider.");
-                const sidProvider = await SidProvider.newFromAccount(this.didStore, this.accountProvider);
-                this.sidProviders[sidProvider.sid] = sidProvider;
+                const sidProvider1 = await SidProvider.newFromAccount(this.didStore, this.accountProvider);
+                this.sidProviders[sidProvider1.sid] = sidProvider1;
             }
         }
     }
-
-    private async bind(accountId: string, did: string): Promise<void> {
+    async bind(accountId, did) {
         if (!this.sidProviders[did]) {
             throw new Error(`${did} provider is not managed.`);
         }
@@ -57,8 +40,7 @@ export class SidManager {
         const accountSecret = await generateAccountSecret(this.accountProvider);
         await this.sidProviders[did].keychain.add(accountId, accountSecret);
     }
-
-    async unbind(): Promise<void> {
+    async unbind() {
         const account = await this.accountProvider.accountId();
         const bindingDid = await this.didStore.getBinding(account.toString());
         if (bindingDid) {
@@ -72,12 +54,10 @@ export class SidManager {
             console.log("binding doesn't exist");
         }
     }
-
-    listDids(): Array<string> {
+    listDids() {
         return Object.keys(this.sidProviders);
     }
-
-    async getSidProvider(): Promise<SidProvider | null> {
+    async getSidProvider() {
         const account = await this.accountProvider.accountId();
         const bindingDid = await this.didStore.getBinding(account.toString());
         if (bindingDid) {
@@ -86,5 +66,9 @@ export class SidManager {
             return null;
         }
     }
-
+    constructor(accountProvider, didStore){
+        this.accountProvider = accountProvider;
+        this.didStore = didStore;
+        this.sidProviders = {};
+    }
 }
