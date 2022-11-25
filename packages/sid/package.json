@@ -21,12 +21,13 @@
     "test": "yarn node --experimental-vm-modules $(yarn bin jest)"
   },
   "dependencies": {
+    "buffer": "^6.0.3",
+    "@keplr-wallet/types": "^0.11.17",
     "@cosmjs/proto-signing": "^0.29.4",
     "@ethersproject/hdnode": "^5.7.0",
-    "@js-sao-did/api-client": "^0.0.0",
     "@js-sao-did/common": "^0.0.0",
     "@stablelib/x25519": "^1.0.3",
-    "SaoNetwork-sao-client-ts": "/home/leor/workspace/12ship/sao/sao-consensus/ts-client",
+    "SaoNetwork-sao-client-ts": "https://github.com/rleor/sao-ts-client.git",
     "axios": "0.27.2",
     "caip": "^1.1.0",
     "did-jwt": "^6.9.0",

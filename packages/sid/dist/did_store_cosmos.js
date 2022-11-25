@@ -1,43 +1,12 @@
-import { BindingProof, BindingProofV1 } from "./types";
-import { DidStore, AccountAuth } from "./did_store";
+import { BindingProofV1 } from "./types";
 import { Client } from "SaoNetwork-sao-client-ts";
 import { queryClient as didQueryClient } from "SaoNetwork-sao-client-ts/dist/saonetwork.sao.did";
-import { Api } from "SaoNetwork-sao-client-ts/dist/saonetwork.sao.did/rest";
 import stringify from 'fast-json-stable-stringify';
-import { OfflineSigner } from "@cosmjs/proto-signing";
-import { AxiosError } from "axios";
-import { JWE } from "did-jwt";
 import * as u8a from 'uint8arrays';
 import { MsgUpdateSidDocumentResponse } from "SaoNetwork-sao-client-ts/dist/saonetwork.sao.did/types/sao/did/tx";
-import {TxMsgData} from "SaoNetwork-sao-client-ts/dist/cosmos.tx.v1beta1/types/cosmos/base/abci/v1beta1/abci";
-import { hexConcat } from "ethers/lib/utils";
-
-export class CosmosDidStore implements DidStore {
-    private signer: OfflineSigner
-    private client: InstanceType<typeof Client>
-    private didQueryClient: Api<unknown>
-
-    constructor(signer: OfflineSigner, apiURL?: string, rpcURL?: string, prefix?: string) {
-        this.signer = signer;
-        const api = apiURL || process.env.COSMOS_API_URL || 'http://localhost:1317';
-        const rpc = rpcURL || process.env.COSMOS_RPC_URL || 'http://localhost:26657';
-        const addressPrefix = prefix || process.env.COSMOS_PREFIX || "cosmos";
-
-        console.log("cosmos did store: ");
-        console.log("api url: ", api);
-        console.log("rpc url: ", rpc);
-        console.log("prefix: ", addressPrefix);
-
-        this.client = new Client({
-            apiURL: api,
-            rpcURL: rpc,
-            prefix: addressPrefix
-        }, signer);
-
-        this.didQueryClient = didQueryClient({addr: api});
-    }
-
-    async addBinding(proof: BindingProof): Promise<void> {
+import { TxMsgData } from "SaoNetwork-sao-client-ts/dist/cosmos.tx.v1beta1/types/cosmos/base/abci/v1beta1/abci";
+export class CosmosDidStore {
+    async addBinding(proof) {
         const account = await this.signer.getAccounts();
         const txResult = await this.client.SaonetworkSaoDid.tx.sendMsgAddBinding({
             value: {
@@ -50,9 +19,9 @@ export class CosmosDidStore implements DidStore {
                     did: proof.did,
                     timestamp: proof.timestamp,
                     // TODO:
-                    version: BindingProofV1,
+                    version: BindingProofV1
                 }
-            },
+            }
         });
         if (txResult.code != 0) {
             console.log(`bind account failed. tx=${txResult.transactionHash} code=${txResult.code}`);
@@ -60,15 +29,13 @@ export class CosmosDidStore implements DidStore {
         } else {
             console.log(`bind account ${proof.accountId} -> did ${proof.did} succeed. tx=${txResult.transactionHash}`);
         }
-        return
+        return;
     }
-
     /**
      * 
      * @param accountId 
      * @returns binded did
-     */
-    async getBinding(accountId: string): Promise<string | null> {
+     */ async getBinding(accountId) {
         try {
             const binding = await this.didQueryClient.queryDidBindingProofs(accountId + ':');
             if (binding.status === 200) {
@@ -77,15 +44,14 @@ export class CosmosDidStore implements DidStore {
                 throw new Error('failed to query binding for accountid ' + accountId);
             }
         } catch (e) {
-            const ae = e as AxiosError
+            const ae = e;
             if (ae.response?.status === 404) {
                 return null;
             }
             throw new Error('failed to query binding for accountid ' + accountId);
         }
     }
-
-    async removeBinding(accountId: string): Promise<void> {
+    async removeBinding(accountId) {
         const account = await this.signer.getAccounts();
         const txResult = await this.client.SaonetworkSaoDid.tx.sendMsgUnbinding({
             value: {
@@ -101,8 +67,7 @@ export class CosmosDidStore implements DidStore {
             console.log(`unbind account succeed. tx=${txResult.transactionHash}`);
         }
     }
-
-    async addAccountAuth(did: string, accountAuth: AccountAuth): Promise<void> {
+    async addAccountAuth(did, accountAuth) {
         const account = await this.signer.getAccounts();
         const txResult = await this.client.SaonetworkSaoDid.tx.sendMsgAddAccountAuth({
             value: {
@@ -122,32 +87,30 @@ export class CosmosDidStore implements DidStore {
             console.log(`add account auth succeed. tx=${txResult.transactionHash}`);
         }
     }
-
-    async getAccountAuth(did: string, accountDid: string): Promise<AccountAuth | null> {
+    async getAccountAuth(did, accountDid) {
         try {
             const accountAuth = await this.didQueryClient.queryAccountAuth(accountDid + ':');
             if (accountAuth.status == 200) {
                 return {
                     accountDid: accountAuth.data.accountAuth.accountDid,
-                    sidEncryptedAccount: JSON.parse(accountAuth.data.accountAuth.sidEncryptedAccount) as JWE,
-                    accountEncryptedSeed: JSON.parse(accountAuth.data.accountAuth.accountEncryptedSeed) as JWE
+                    sidEncryptedAccount: JSON.parse(accountAuth.data.accountAuth.sidEncryptedAccount),
+                    accountEncryptedSeed: JSON.parse(accountAuth.data.accountAuth.accountEncryptedSeed)
                 };
             } else {
                 throw new Error('failed to account auth for accountdid ' + accountDid);
             }
         } catch (e) {
             console.log(e);
-            const ae = e as AxiosError
+            const ae = e;
             if (ae.response?.status === 404) {
                 return null;
             }
             throw new Error(`failed to account auth for accountdid ${accountDid}. error: ${e}`);
         }
     }
-
-    async updateAccountAuths(did: string, update: AccountAuth[], remove: string[]): Promise<void> {
+    async updateAccountAuths(did, update, remove) {
         var updates = [];
-        update.forEach(u => {
+        update.forEach((u)=>{
             updates.push({
                 accountDid: u.accountDid,
                 accountEncryptedSeed: u.accountEncryptedSeed,
@@ -170,17 +133,16 @@ export class CosmosDidStore implements DidStore {
             console.log(`add account auth succeed. tx=${txResult.transactionHash}`);
         }
     }
-
-    async getAllAccountAuth(did: string): Promise<AccountAuth[]> {
+    async getAllAccountAuth(did) {
         try {
             const resp = await this.didQueryClient.queryGetAllAccountAuths(did + ":");
             if (resp.status === 200) {
-                var auths: AccountAuth[] = [];
-                resp.data.accountAuths.forEach(a => {
+                var auths = [];
+                resp.data.accountAuths.forEach((a)=>{
                     auths.push({
                         accountDid: a.accountDid,
-                        sidEncryptedAccount: JSON.parse(a.sidEncryptedAccount) as JWE,
-                        accountEncryptedSeed: JSON.parse(a.accountEncryptedSeed) as JWE
+                        sidEncryptedAccount: JSON.parse(a.sidEncryptedAccount),
+                        accountEncryptedSeed: JSON.parse(a.accountEncryptedSeed)
                     });
                 });
                 return auths;
@@ -188,15 +150,14 @@ export class CosmosDidStore implements DidStore {
                 throw new Error('failed to get all account auths for did ' + did);
             }
         } catch (e) {
-            const ae = e as AxiosError
+            const ae = e;
             if (ae.response?.status === 404) {
                 return [];
             }
             throw new Error(`failed to get all account auths for did ${did}. error: ${e}`);
         }
     }
-
-    async updateSidDocument(signingKey: string, encryptKey: string, rootDocId?: string): Promise<string> {
+    async updateSidDocument(signingKey, encryptKey, rootDocId) {
         const account = await this.signer.getAccounts();
         const txResult = await this.client.SaonetworkSaoDid.tx.sendMsgUpdateSidDocument({
             value: {
@@ -221,8 +182,7 @@ export class CosmosDidStore implements DidStore {
             }
         }
     }
-
-    async listSidDocumentVersions(rootDocId: string): Promise<Array<string>> {
+    async listSidDocumentVersions(rootDocId) {
         try {
             const resp = await this.didQueryClient.querySidDocumentVersion(rootDocId);
             if (resp.status === 200) {
@@ -231,11 +191,29 @@ export class CosmosDidStore implements DidStore {
                 throw new Error(`failed to get all sid document for root doc id ${rootDocId}.`);
             }
         } catch (e) {
-            const ae = e as AxiosError
+            const ae = e;
             if (ae.response?.status === 404) {
                 return [];
             }
             throw new Error(`failed to get all sid document for root doc id ${rootDocId}.`);
         }
+    }
+    constructor(signer, apiURL, rpcURL, prefix){
+        this.signer = signer;
+        const api = apiURL || process.env.COSMOS_API_URL || 'http://localhost:1317';
+        const rpc = rpcURL || process.env.COSMOS_RPC_URL || 'http://localhost:26657';
+        const addressPrefix = prefix || process.env.COSMOS_PREFIX || "cosmos";
+        console.log("cosmos did store: ");
+        console.log("api url: ", api);
+        console.log("rpc url: ", rpc);
+        console.log("prefix: ", addressPrefix);
+        this.client = new Client({
+            apiURL: api,
+            rpcURL: rpc,
+            prefix: addressPrefix
+        }, signer);
+        this.didQueryClient = didQueryClient({
+            addr: api
+        });
     }
 }

@@ -32,6 +32,7 @@ export function encodeKey(key: Uint8Array, keyType: string): string {
 export async function generateAccountSecret(accountProvider: AccountProvider): Promise<Uint8Array> {
     const account = await accountProvider.accountId();
     const message = " allows " + account.toString() + " to control the did";
+    console.log(`generate account secret: sign msg: ${message}`);
     const signedMessage = await accountProvider.sign(message);
     return hash(fromString(signedMessage.slice(2)));
 }
