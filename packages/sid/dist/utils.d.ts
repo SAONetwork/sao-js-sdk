@@ -8,3 +8,5 @@ export declare function accountSecretToDid(accountSecret: Uint8Array): Promise<D
 export declare function toStableObject(obj: Record<string, any>): Record<string, any>;
 export declare function toJWS(jws: string): JWS;
 export declare function parseJWEKids(jwe: JWE): Array<string>;
+export declare function encodeRpcMessage(method: string, params?: any): any;
+export declare function utf8ToHex(message: string): string;

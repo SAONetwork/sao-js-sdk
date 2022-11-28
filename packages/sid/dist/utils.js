@@ -59,3 +59,16 @@ export function parseJWEKids(jwe) {
         return kids;
     }, []) || [];
 }
+export function encodeRpcMessage(method, params) {
+    return {
+        jsonrpc: '2.0',
+        id: 1,
+        method,
+        params
+    };
+}
+export function utf8ToHex(message) {
+    const bytes = u8a.fromString(message);
+    const hex = u8a.toString(bytes, 'base16');
+    return '0x' + hex;
+}

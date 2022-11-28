@@ -39,12 +39,13 @@ export default function App() {
     addLog(`${(await accountProvider.accountId()).toString()} is binded to ${provider?.sid}`);
   };
   const addLog = (newlog: string) => {
-    setLog(prev => {
-      var l = new Array<string>()
-      l = l.concat(prev);
-      l.push(newlog);
-      return l;
-    });
+    console.log(newlog);
+    // setLog(prev => {
+    //   var l = new Array<string>()
+    //   l = l.concat(prev);
+    //   l.push(newlog);
+    //   return l;
+    // });
   };
   const sign = async () => {
     const provider = await manager.getSidProvider();
