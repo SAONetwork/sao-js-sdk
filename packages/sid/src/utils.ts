@@ -67,3 +67,18 @@ export function parseJWEKids(jwe: JWE): Array<string> {
         }, []) || []
     )
 }
+
+export function encodeRpcMessage(method: string, params?: any): any {
+    return {
+        jsonrpc: '2.0',
+        id: 1,
+        method,
+        params,
+    }
+}
+
+export function utf8ToHex(message: string): string {
+    const bytes = u8a.fromString(message)
+    const hex = u8a.toString(bytes, 'base16')
+    return '0x' + hex;
+}

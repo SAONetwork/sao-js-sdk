@@ -77,13 +77,17 @@ export class SidManager {
         return Object.keys(this.sidProviders);
     }
 
-    async getSidProvider(): Promise<SidProvider | null> {
-        const account = await this.accountProvider.accountId();
-        const bindingDid = await this.didStore.getBinding(account.toString());
-        if (bindingDid) {
-            return this.sidProviders[bindingDid];
+    async getSidProvider(did?: string): Promise<SidProvider | null> {
+        if (did) {
+            return this.sidProviders[did];
         } else {
-            return null;
+            const account = await this.accountProvider.accountId();
+            const bindingDid = await this.didStore.getBinding(account.toString());
+            if (bindingDid) {
+                return this.sidProviders[bindingDid];
+            } else {
+                return null;
+            }
         }
     }
 

@@ -12,5 +12,5 @@ export declare class SidManager {
     private bind;
     unbind(): Promise<void>;
     listDids(): Array<string>;
-    getSidProvider(): Promise<SidProvider | null>;
+    getSidProvider(did?: string): Promise<SidProvider | null>;
 }

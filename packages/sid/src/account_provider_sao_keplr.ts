@@ -1,11 +1,19 @@
 import { AccountId } from "caip";
-import { AccountProvider } from "./account_provider";
+import { AccountProvider, getBindMessage } from "./account_provider";
 import { BindingProof } from "./types";
-import { OfflineAminoSigner, StdSignDoc, Keplr } from "@keplr-wallet/types";
-import {Buffer} from "buffer";
+import { Keplr } from "@keplr-wallet/types";
 
 const CHAIN_ID = "sao";
 
+/**
+ * account provider implementation for keplr wallet.
+ * 
+ * sao chain account id format: cosmos:sao:<id>
+ * 
+ * TODO: signer issue. the best way to sign is use OfflineAminoSigner/OfflineDirectSigner to sign arbitrarily.
+ * for direct signer, don't know the exact ARR36 format for signdoc;
+ * for amino signer, same payload doesn't work as well. only kepler instance can work now.
+ */
 export class SaoKeplrAccountProvider implements AccountProvider {
     private address: string
     // private signer: OfflineAminoSigner
@@ -51,14 +59,13 @@ export class SaoKeplrAccountProvider implements AccountProvider {
     }
 
     async generateBindingProof(did: string): Promise<BindingProof> {
-        const timestamp = Date.now();
-        const message = `Link this account to your did: ${did}\nTimestamp: ${timestamp}`;
-        const signed = await this.sign(message);
+        const bm = getBindMessage(did);
+        const signed = await this.sign(bm.message);
         const accountId = await this.accountId();
         return {
-            timestamp,
+            timestamp: bm.timestamp,
+            message: bm.message,
             did,
-            message,
             signature: signed,
             accountId: accountId.toString()
         };

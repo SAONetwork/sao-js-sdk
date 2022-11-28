@@ -16,3 +16,8 @@ export interface AccountProvider {
      */
     generateBindingProof(did: string): Promise<BindingProof>;
 }
+export interface BindMessage {
+    message: string;
+    timestamp?: number;
+}
+export declare const getBindMessage: (did: string) => BindMessage;
