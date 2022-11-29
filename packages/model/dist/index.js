@@ -1,3 +1,5 @@
+import { BuildCreateReqParams, BuildLoadReqParams, BuildNodeAddressReqParams, BuildRenewReqParams, BuildUpdateReqParams } from '@js-sao-did/api-client';
+import { Uint8ArrayToString } from './utils';
 export class Model {
     cast() {
         return JSON.parse(Uint8ArrayToString(this.content));
@@ -12,15 +14,63 @@ export class Model {
     }
 }
 export class ModelProvider {
-    async load(request) {
+    getOwnerSid() {
+        return this.ownerSid;
+    }
+    getGroupId() {
+        return this.groupId;
+    }
+    getNodeAddress() {
+        return this.nodeAddress;
+    }
+    validate(proposal) {
+        return proposal.groupId === this.groupId && proposal.owner === this.ownerSid;
+    }
+    async create(clientProposal, orderId, content) {
         return new Promise((resolve, reject)=>{
-            this.nodeApiClient.load({
-                KeyWord: request.keyword,
-                PublicKey: this.ownerSid,
-                GroupId: this.groupId,
-                CommitId: request.commitId,
-                Version: request.version
-            }).then((res)=>{
+            this.nodeApiClient.jsonRpcApi(BuildCreateReqParams(clientProposal, orderId, content)).then((res)=>{
+                try {
+                    const model = JSON.parse(res);
+                    resolve(new Model(model.dataId, model.alias, model.Content));
+                } catch  {
+                    reject("not found");
+                }
+            }).catch((err)=>{
+                reject(err);
+            });
+        });
+    }
+    async load(req) {
+        return new Promise((resolve, reject)=>{
+            this.nodeApiClient.jsonRpcApi(BuildLoadReqParams(req)).then((res)=>{
+                try {
+                    const model = JSON.parse(res);
+                    resolve(new Model(model.dataId, model.alias, model.Content));
+                } catch  {
+                    reject("not found");
+                }
+            }).catch((err)=>{
+                reject(err);
+            });
+        });
+    }
+    async update(clientProposal, orderId, patch) {
+        return new Promise((resolve, reject)=>{
+            this.nodeApiClient.jsonRpcApi(BuildUpdateReqParams(clientProposal, orderId, patch)).then((res)=>{
+                try {
+                    const model = JSON.parse(res);
+                    resolve(new Model(model.dataId, model.alias, model.Content));
+                } catch  {
+                    reject("not found");
+                }
+            }).catch((err)=>{
+                reject(err);
+            });
+        });
+    }
+    async renew(clientProposal, orderId) {
+        return new Promise((resolve, reject)=>{
+            this.nodeApiClient.jsonRpcApi(BuildRenewReqParams(clientProposal, orderId)).then((res)=>{
                 try {
                     const model = JSON.parse(res);
                     resolve(new Model(model.dataId, model.alias, model.Content));
@@ -36,20 +86,11 @@ export class ModelProvider {
         this.ownerSid = ownerSid;
         this.groupId = groupId;
         this.nodeApiClient = nodeApiClient;
+        this.nodeAddress = "";
+        this.nodeApiClient.jsonRpcApi(BuildNodeAddressReqParams()).then((res)=>{
+            this.nodeAddress = res.data;
+        }).catch((err)=>{
+            console.error(err);
+        });
     }
 }
-export const Uint8ArrayToString = (dataArray)=>{
-    var dataString = "";
-    for(var i = 0; i < dataArray.length; i++){
-        dataString += String.fromCharCode(dataArray[i]);
-    }
-    return dataString;
-};
-export const stringToUint8Array = (dataString)=>{
-    var dataArray = [];
-    for(var i = 0, j = dataString.length; i < j; ++i){
-        dataArray.push(dataString.charCodeAt(i));
-    }
-    var tmpUint8Array = new Uint8Array(dataArray);
-    return tmpUint8Array;
-};

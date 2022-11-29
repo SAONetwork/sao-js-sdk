@@ -1,4 +1,4 @@
-import { AxiosRequestHeaders, AxiosRequestConfig, AxiosResponse, AxiosError, HeadersDefaults } from 'axios';
+import { AxiosRequestHeaders, AxiosRequestConfig, AxiosResponse, AxiosError, HeadersDefaults, RawAxiosRequestHeaders } from 'axios';
 import { JWE } from "did-jwt";
 import { OfflineSigner } from "@cosmjs/proto-signing";
 
@@ -31,7 +31,7 @@ export type APISchema = Record<string, {
 
 export type CreateRequestConfig<T extends APISchema> = {
   baseURL: string;
-  headers?: Partial<HeadersDefaults>;
+  headers?: RawAxiosRequestHeaders | Partial<HeadersDefaults>;
   headerHandlers?: Array<HeaderHandler>;
   errorHandler?: RequestErrorHandler;
   apis?: {

@@ -1,4 +1,6 @@
+import { JWS } from "@js-sao-did/common";
 import { CreateRequestClient, SaoNodeAPISchema } from '@js-sao-did/api-client';
+import { ClientOrderProposal, LoadReq, Proposal } from './types';
 export declare class Model {
     dataId: string;
     alias: string;
@@ -9,17 +11,18 @@ export declare class Model {
     cast(): any;
     toString(): string;
 }
-export declare type LoadModelRequest = {
-    keyword: string;
-    commitId: string | undefined;
-    version: string | undefined;
-};
 export declare class ModelProvider {
     private ownerSid;
     private groupId;
+    private nodeAddress;
     private nodeApiClient;
     constructor(ownerSid: string, groupId: string, nodeApiClient: CreateRequestClient<SaoNodeAPISchema>);
-    load(request: LoadModelRequest): Promise<Model>;
+    getOwnerSid(): string;
+    getGroupId(): string;
+    getNodeAddress(): string;
+    validate(proposal: Proposal): boolean;
+    create(clientProposal: JWS, orderId: number, content: Uint8Array): Promise<Model>;
+    load(req: LoadReq): Promise<Model>;
+    update(clientProposal: ClientOrderProposal, orderId: number, patch: Uint8Array): Promise<Model>;
+    renew(clientProposal: ClientOrderProposal, orderId: number): Promise<Model>;
 }
-export declare const Uint8ArrayToString: (dataArray: Uint8Array) => string;
-export declare const stringToUint8Array: (dataString: string) => Uint8Array;
