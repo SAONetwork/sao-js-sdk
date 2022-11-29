@@ -1,16 +1,14 @@
-import { ModelProvider } from ".";
-export declare type ModelManagerConfig = {
-    chainApiUrl: string;
-    chainApiToken: string;
-    nodeApiUrl: string;
-    nodeApiToken: string;
-    platformId: string;
-};
+import { SidManager } from '@js-sao-did/sid';
+import { ModelConfig, ModelDef, ModelProviderConfig } from './types';
 export declare class ModelManager {
     private defaultModelProvider;
     private modelProviders;
-    constructor(ownerDid: string, config: ModelManagerConfig);
+    private sidManager;
+    constructor(config: ModelProviderConfig, sidManager: SidManager);
     private getModelProvider;
-    setModelProvider(ownerSid: string, modelProvider: ModelProvider): Promise<void>;
-    loadModel<T>(keyword: string, ownerDid?: string, commitId?: string, version?: string): Promise<T>;
+    addModelProvider(config: ModelProviderConfig): void;
+    createModel<T>(def: ModelDef<T>, modelConfig?: ModelConfig, ownerDid?: string): Promise<T>;
+    loadModel<T>(keyword: string, ownerDid?: string): Promise<T>;
+    loadModelByCommitId<T>(keyword: string, commitId: string, ownerDid?: string): Promise<T>;
+    loadModelByVersion<T>(keyword: string, version: string, ownerDid?: string): Promise<T>;
 }
