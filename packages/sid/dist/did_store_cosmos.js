@@ -1,112 +1,88 @@
-import { BindingProofV1 } from "./types";
-import { Client } from "SaoNetwork-sao-client-ts";
-import { queryClient as didQueryClient } from "SaoNetwork-sao-client-ts/dist/saonetwork.sao.did";
-import stringify from 'fast-json-stable-stringify';
-import * as u8a from 'uint8arrays';
-import { MsgUpdateSidDocumentResponse } from "SaoNetwork-sao-client-ts/dist/saonetwork.sao.did/types/sao/did/tx";
-import { TxMsgData } from "SaoNetwork-sao-client-ts/dist/cosmos.tx.v1beta1/types/cosmos/base/abci/v1beta1/abci";
+import { ChainApiClient } from "@js-sao-did/api-client";
 export class CosmosDidStore {
     async addBinding(proof) {
-        const account = await this.signer.getAccounts();
-        const txResult = await this.client.SaonetworkSaoDid.tx.sendMsgAddBinding({
-            value: {
-                creator: account[0].address,
-                accountId: proof.accountId,
-                proof: {
-                    message: proof.message,
-                    signature: proof.signature,
-                    account: proof.accountId,
-                    did: proof.did,
-                    timestamp: proof.timestamp,
-                    // TODO:
-                    version: BindingProofV1
+        return new Promise((resovle, reject)=>{
+            this.chainApiClient.AddBinding(proof).then((txResult)=>{
+                if (txResult.code != 0) {
+                    console.log(`bind account failed. tx=${txResult.transactionHash} code=${txResult.code}`);
+                    reject(`bind account ${proof.accountId} -> did ${proof.did} failed.`);
+                } else {
+                    console.log(`bind account ${proof.accountId} -> did ${proof.did} succeed. tx=${txResult.transactionHash}`);
+                    resovle();
                 }
-            }
+            }).catch((err)=>{
+                reject(err);
+            });
         });
-        if (txResult.code != 0) {
-            console.log(`bind account failed. tx=${txResult.transactionHash} code=${txResult.code}`);
-            throw new Error(`bind account ${proof.accountId} -> did ${proof.did} failed.`);
-        } else {
-            console.log(`bind account ${proof.accountId} -> did ${proof.did} succeed. tx=${txResult.transactionHash}`);
-        }
-        return;
     }
     /**
-     * 
-     * @param accountId 
-     * @returns binded did
-     */ async getBinding(accountId) {
-        try {
-            const binding = await this.didQueryClient.queryDidBindingProofs(accountId + ':');
-            if (binding.status === 200) {
-                return binding.data.didBindingProofs?.proof?.did || null;
-            } else {
-                throw new Error('failed to query binding for accountid ' + accountId);
-            }
-        } catch (e) {
-            const ae = e;
-            if (ae.response?.status === 404) {
-                return null;
-            }
-            throw new Error('failed to query binding for accountid ' + accountId);
-        }
+   * 
+   * @param accountId 
+   * @returns binded did
+   */ async getBinding(accountId) {
+        return new Promise((resolve, reject)=>{
+            this.chainApiClient.GetBinding(accountId).then((res)=>{
+                if (res.status === 200) {
+                    resolve(res.data?.didBindingProofs?.proof?.did || null);
+                } else {
+                    reject("failed to query binding for accountid: " + accountId);
+                }
+            }).catch((err)=>{
+                reject("failed to query binding for accountid: " + accountId + ", " + err);
+            });
+        });
     }
     async removeBinding(accountId) {
-        const account = await this.signer.getAccounts();
-        const txResult = await this.client.SaonetworkSaoDid.tx.sendMsgUnbinding({
-            value: {
-                creator: account[0].address,
-                accountId
-            }
+        return new Promise((resolve, reject)=>{
+            this.chainApiClient.RemoveBinding(accountId).then((txResult)=>{
+                if (txResult.code != 0) {
+                    console.log(`unbind account failed. tx=${txResult.transactionHash} code=${txResult.code}`);
+                    reject(`unbind account ${accountId} failed.`);
+                } else {
+                    console.log(`unbind account succeed. tx=${txResult.transactionHash}`);
+                    resolve();
+                }
+            }).catch((error)=>{
+                reject(`unbind account ${accountId} failed, ` + error);
+            });
         });
-        console.log(txResult);
-        if (txResult.code != 0) {
-            console.log(`unbind account failed. tx=${txResult.transactionHash} code=${txResult.code}`);
-            throw new Error(`unbind account ${accountId} failed.`);
-        } else {
-            console.log(`unbind account succeed. tx=${txResult.transactionHash}`);
-        }
     }
     async addAccountAuth(did, accountAuth) {
-        const account = await this.signer.getAccounts();
-        const txResult = await this.client.SaonetworkSaoDid.tx.sendMsgAddAccountAuth({
-            value: {
-                creator: account[0].address,
-                did: did,
-                accountAuth: {
-                    accountDid: accountAuth.accountDid,
-                    accountEncryptedSeed: stringify(accountAuth.accountEncryptedSeed),
-                    sidEncryptedAccount: stringify(accountAuth.sidEncryptedAccount)
+        return new Promise((resolve, reject)=>{
+            this.chainApiClient.AddAccountAuth(did, accountAuth).then((result)=>{
+                if (result.code != 0) {
+                    console.log(`add account auth failed. tx=${result.transactionHash} code=${result.code}`);
+                    reject(`add account auth did ${did} -> accountdid ${accountAuth.accountDid} failed.`);
+                } else {
+                    console.log(`add account auth succeed. tx=${result.transactionHash}`);
+                    resolve();
                 }
-            }
+            }).catch((error)=>{
+                reject("add account auth succeed, " + error);
+            });
         });
-        if (txResult.code != 0) {
-            console.log(`add account auth failed. tx=${txResult.transactionHash} code=${txResult.code}`);
-            throw new Error(`add account auth did ${did} -> accountdid ${accountAuth.accountDid} failed.`);
-        } else {
-            console.log(`add account auth succeed. tx=${txResult.transactionHash}`);
-        }
     }
     async getAccountAuth(did, accountDid) {
-        try {
-            const accountAuth = await this.didQueryClient.queryAccountAuth(accountDid + ':');
-            if (accountAuth.status == 200) {
-                return {
-                    accountDid: accountAuth.data.accountAuth.accountDid,
-                    sidEncryptedAccount: JSON.parse(accountAuth.data.accountAuth.sidEncryptedAccount),
-                    accountEncryptedSeed: JSON.parse(accountAuth.data.accountAuth.accountEncryptedSeed)
-                };
-            } else {
-                throw new Error('failed to account auth for accountdid ' + accountDid);
-            }
-        } catch (e) {
-            console.log(e);
-            const ae = e;
-            if (ae.response?.status === 404) {
-                return null;
-            }
-            throw new Error(`failed to account auth for accountdid ${accountDid}. error: ${e}`);
-        }
+        return new Promise((resolve, reject)=>{
+            this.chainApiClient.GetAccountAuth(did).then((resp)=>{
+                if (resp.status == 200) {
+                    resolve({
+                        accountDid: resp.data.accountAuth.accountDid,
+                        sidEncryptedAccount: JSON.parse(resp.data.accountAuth.sidEncryptedAccount),
+                        accountEncryptedSeed: JSON.parse(resp.data.accountAuth.accountEncryptedSeed)
+                    });
+                } else {
+                    reject('failed to account auth for accountdid ' + accountDid);
+                }
+            }).catch((err)=>{
+                console.log(err);
+                // const ae = err as AxiosError
+                if (err.response.status === 404) {
+                    resolve(null);
+                }
+                reject(`failed to account auth for accountdid ${accountDid}. error: ${err}`);
+            });
+        });
     }
     async updateAccountAuths(did, update, remove) {
         var updates = [];
@@ -117,103 +93,96 @@ export class CosmosDidStore {
                 sidEncryptedAccount: u.sidEncryptedAccount
             });
         });
-        const account = await this.signer.getAccounts();
-        const txResult = await this.client.SaonetworkSaoDid.tx.sendMsgUpdateAccountAuths({
-            value: {
-                creator: account[0].address,
-                did: did,
-                update: updates,
-                remove
-            }
+        return new Promise((resolve, reject)=>{
+            this.chainApiClient.UpdateAccountAuths(did, update, remove).then((txResult)=>{
+                if (txResult.code != 0) {
+                    console.log(`update account auths failed. tx=${txResult.transactionHash} code=${txResult.code}`);
+                    reject(`update account auth did ${did} failed.`);
+                } else {
+                    console.log(`add account auth succeed. tx=${txResult.transactionHash}`);
+                    resolve();
+                }
+            }).catch((error)=>{
+                reject(`update account auth did ${did} failed, ` + error);
+            });
         });
-        if (txResult.code != 0) {
-            console.log(`update account auths failed. tx=${txResult.transactionHash} code=${txResult.code}`);
-            throw new Error(`update account auth did ${did} failed.`);
-        } else {
-            console.log(`add account auth succeed. tx=${txResult.transactionHash}`);
-        }
     }
     async getAllAccountAuth(did) {
-        try {
-            const resp = await this.didQueryClient.queryGetAllAccountAuths(did + ":");
-            if (resp.status === 200) {
-                var auths = [];
-                resp.data.accountAuths.forEach((a)=>{
-                    auths.push({
-                        accountDid: a.accountDid,
-                        sidEncryptedAccount: JSON.parse(a.sidEncryptedAccount),
-                        accountEncryptedSeed: JSON.parse(a.accountEncryptedSeed)
+        return new Promise((resolve, reject)=>{
+            this.chainApiClient.GetAllAccountAuth(did).then((resp)=>{
+                if (resp.status === 200) {
+                    var auths = [];
+                    resp.data.accountAuths.forEach((a)=>{
+                        auths.push({
+                            accountDid: a.accountDid,
+                            sidEncryptedAccount: JSON.parse(a.sidEncryptedAccount),
+                            accountEncryptedSeed: JSON.parse(a.accountEncryptedSeed)
+                        });
                     });
-                });
-                return auths;
-            } else {
-                throw new Error('failed to get all account auths for did ' + did);
-            }
-        } catch (e) {
-            const ae = e;
-            if (ae.response?.status === 404) {
-                return [];
-            }
-            throw new Error(`failed to get all account auths for did ${did}. error: ${e}`);
-        }
+                    resolve(auths);
+                } else {
+                    reject('failed to get all account auths for did ' + did);
+                }
+            }).catch((err)=>{
+                // const ae = err as AxiosError
+                if (err.response.status === 404) {
+                    return [];
+                }
+                reject(`failed to get all account auths for did: ${did}, ` + err);
+            });
+        });
     }
     async updateSidDocument(signingKey, encryptKey, rootDocId) {
-        const account = await this.signer.getAccounts();
-        const txResult = await this.client.SaonetworkSaoDid.tx.sendMsgUpdateSidDocument({
-            value: {
-                creator: account[0].address,
-                signingKey: signingKey,
-                encryptKey: encryptKey,
-                rootDocId: rootDocId
-            }
+        return new Promise((resolve, reject)=>{
+            this.chainApiClient.UpdateSidDocument(signingKey, encryptKey, rootDocId).then((txResult)=>{
+                console.log(txResult);
+                if (txResult.code != 0) {
+                    console.log(`update sid document failed. tx=${txResult.transactionHash} code=${txResult.code}`);
+                    reject(`update sid document failed.`);
+                } else {
+                    console.log(`update sid document succeed. tx=${txResult.transactionHash}`);
+                    this.chainApiClient.GetTx(txResult.transactionHash).then((res)=>{
+                        if (res.status === 200) {
+                            this.chainApiClient.Decode(res.data.tx_response.data).then((r)=>{
+                                resolve(r.docId);
+                            }).catch((e)=>{
+                                reject(`update sid document failed, ` + e);
+                            });
+                        } else {
+                            reject(`update sid document failed. ${res.statusText}`);
+                        }
+                    }).catch((err)=>{
+                        reject(`update sid document failed, ` + err);
+                    });
+                }
+            }).catch((error)=>{
+                reject(`update sid document failed, ` + error);
+            });
         });
-        console.log(txResult);
-        if (txResult.code != 0) {
-            console.log(`update sid document failed. tx=${txResult.transactionHash} code=${txResult.code}`);
-            throw new Error(`update sid document failed.`);
-        } else {
-            console.log(`update sid document succeed. tx=${txResult.transactionHash}`);
-            const r = await this.client.CosmosTxV1Beta1.query.serviceGetTx(txResult.transactionHash);
-            if (r.status === 200) {
-                const decoded = u8a.fromString(r.data.tx_response.data.toLowerCase(), 'base16');
-                return MsgUpdateSidDocumentResponse.decode(TxMsgData.decode(decoded).msgResponses[0].value).docId;
-            } else {
-                throw new Error(`update sid document failed. ${r.statusText}`);
-            }
-        }
     }
     async listSidDocumentVersions(rootDocId) {
-        try {
-            const resp = await this.didQueryClient.querySidDocumentVersion(rootDocId);
-            if (resp.status === 200) {
-                return resp.data.sidDocumentVersion.versionList;
-            } else {
-                throw new Error(`failed to get all sid document for root doc id ${rootDocId}.`);
-            }
-        } catch (e) {
-            const ae = e;
-            if (ae.response?.status === 404) {
-                return [];
-            }
-            throw new Error(`failed to get all sid document for root doc id ${rootDocId}.`);
-        }
+        return new Promise((resolve, reject)=>{
+            this.chainApiClient.ListSidDocumentVersions(rootDocId).then((resp)=>{
+                if (resp.status === 200) {
+                    resolve(resp.data.sidDocumentVersion.versionList);
+                } else {
+                    reject(`failed to get all sid document for root doc id ${rootDocId}.`);
+                }
+            }).catch((err)=>{
+                // const ae = err as AxiosError
+                if (err.response.status === 404) {
+                    return [];
+                }
+                reject(`failed to get all sid document for root doc id ${rootDocId}.`);
+            });
+        });
     }
     constructor(signer, apiURL, rpcURL, prefix){
-        this.signer = signer;
-        const api = apiURL || process.env.COSMOS_API_URL || 'http://localhost:1317';
-        const rpc = rpcURL || process.env.COSMOS_RPC_URL || 'http://localhost:26657';
-        const addressPrefix = prefix || process.env.COSMOS_PREFIX || "cosmos";
-        console.log("cosmos did store: ");
-        console.log("api url: ", api);
-        console.log("rpc url: ", rpc);
-        console.log("prefix: ", addressPrefix);
-        this.client = new Client({
-            apiURL: api,
-            rpcURL: rpc,
-            prefix: addressPrefix
-        }, signer);
-        this.didQueryClient = didQueryClient({
-            addr: api
+        this.chainApiClient = new ChainApiClient({
+            apiURL,
+            rpcURL,
+            prefix,
+            signer: signer
         });
     }
 }

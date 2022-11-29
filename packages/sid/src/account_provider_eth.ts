@@ -1,7 +1,6 @@
 import { AccountId } from "caip";
-import { bytesToMultibase } from "did-jwt/lib/util";
 import { AccountProvider, getBindMessage } from "./account_provider";
-import { BindingProof } from "./types";
+import { BindingProof } from '@js-sao-did/api-client';
 import { utf8ToHex} from "./utils";
 
 export class EthAccountProvider implements AccountProvider {

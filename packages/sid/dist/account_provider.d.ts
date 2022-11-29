@@ -1,5 +1,5 @@
 import { AccountId } from "caip";
-import { BindingProof } from "./types";
+import { BindingProof } from '@js-sao-did/api-client';
 export interface AccountProvider {
     /**
      * caip account id.
