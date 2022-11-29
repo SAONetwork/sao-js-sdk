@@ -30,6 +30,7 @@ export class ChainApiClient {
       prefix: addressPrefix
     }, config.signer);
 
+    this.signer = config.signer;
     this.didClient = didQueryClient({ addr: api });
     this.modelClient = modelQueryClient({ addr: api });
   }
@@ -39,7 +40,7 @@ export class ChainApiClient {
   }
 
   async Decode(data: string): Promise<any> {
-    const decoded = u8a.fromString(data, 'base16');
+    const decoded = u8a.fromString(data.toLowerCase(), 'base16');
     return MsgUpdateSidDocumentResponse.decode(TxMsgData.decode(decoded).msgResponses[0].value);
   }
 
