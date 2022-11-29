@@ -47,4 +47,7 @@ export interface DidStore {
     updateSidDocument(signingKey: string, encryptKey: string, rootDocId?: string): Promise<string>
 
     listSidDocumentVersions(rootDocId: string): Promise<Array<string>>
+
+    // getPastSeeds(did: string): Promise<Array<string>>
+
 }
