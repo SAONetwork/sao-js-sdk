@@ -29,7 +29,7 @@ import { createJWS } from 'did-jwt';
             throw new Error("account auth is missing.");
         }
         const seed = await accountDid.decryptJWE(accountAuth.accountEncryptedSeed);
-        const keychain = Keychain.load(didStore, seed, did);
+        const keychain = await Keychain.load(didStore, seed, did);
         return new SidProvider(keychain, did);
     }
     async sign(payload, didWithFragment, protectedHeader = {}) {
@@ -41,12 +41,14 @@ import { createJWS } from 'did-jwt';
             keyFragment = this.keychain.getKeyFragment();
         }
         const signer = this.keychain.getSigner();
-        const kid = `${did}#${keyFragment}`;
+        const kid = `${did}?version-id=${this.keychain.latestDocid}#${keyFragment}`;
         const header = toStableObject(Object.assign(protectedHeader, {
             kid
         }));
         const content = typeof payload === 'string' ? payload : toStableObject(payload);
-        const jws = await createJWS(content, signer, header);
+        const jws = await createJWS(content, signer, header, {
+            canonicalize: true
+        });
         return toJWS(jws);
     }
     async authenticate(param) {

@@ -14,10 +14,12 @@ export interface FullKeySeries {
 export declare class Keychain {
     private keysMap;
     private kidToDocid;
+    latestDocid: string;
+    private SeedHistory;
     did: string;
     private didStore;
     constructor(did: string, didStore: DidStore);
-    static load(didStore: DidStore, seed: Uint8Array, did: string): Keychain;
+    static load(didStore: DidStore, seed: Uint8Array, did: string): Promise<Keychain>;
     static create(didStore: DidStore): Promise<Keychain>;
     getSigner(docid?: string): Signer;
     getKeyFragment(docid?: string, keyUsage?: string): string;
