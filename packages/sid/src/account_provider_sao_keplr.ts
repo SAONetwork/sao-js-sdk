@@ -1,6 +1,6 @@
 import { AccountId } from "caip";
 import { AccountProvider, getBindMessage } from "./account_provider";
-import { BindingProof } from "./types";
+import { BindingProof } from '@js-sao-did/api-client';
 import { Keplr } from "@keplr-wallet/types";
 
 const CHAIN_ID = "sao";

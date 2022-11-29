@@ -1,5 +1,5 @@
 import { GetNodeApiClient } from '@js-sao-did/api-client'
-import { MockSidManager } from './mock_sidmanager'
+import { SidManager } from '@js-sao-did/sid'
 import { ModelConfig, ModelDef, ModelProviderConfig, Proposal } from './types'
 import { CalculateCid, GenerateDataId, stringToUint8Array } from './utils'
 import { ModelProvider } from ".";
@@ -13,9 +13,9 @@ const defaultModelConfig: ModelConfig = {
 export class ModelManager {
     private defaultModelProvider:ModelProvider
     private modelProviders: Record<string, ModelProvider>
-    private sidManager:MockSidManager
+    private sidManager:SidManager
 
-    constructor(config: ModelProviderConfig) {
+    constructor(config: ModelProviderConfig, sidManager: SidManager) {
         const nodeApiClient = GetNodeApiClient({
             baseURL: config.nodeApiUrl,
             headers: {
@@ -27,7 +27,7 @@ export class ModelManager {
         this.modelProviders = {}
         this.modelProviders[config.ownerDid] = this.defaultModelProvider;
 
-        this.sidManager = new MockSidManager();
+        this.sidManager = sidManager;
     }
 
     private getModelProvider(ownerDid: string): ModelProvider {
@@ -74,16 +74,18 @@ export class ModelManager {
             operation: modelConfig.operation,
         }
 
-        const sidProvider = await this.sidManager.getSidProvider(provider.getOwnerSid());
+        const sidProvider = await this.sidManager.getSidProvider();
+        if (sidProvider === null) {
+            return new Promise((_, reject) => reject("failed to get sid provider"))
+        }
         const clientProposal = await sidProvider.createJWS({
             payload: JSON.stringify(proposal)
         })
 
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve, reject) => {            
             if (provider.validate(proposal)) {
                 reject("invalid provider")
             }
-
 
             provider.create(
                 clientProposal,
