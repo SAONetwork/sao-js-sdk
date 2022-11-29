@@ -10,7 +10,7 @@ export class ChainApiClient {
         return this.client.CosmosTxV1Beta1.query.serviceGetTx(transactionHash);
     }
     async Decode(data) {
-        const decoded = u8a.fromString(data, 'base16');
+        const decoded = u8a.fromString(data.toLowerCase(), 'base16');
         return MsgUpdateSidDocumentResponse.decode(TxMsgData.decode(decoded).msgResponses[0].value);
     }
     async AddAccountAuth(did, accountAuth) {
@@ -102,6 +102,7 @@ export class ChainApiClient {
             rpcURL: rpc,
             prefix: addressPrefix
         }, config.signer);
+        this.signer = config.signer;
         this.didClient = didQueryClient({
             addr: api
         });

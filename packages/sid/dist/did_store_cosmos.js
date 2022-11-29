@@ -28,7 +28,14 @@ export class CosmosDidStore {
                     reject("failed to query binding for accountid: " + accountId);
                 }
             }).catch((err)=>{
-                reject("failed to query binding for accountid: " + accountId + ", " + err);
+                console.log(err);
+                // const ae = err as AxiosError
+                if (err.response.status === 404) {
+                    console.log();
+                    resolve(null);
+                } else {
+                    reject("failed to query binding for accountid: " + accountId + ", !!!" + err.response.status);
+                }
             });
         });
     }
@@ -146,13 +153,13 @@ export class CosmosDidStore {
                             this.chainApiClient.Decode(res.data.tx_response.data).then((r)=>{
                                 resolve(r.docId);
                             }).catch((e)=>{
-                                reject(`update sid document failed, ` + e);
+                                reject(`update sid document failed, decode error, ` + e);
                             });
                         } else {
                             reject(`update sid document failed. ${res.statusText}`);
                         }
                     }).catch((err)=>{
-                        reject(`update sid document failed, ` + err);
+                        reject(`update sid document failed, get transaction error, ` + err);
                     });
                 }
             }).catch((error)=>{
