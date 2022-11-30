@@ -1,6 +1,6 @@
 import { AccountId } from "caip";
 import { AccountProvider } from "./account_provider";
-import { BindingProof } from "./types";
+import { BindingProof } from '@js-sao-did/api-client';
 export declare class EthAccountProvider implements AccountProvider {
     private provider;
     private address;

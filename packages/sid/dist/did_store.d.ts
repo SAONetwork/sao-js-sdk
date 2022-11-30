@@ -1,4 +1,4 @@
-import { BindingProof } from './types';
+import { BindingProof } from '@js-sao-did/api-client';
 import { JWE } from "did-jwt";
 export interface AccountAuth {
     accountDid: string;
