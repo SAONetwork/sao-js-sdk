@@ -1,10 +1,8 @@
-import { BindingProof } from "./types";
-import { DidStore, AccountAuth } from "./did_store";
+import { DidStore } from "./did_store";
 import { OfflineSigner } from "@cosmjs/proto-signing";
+import { AccountAuth, BindingProof } from "@js-sao-did/api-client";
 export declare class CosmosDidStore implements DidStore {
-    private signer;
-    private client;
-    private didQueryClient;
+    private chainApiClient;
     constructor(signer: OfflineSigner, apiURL?: string, rpcURL?: string, prefix?: string);
     addBinding(proof: BindingProof): Promise<void>;
     /**
@@ -12,7 +10,7 @@ export declare class CosmosDidStore implements DidStore {
      * @param accountId
      * @returns binded did
      */
-    getBinding(accountId: string): Promise<string | null>;
+    getBinding(accountId: string): Promise<any | null>;
     removeBinding(accountId: string): Promise<void>;
     addAccountAuth(did: string, accountAuth: AccountAuth): Promise<void>;
     getAccountAuth(did: string, accountDid: string): Promise<AccountAuth | null>;
