@@ -26,3 +26,6 @@ export declare class ModelProvider {
     update(clientProposal: ClientOrderProposal, orderId: number, patch: Uint8Array): Promise<Model>;
     renew(clientProposal: ClientOrderProposal, orderId: number): Promise<Model>;
 }
+export * from "./manager";
+export * from "./types";
+export * from "./utils";

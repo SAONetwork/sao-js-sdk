@@ -1,3 +1,4 @@
+import * as jsonpatch from 'fast-json-patch';
 import { GetNodeApiClient } from '@js-sao-did/api-client';
 import { CalculateCid, GenerateDataId, stringToUint8Array } from './utils';
 import { ModelProvider } from ".";
@@ -39,6 +40,58 @@ export class ModelManager {
             alias: def.alias,
             dataId,
             commitId: dataId,
+            tags: def.tags,
+            cid,
+            rule: def.rule,
+            extendInfo: def.extendInfo,
+            size: dataBytes.length,
+            operation: modelConfig.operation
+        };
+        const sidProvider = await this.sidManager.getSidProvider();
+        if (sidProvider === null) {
+            return new Promise((_, reject)=>reject("failed to get sid provider"));
+        }
+        const clientProposal = await sidProvider.createJWS({
+            payload: JSON.stringify(proposal)
+        });
+        return new Promise((resolve, reject)=>{
+            if (provider.validate(proposal)) {
+                reject("invalid provider");
+            }
+            provider.create(clientProposal, 0, dataBytes).then((model)=>{
+                resolve(model.cast());
+            }).catch((err)=>{
+                reject(err);
+            });
+        });
+    }
+    async updateModel(def, modelConfig = defaultModelConfig, ownerDid) {
+        var provider = this.defaultModelProvider;
+        if (ownerDid !== undefined) {
+            provider = this.getModelProvider(ownerDid);
+        }
+        if (def.dataId === undefined || def.dataId === null || def.dataId === "") {
+            throw new Error("Invalid dataId: " + def.dataId);
+        }
+        const origin = (await provider.load({
+            keyword: def.dataId
+        })).cast();
+        const patch = jsonpatch.compare(origin, def.data);
+        console.log("Patch: ", JSON.stringify(patch));
+        const target = jsonpatch.applyPatch(origin, patch).newDocument;
+        const dataBytes = stringToUint8Array(JSON.stringify(patch));
+        const targetDataBytes = stringToUint8Array(JSON.stringify(target));
+        const cid = await CalculateCid(targetDataBytes);
+        var proposal = {
+            owner: provider.getOwnerSid(),
+            provider: provider.getNodeAddress(),
+            groupId: provider.getGroupId(),
+            duration: modelConfig.duration,
+            replica: modelConfig.replica,
+            timeout: modelConfig.timeout,
+            alias: def.alias,
+            dataId: def.dataId,
+            commitId: GenerateDataId(),
             tags: def.tags,
             cid,
             rule: def.rule,

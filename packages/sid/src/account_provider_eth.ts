@@ -7,7 +7,7 @@ export class EthAccountProvider implements AccountProvider {
     private provider: any
     private address: string
     static async new(provider: any): Promise<EthAccountProvider> {
-        const accounts = await provider.request({method: 'eth_accounts'});
+        const accounts = await provider.request({method: 'eth_requestAccounts'});
         if (accounts.length === 0) {
             throw new Error("Please connect to metamask");
         } else {
@@ -32,9 +32,10 @@ export class EthAccountProvider implements AccountProvider {
 
     async accountId(): Promise<AccountId> {
         const chainId = await this.chainId();
+        const namespace = this.namespace();
         return new AccountId({
             address: this.address,
-            chainId: `${this.namespace}:${chainId}`
+            chainId: `${namespace}:${chainId}`
         });
     }
 
