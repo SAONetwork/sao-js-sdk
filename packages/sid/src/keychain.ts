@@ -74,7 +74,7 @@ export class Keychain {
 
     getSigner(docid: string = this.latestDocid): Signer {
         const keys = this.keysMap[docid] || this.keysMap[this.latestDocid];
-        return ES256KSigner(keys.priv.signing);
+        return ES256KSigner(keys.priv.signing, false, { canonical: true });
     }
 
     getKeyFragment(docid: string = this.latestDocid, keyUsage: string = "sign"): string {
