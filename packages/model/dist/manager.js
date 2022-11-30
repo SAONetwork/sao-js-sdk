@@ -1,4 +1,5 @@
 import * as jsonpatch from 'fast-json-patch';
+import stringify from 'fast-json-stable-stringify';
 import { GetNodeApiClient } from '@js-sao-did/api-client';
 import { CalculateCid, GenerateDataId, stringToUint8Array } from './utils';
 import { ModelProvider } from ".";
@@ -27,7 +28,8 @@ export class ModelManager {
         if (ownerDid !== undefined) {
             provider = this.getModelProvider(ownerDid);
         }
-        const dataBytes = stringToUint8Array(JSON.stringify(def.data));
+        console.log("NodeAddress: ", provider.getNodeAddress());
+        const dataBytes = stringToUint8Array(stringify(def.data));
         const dataId = GenerateDataId();
         const cid = await CalculateCid(dataBytes);
         var proposal = {
@@ -52,13 +54,16 @@ export class ModelManager {
             return new Promise((_, reject)=>reject("failed to get sid provider"));
         }
         const clientProposal = await sidProvider.createJWS({
-            payload: JSON.stringify(proposal)
+            payload: stringify(proposal)
         });
         return new Promise((resolve, reject)=>{
-            if (provider.validate(proposal)) {
+            if (!provider.validate(proposal)) {
                 reject("invalid provider");
             }
-            provider.create(clientProposal, 0, dataBytes).then((model)=>{
+            provider.create({
+                Proposal: proposal,
+                JwsSignature: clientProposal.signatures[0]
+            }, 0, Array.from(dataBytes)).then((model)=>{
                 resolve(model.cast());
             }).catch((err)=>{
                 reject(err);
@@ -77,10 +82,10 @@ export class ModelManager {
             keyword: def.dataId
         })).cast();
         const patch = jsonpatch.compare(origin, def.data);
-        console.log("Patch: ", JSON.stringify(patch));
+        console.log("Patch: ", stringify(patch));
         const target = jsonpatch.applyPatch(origin, patch).newDocument;
-        const dataBytes = stringToUint8Array(JSON.stringify(patch));
-        const targetDataBytes = stringToUint8Array(JSON.stringify(target));
+        const dataBytes = stringToUint8Array(stringify(patch));
+        const targetDataBytes = stringToUint8Array(stringify(target));
         const cid = await CalculateCid(targetDataBytes);
         var proposal = {
             owner: provider.getOwnerSid(),
@@ -104,13 +109,16 @@ export class ModelManager {
             return new Promise((_, reject)=>reject("failed to get sid provider"));
         }
         const clientProposal = await sidProvider.createJWS({
-            payload: JSON.stringify(proposal)
+            payload: stringify(proposal)
         });
         return new Promise((resolve, reject)=>{
-            if (provider.validate(proposal)) {
+            if (!provider.validate(proposal)) {
                 reject("invalid provider");
             }
-            provider.create(clientProposal, 0, dataBytes).then((model)=>{
+            provider.update({
+                Proposal: proposal,
+                JwsSignature: clientProposal.signatures[0]
+            }, 0, Array.from(dataBytes)).then((model)=>{
                 resolve(model.cast());
             }).catch((err)=>{
                 reject(err);

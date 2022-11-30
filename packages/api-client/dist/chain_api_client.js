@@ -19,9 +19,6 @@ export class ChainApiClient {
         const accountDid = accountAuth.accountDid;
         const accountEncryptedSeed = stringify(accountAuth.accountEncryptedSeed);
         const sidEncryptedAccount = stringify(accountAuth.sidEncryptedAccount);
-        console.log("accountDid: ", accountDid);
-        console.log("accountEncryptedSeed: ", accountEncryptedSeed);
-        console.log("sidEncryptedAccount: ", sidEncryptedAccount);
         const txResult = await this.client.SaonetworkSaoDid.tx.sendMsgAddAccountAuth({
             value: {
                 creator: account[0].address,

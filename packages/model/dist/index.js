@@ -2,7 +2,7 @@ import { BuildCreateReqParams, BuildLoadReqParams, BuildNodeAddressReqParams, Bu
 import { Uint8ArrayToString } from './utils';
 export class Model {
     cast() {
-        return JSON.parse(Uint8ArrayToString(this.content));
+        return JSON.parse(Uint8ArrayToString(new Uint8Array(this.content)));
     }
     toString() {
         return JSON.stringify(this);
@@ -88,7 +88,11 @@ export class ModelProvider {
         this.nodeApiClient = nodeApiClient;
         this.nodeAddress = "";
         this.nodeApiClient.jsonRpcApi(BuildNodeAddressReqParams()).then((res)=>{
-            this.nodeAddress = res.data;
+            try {
+                this.nodeAddress = res.data.result;
+            } catch (e) {
+                console.error(e);
+            }
         }).catch((err)=>{
             console.error(err);
         });

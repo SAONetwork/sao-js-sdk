@@ -46,7 +46,9 @@ import { createJWS } from 'did-jwt';
             kid
         }));
         const content = typeof payload === 'string' ? payload : toStableObject(payload);
-        const jws = await createJWS(content, signer, header);
+        const jws = await createJWS(content, signer, header, {
+            canonicalize: true
+        });
         return toJWS(jws);
     }
     async authenticate(param) {

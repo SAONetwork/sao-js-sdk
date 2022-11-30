@@ -48,5 +48,5 @@ export type Proposal = {
 };
 export type ClientOrderProposal = {
     Proposal: Proposal;
-    ClientSignature: JWSSignature;
+    JwsSignature: JWSSignature;
 };
