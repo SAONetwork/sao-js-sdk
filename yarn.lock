@@ -6594,10 +6594,28 @@ dezalgo@^1.0.0:
     asap "^2.0.0"
     wrappy "1"
 
-did-jwt@^6.0.0, did-jwt@^6.9.0:
+did-jwt@^6.0.0:
   version "6.9.0"
   resolved "https://registry.npmjs.org/did-jwt/-/did-jwt-6.9.0.tgz"
   integrity sha512-kZ8pakovM2VkG0pia6x0SA9/1rl9dOUti4i2FL3xg7arJDWW7dACJxX+6gQK7iR/DvXrfFo8F784ejHVbw9ryA==
+  dependencies:
+    "@stablelib/ed25519" "^1.0.2"
+    "@stablelib/random" "^1.0.1"
+    "@stablelib/sha256" "^1.0.1"
+    "@stablelib/x25519" "^1.0.2"
+    "@stablelib/xchacha20poly1305" "^1.0.1"
+    bech32 "^2.0.0"
+    canonicalize "^1.0.8"
+    did-resolver "^4.0.0"
+    elliptic "^6.5.4"
+    js-sha3 "^0.8.0"
+    multiformats "^9.6.5"
+    uint8arrays "^3.0.0"
+
+did-jwt@^6.10.1:
+  version "6.10.1"
+  resolved "http://205.204.75.250:38081/repository/sao-network-group/did-jwt/-/did-jwt-6.10.1.tgz#4b1426b76b3f7d32144ac5eba471f23fd3507e11"
+  integrity sha512-7n8qyLQw+zUmLWu/KQYL23AoNwkgycbco4pJVkNf3au/RC16J24NlkYU0vkmSHZZwd+T0mHTbFOP/Q5ogcTXTQ==
   dependencies:
     "@stablelib/ed25519" "^1.0.2"
     "@stablelib/random" "^1.0.1"
