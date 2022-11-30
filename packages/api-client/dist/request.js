@@ -26,7 +26,7 @@ function attachAPI(client, apis) {
             const _params = {
                 ...params || {}
             };
-            const [prefix, methodName] = apiPath.match(MATCH_METHOD) || [
+            const [prefix, method] = apiPath.match(MATCH_METHOD) || [
                 'GET ',
                 'GET'
             ];
@@ -41,14 +41,14 @@ function attachAPI(client, apis) {
                     }
                 });
             }
-            const requestParams = USE_DATA_METHODS.includes(methodName) ? {
+            const requestParams = USE_DATA_METHODS.includes(method) ? {
                 data: _params
             } : {
                 params: _params
             };
             return client.request({
                 url,
-                // method: methodName.toLowerCase(),
+                method: method.toLowerCase(),
                 ...requestParams,
                 ...apiOptions,
                 ...options
@@ -64,7 +64,7 @@ export function createRequestClient(requestConfig) {
     });
     client.interceptors.request.use((config)=>{
         const headerHandlers = (requestConfig.headerHandlers || []).map((handler)=>{
-            return handler(config).then((_)=>{
+            return handler(config).then((mixHeaders)=>{
             // Object.assign(config.headers, mixHeaders);
             }).catch();
         });

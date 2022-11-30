@@ -7,16 +7,16 @@ export class Model {
     alias: string;
     commitId?: string;
     version?: string;
-    content: Uint8Array;
+    content: number[];
 
-    constructor(dataId: string, alias: string, content: Uint8Array) {
+    constructor(dataId: string, alias: string, content: number[]) {
         this.dataId = dataId;
         this.alias = alias;
         this.content = content;
     }
 
     cast(): any {
-        return JSON.parse(Uint8ArrayToString(this.content))
+        return JSON.parse(Uint8ArrayToString(new Uint8Array(this.content)))
     }
 
     toString(): string {
@@ -37,8 +37,12 @@ export class ModelProvider {
 
         this.nodeAddress = ""
         this.nodeApiClient.jsonRpcApi(BuildNodeAddressReqParams()).then((res: any) => {
-            this.nodeAddress = res.data
-        }).catch((err:Error) => {
+            try {
+                this.nodeAddress = res.data.result
+            } catch (e) {
+                console.error(e)
+            }
+        }).catch((err: Error) => {
             console.error(err)
         })
     }
@@ -59,7 +63,7 @@ export class ModelProvider {
         return proposal.groupId === this.groupId && proposal.owner === this.ownerSid
     }
 
-    async create(clientProposal: JWS, orderId: number, content: Uint8Array): Promise<Model> {
+    async create(clientProposal: ClientOrderProposal, orderId: number, content: number[]): Promise<Model> {
         return new Promise((resolve, reject) => {
             this.nodeApiClient.jsonRpcApi(BuildCreateReqParams(
                 clientProposal,
@@ -95,7 +99,7 @@ export class ModelProvider {
         });
     }
 
-    async update(clientProposal: ClientOrderProposal, orderId: number, patch: Uint8Array): Promise<Model> {
+    async update(clientProposal: ClientOrderProposal, orderId: number, patch: number[]): Promise<Model> {
         return new Promise((resolve, reject) => {
             this.nodeApiClient.jsonRpcApi(BuildUpdateReqParams(
                 clientProposal,

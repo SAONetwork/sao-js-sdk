@@ -1,5 +1,6 @@
 import multihashing from 'multihashing-async';
 import CID from 'cids';
+import { v4 as uuid } from "uuid";
 
 export const Uint8ArrayToString = (dataArray: Uint8Array) => {
     var dataString = "";
@@ -21,7 +22,7 @@ export const stringToUint8Array = (dataString: string) => {
 }
 
 export const GenerateDataId = () => {
-    return "";
+    return uuid();
 }
 
 export const CalculateCid = async (content: Uint8Array) => {
