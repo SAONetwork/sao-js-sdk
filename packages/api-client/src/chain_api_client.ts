@@ -5,6 +5,7 @@ import { Client } from "SaoNetwork-sao-client-ts";
 import { queryClient as didQueryClient } from "SaoNetwork-sao-client-ts/dist/saonetwork.sao.did";
 import { queryClient as modelQueryClient } from "SaoNetwork-sao-client-ts/dist/saonetwork.sao.model";
 import * as u8a from 'uint8arrays';
+import stringify from 'fast-json-stable-stringify';
 import { MsgUpdateSidDocumentResponse } from "SaoNetwork-sao-client-ts/dist/saonetwork.sao.did/types/sao/did/tx";
 import { TxMsgData } from "SaoNetwork-sao-client-ts/dist/cosmos.tx.v1beta1/types/cosmos/base/abci/v1beta1/abci";
 
@@ -46,11 +47,20 @@ export class ChainApiClient {
 
   async AddAccountAuth(did: string, accountAuth: AccountAuth): Promise<any> {
     const account = await this.signer.getAccounts();
+
+    const accountDid = accountAuth.accountDid;
+    const accountEncryptedSeed = stringify(accountAuth.accountEncryptedSeed);
+    const sidEncryptedAccount = stringify(accountAuth.sidEncryptedAccount);
+
     const txResult = await this.client.SaonetworkSaoDid.tx.sendMsgAddAccountAuth({
       value: {
         creator: account[0].address,
         did: did,
-        accountAuth,
+        accountAuth: {
+          accountDid,
+          accountEncryptedSeed,
+          sidEncryptedAccount,
+        },
       }
     });
     return txResult;

@@ -37,7 +37,7 @@ export class CosmosDidStore implements DidStore {
    * @param accountId 
    * @returns binded did
    */
-  async getBinding(accountId: string): Promise<any | null> {
+  async getBinding(accountId: string): Promise<string | null> {
     return new Promise((resolve, reject) => {
       this.chainApiClient.GetBinding(accountId)
         .then(res => {
@@ -76,7 +76,7 @@ export class CosmosDidStore implements DidStore {
     });
   }
 
-  async addAccountAuth(did: string, accountAuth: AccountAuth): Promise<void> {
+  addAccountAuth(did: string, accountAuth: AccountAuth): Promise<void> {
     return new Promise((resolve, reject) => {
       this.chainApiClient.AddAccountAuth(did, accountAuth)
         .then(result => {
@@ -88,14 +88,14 @@ export class CosmosDidStore implements DidStore {
             resolve()
           }
         }).catch(error => {
-          reject("add account auth succeed, " + error);
+          reject("add account auth failed, " + error);
         })
     });
   }
 
-  async getAccountAuth(did: string, accountDid: string): Promise<AccountAuth | null> {
+  async getAccountAuth(_: string, accountDid: string): Promise<AccountAuth | null> {
     return new Promise((resolve, reject) => {
-      this.chainApiClient.GetAccountAuth(did)
+      this.chainApiClient.GetAccountAuth(accountDid)
         .then(resp => {
           if (resp.status == 200) {
             resolve({
@@ -134,7 +134,7 @@ export class CosmosDidStore implements DidStore {
             console.log(`update account auths failed. tx=${txResult.transactionHash} code=${txResult.code}`);
             reject(`update account auth did ${did} failed.`);
           } else {
-            console.log(`add account auth succeed. tx=${txResult.transactionHash}`);
+            console.log(`update account auth succeed. tx=${txResult.transactionHash}`);
             resolve()
           }
         }).catch(error => {

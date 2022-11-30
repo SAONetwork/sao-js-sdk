@@ -10,10 +10,10 @@ export declare class CosmosDidStore implements DidStore {
      * @param accountId
      * @returns binded did
      */
-    getBinding(accountId: string): Promise<any | null>;
+    getBinding(accountId: string): Promise<string | null>;
     removeBinding(accountId: string): Promise<void>;
     addAccountAuth(did: string, accountAuth: AccountAuth): Promise<void>;
-    getAccountAuth(did: string, accountDid: string): Promise<AccountAuth | null>;
+    getAccountAuth(_: string, accountDid: string): Promise<AccountAuth | null>;
     updateAccountAuths(did: string, update: AccountAuth[], remove: string[]): Promise<void>;
     getAllAccountAuth(did: string): Promise<AccountAuth[]>;
     updateSidDocument(signingKey: string, encryptKey: string, rootDocId?: string): Promise<string>;
