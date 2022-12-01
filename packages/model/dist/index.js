@@ -1,16 +1,27 @@
-import { BuildCreateReqParams, BuildLoadReqParams, BuildNodeAddressReqParams, BuildRenewReqParams, BuildUpdateReqParams } from '@js-sao-did/api-client';
+import { BuildCreateReqParams, BuildLoadReqParams, BuildNodeAddressReqParams, BuildUpdateReqParams } from '@js-sao-did/api-client';
 import { Uint8ArrayToString } from './utils';
 export class Model {
+    setCommitId(commitId) {
+        this.commitId = commitId;
+    }
+    setVersion(version) {
+        this.version = version;
+    }
+    setContent(content) {
+        this.content = content;
+    }
+    setCid(cid) {
+        this.cid = cid;
+    }
     cast() {
         return JSON.parse(Uint8ArrayToString(new Uint8Array(this.content)));
     }
     toString() {
         return JSON.stringify(this);
     }
-    constructor(dataId, alias, content){
+    constructor(dataId, alias){
         this.dataId = dataId;
         this.alias = alias;
-        this.content = content;
     }
 }
 export class ModelProvider {
@@ -27,60 +38,28 @@ export class ModelProvider {
         return proposal.groupId === this.groupId && proposal.owner === this.ownerSid;
     }
     async create(clientProposal, orderId, content) {
-        return new Promise((resolve, reject)=>{
-            this.nodeApiClient.jsonRpcApi(BuildCreateReqParams(clientProposal, orderId, content)).then((res)=>{
-                try {
-                    const model = JSON.parse(res);
-                    resolve(new Model(model.dataId, model.alias, model.Content));
-                } catch  {
-                    reject("not found");
-                }
-            }).catch((err)=>{
-                reject(err);
-            });
-        });
+        const res = await this.nodeApiClient.jsonRpcApi(BuildCreateReqParams(clientProposal, orderId, content));
+        var model = new Model(res.data.result.DataId, res.data.result.Alias);
+        model.setCid(res.data.result.Cid);
+        return model;
     }
     async load(req) {
-        return new Promise((resolve, reject)=>{
-            this.nodeApiClient.jsonRpcApi(BuildLoadReqParams(req)).then((res)=>{
-                try {
-                    const model = JSON.parse(res);
-                    resolve(new Model(model.dataId, model.alias, model.Content));
-                } catch  {
-                    reject("not found");
-                }
-            }).catch((err)=>{
-                reject(err);
-            });
-        });
+        const res = await this.nodeApiClient.jsonRpcApi(BuildLoadReqParams(req));
+        var model = new Model(res.data.result.DataId, res.data.result.Alias);
+        model.setCid(res.data.result.Cid);
+        model.setContent(res.data.result.Content);
+        model.setCommitId(res.data.result.CommitId);
+        model.setVersion(res.data.result.Version);
+        return model;
     }
     async update(clientProposal, orderId, patch) {
-        return new Promise((resolve, reject)=>{
-            this.nodeApiClient.jsonRpcApi(BuildUpdateReqParams(clientProposal, orderId, patch)).then((res)=>{
-                try {
-                    const model = JSON.parse(res);
-                    resolve(new Model(model.dataId, model.alias, model.Content));
-                } catch  {
-                    reject("not found");
-                }
-            }).catch((err)=>{
-                reject(err);
-            });
-        });
+        const res = await this.nodeApiClient.jsonRpcApi(BuildUpdateReqParams(clientProposal, orderId, patch));
+        var model = new Model(res.data.result.DataId, res.data.result.Alias);
+        model.setCid(res.data.result.Cid);
+        return model;
     }
     async renew(clientProposal, orderId) {
-        return new Promise((resolve, reject)=>{
-            this.nodeApiClient.jsonRpcApi(BuildRenewReqParams(clientProposal, orderId)).then((res)=>{
-                try {
-                    const model = JSON.parse(res);
-                    resolve(new Model(model.dataId, model.alias, model.Content));
-                } catch  {
-                    reject("not found");
-                }
-            }).catch((err)=>{
-                reject(err);
-            });
-        });
+        throw new Error("comming soon...");
     }
     constructor(ownerSid, groupId, nodeApiClient){
         this.ownerSid = ownerSid;
