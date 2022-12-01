@@ -78,11 +78,12 @@ export class ModelManager {
                 throw new Error("Neither dataId nor alias is specified.");
             }
         }
-        const origin = (await provider.load({
+        const originModel = await provider.load({
             keyword,
             publicKey: provider.getOwnerSid(),
             groupId: def.groupId
-        })).cast();
+        });
+        const origin = originModel.cast();
         const patch = jsonpatch.compare(origin, def.data);
         console.log("Patch: ", stringify(patch));
         const target = jsonpatch.applyPatch(origin, patch).newDocument;
@@ -96,13 +97,13 @@ export class ModelManager {
             duration: modelConfig.duration,
             replica: modelConfig.replica,
             timeout: modelConfig.timeout,
-            alias: def.alias,
-            dataId: def.dataId,
+            alias: originModel.alias,
+            dataId: originModel.dataId,
             commitId: GenerateDataId(),
-            tags: def.tags,
+            tags: originModel.tags,
             cid,
-            rule: def.rule,
-            extendInfo: def.extendInfo,
+            rule: originModel.rule,
+            extendInfo: originModel.extendInfo,
             size: dataBytes.length,
             operation: modelConfig.operation
         };

@@ -12,6 +12,17 @@ export class Model {
     setCid(cid) {
         this.cid = cid;
     }
+    setTags(tags) {
+        this.tags = [
+            ...tags
+        ];
+    }
+    setRule(rule) {
+        this.rule = rule;
+    }
+    setExtendInfo(extendInfo) {
+        this.extendInfo = extendInfo;
+    }
     cast() {
         return JSON.parse(String(this.content));
     }

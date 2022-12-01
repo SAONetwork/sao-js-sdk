@@ -7,11 +7,17 @@ export declare class Model {
     version?: string;
     content?: number[];
     cid?: string;
+    tags?: string[];
+    rule?: string;
+    extendInfo?: string;
     constructor(dataId: string, alias: string);
     setCommitId(commitId: string): void;
     setVersion(version: string): void;
     setContent(content: number[]): void;
     setCid(cid: string): void;
+    setTags(tags: string[]): void;
+    setRule(rule: string): void;
+    setExtendInfo(extendInfo: string): void;
     cast(): any;
     toString(): string;
 }

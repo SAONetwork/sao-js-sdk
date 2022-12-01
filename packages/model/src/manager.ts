@@ -5,7 +5,7 @@ import { GetNodeApiClient } from '@js-sao-did/api-client'
 import { SidManager } from '@js-sao-did/sid'
 import { ModelConfig, ModelDef, ModelProviderConfig, Proposal } from './types'
 import { CalculateCid, GenerateDataId, stringToUint8Array } from './utils'
-import { Model, ModelProvider } from ".";
+import { ModelProvider } from ".";
 
 const defaultModelConfig: ModelConfig = {
   duration: 365,
@@ -116,12 +116,13 @@ export class ModelManager {
       }
     }
 
-    const origin = (await provider.load({
+    const originModel = (await provider.load({
       keyword,
       publicKey: provider.getOwnerSid(),
       groupId: def.groupId,
-    })).cast();
+    }))
 
+    const origin = originModel.cast();
 
     const patch = jsonpatch.compare(origin, def.data);
     console.log("Patch: ", stringify(patch));
@@ -138,13 +139,13 @@ export class ModelManager {
       duration: modelConfig.duration,
       replica: modelConfig.replica,
       timeout: modelConfig.timeout,
-      alias: def.alias,
-      dataId: def.dataId,
+      alias: originModel.alias,
+      dataId: originModel.dataId,
       commitId: GenerateDataId(),
-      tags: def.tags,
+      tags: originModel.tags,
       cid,
-      rule: def.rule,
-      extendInfo: def.extendInfo,
+      rule: originModel.rule,
+      extendInfo: originModel.extendInfo,
       size: dataBytes.length,
       operation: modelConfig.operation,
     }
