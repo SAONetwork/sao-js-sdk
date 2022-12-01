@@ -81,8 +81,10 @@ export class ModelManager {
         if (sidProvider === null) {
             return new Promise((_, reject) => reject("failed to get sid provider"))
         }
+        const jsonString = stringify(proposal)
+        console.log("jsonString: ", jsonString)
         const clientProposal = await sidProvider.createJWS({
-            payload: stringify(proposal)
+            payload: jsonString
         })
 
         return new Promise((resolve, reject) => {
