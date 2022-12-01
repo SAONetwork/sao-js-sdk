@@ -1,5 +1,4 @@
 import { BuildCreateReqParams, BuildLoadReqParams, BuildNodeAddressReqParams, BuildUpdateReqParams } from '@js-sao-did/api-client';
-import { Uint8ArrayToString } from './utils';
 export class Model {
     setCommitId(commitId) {
         this.commitId = commitId;
@@ -14,7 +13,7 @@ export class Model {
         this.cid = cid;
     }
     cast() {
-        return JSON.parse(Uint8ArrayToString(new Uint8Array(this.content)));
+        return JSON.parse(String(this.content));
     }
     toString() {
         return JSON.stringify(this);
@@ -39,24 +38,48 @@ export class ModelProvider {
     }
     async create(clientProposal, orderId, content) {
         const res = await this.nodeApiClient.jsonRpcApi(BuildCreateReqParams(clientProposal, orderId, content));
-        var model = new Model(res.data.result.DataId, res.data.result.Alias);
-        model.setCid(res.data.result.Cid);
-        return model;
-    }
-    async load(req) {
-        const res = await this.nodeApiClient.jsonRpcApi(BuildLoadReqParams(req));
-        var model = new Model(res.data.result.DataId, res.data.result.Alias);
-        model.setCid(res.data.result.Cid);
-        model.setContent(res.data.result.Content);
-        model.setCommitId(res.data.result.CommitId);
-        model.setVersion(res.data.result.Version);
-        return model;
+        if (res.data.result) {
+            var model = new Model(res.data.result.DataId, res.data.result.Alias);
+            model.setCid(res.data.result.Cid);
+            return model;
+        } else if (res.data.error) {
+            throw new Error(res.data.error.message);
+        } else {
+            throw new Error("unknown error");
+        }
     }
     async update(clientProposal, orderId, patch) {
         const res = await this.nodeApiClient.jsonRpcApi(BuildUpdateReqParams(clientProposal, orderId, patch));
-        var model = new Model(res.data.result.DataId, res.data.result.Alias);
-        model.setCid(res.data.result.Cid);
-        return model;
+        if (res.data.result) {
+            var model = new Model(res.data.result.DataId, res.data.result.Alias);
+            model.setCid(res.data.result.Cid);
+            return model;
+        } else if (res.data.error) {
+            throw new Error(res.data.error.message);
+        } else {
+            throw new Error("unknown error");
+        }
+    }
+    async load(req) {
+        if (req.groupId === undefined) {
+            req.groupId = this.groupId;
+        }
+        if (req.publicKey === undefined) {
+            req.publicKey = this.ownerSid;
+        }
+        const res = await this.nodeApiClient.jsonRpcApi(BuildLoadReqParams(req));
+        if (res.data.result) {
+            var model = new Model(res.data.result.DataId, res.data.result.Alias);
+            model.setCid(res.data.result.Cid);
+            model.setContent(res.data.result.Content);
+            model.setCommitId(res.data.result.CommitId);
+            model.setVersion(res.data.result.Version);
+            return model;
+        } else if (res.data.error) {
+            throw new Error(res.data.error.message);
+        } else {
+            throw new Error("unknown error");
+        }
     }
     async renew(clientProposal, orderId) {
         throw new Error("comming soon...");

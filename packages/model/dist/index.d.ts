@@ -26,8 +26,8 @@ export declare class ModelProvider {
     getNodeAddress(): string;
     validate(proposal: Proposal): boolean;
     create(clientProposal: ClientOrderProposal, orderId: number, content: number[]): Promise<Model>;
-    load(req: LoadReq): Promise<Model>;
     update(clientProposal: ClientOrderProposal, orderId: number, patch: number[]): Promise<Model>;
+    load(req: LoadReq): Promise<Model>;
     renew(clientProposal: ClientOrderProposal, orderId: number): Promise<Model>;
 }
 export * from "./manager";

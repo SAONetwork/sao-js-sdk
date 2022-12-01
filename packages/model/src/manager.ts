@@ -5,7 +5,7 @@ import { GetNodeApiClient } from '@js-sao-did/api-client'
 import { SidManager } from '@js-sao-did/sid'
 import { ModelConfig, ModelDef, ModelProviderConfig, Proposal } from './types'
 import { CalculateCid, GenerateDataId, stringToUint8Array } from './utils'
-import { ModelProvider } from ".";
+import { Model, ModelProvider } from ".";
 
 const defaultModelConfig: ModelConfig = {
   duration: 365,
@@ -49,7 +49,7 @@ export class ModelManager {
     this.modelProviders[config.ownerDid] = provider;
   }
 
-  async createModel<T>(def: ModelDef<T>, modelConfig: ModelConfig = defaultModelConfig, ownerDid?: string): Promise<void> {
+  async createModel<T>(def: ModelDef<T>, modelConfig: ModelConfig = defaultModelConfig, ownerDid?: string): Promise<string> {
     var provider = this.defaultModelProvider
     if (ownerDid !== undefined) {
       provider = this.getModelProvider(ownerDid)
@@ -91,25 +91,36 @@ export class ModelManager {
       throw new Error("invalid provider")
     }
 
-    await provider.create(
+    const model = await provider.create(
       {
         Proposal: proposal,
         JwsSignature: clientProposal.signatures[0],
       },
       0,
       Array.from(dataBytes),);
+
+    return model.dataId
   }
 
-  async updateModel<T>(def: ModelDef<T>, modelConfig: ModelConfig = defaultModelConfig, ownerDid?: string): Promise<void> {
+  async updateModel<T>(def: ModelDef<T>, modelConfig: ModelConfig = defaultModelConfig, ownerDid?: string): Promise<string> {
     var provider = this.defaultModelProvider
     if (ownerDid !== undefined) {
       provider = this.getModelProvider(ownerDid)
     }
 
-    if (def.dataId === undefined || def.dataId === null || def.dataId === "") {
-      throw new Error("Invalid dataId: " + def.dataId);
+    var keyword = def.dataId
+    if (keyword === undefined) {
+      keyword = def.alias
+      if (keyword === undefined) {
+        throw new Error("Neither dataId nor alias is specified.")
+      }
     }
-    const origin = (await provider.load({ keyword: def.dataId })).cast();
+
+    const origin = (await provider.load({
+      keyword,
+      publicKey: provider.getOwnerSid(),
+      groupId: def.groupId,
+    })).cast();
 
 
     const patch = jsonpatch.compare(origin, def.data);
@@ -150,44 +161,59 @@ export class ModelManager {
       throw new Error("invalid provider")
     }
 
-    await provider.update(
+    const model = await provider.update(
       {
         Proposal: proposal,
         JwsSignature: clientProposal.signatures[0],
       }, 0,
       Array.from(dataBytes));
+    return model.dataId
   }
 
-  async loadModel<T>(keyword: string, ownerDid?: string): Promise<T> {
+  async loadModel<T>(keyword: string, ownerDid?: string, groupId?: string): Promise<T> {
     var provider = this.defaultModelProvider
     if (ownerDid !== undefined) {
       provider = this.getModelProvider(ownerDid)
     }
 
-    const model = await provider.load({ keyword})
+    const model = await provider.load({
+      keyword,
+      publicKey: provider.getOwnerSid(),
+      groupId,
+    })
+
+    console.log(String(model.content));
 
     return model.cast()
   }
 
-  async loadModelByCommitId<T>(keyword: string, commitId: string, ownerDid?: string): Promise<T> {
+  async loadModelByCommitId<T>(keyword: string, commitId: string, ownerDid?: string, groupId?: string): Promise<T> {
     var provider = this.defaultModelProvider
     if (ownerDid !== undefined) {
       provider = this.getModelProvider(ownerDid)
     }
 
-    const model = await provider.load({ keyword, commitId})
-    
+    const model = await provider.load({
+      keyword,
+      publicKey: provider.getOwnerSid(),
+      groupId, commitId
+    })
+
     return model.cast()
   }
 
-  async loadModelByVersion<T>(keyword: string, version: string, ownerDid?: string): Promise<T> {
+  async loadModelByVersion<T>(keyword: string, version: string, ownerDid?: string, groupId?: string): Promise<T> {
     var provider = this.defaultModelProvider
     if (ownerDid !== undefined) {
       provider = this.getModelProvider(ownerDid)
     }
 
-    const model = await provider.load({ keyword, version})
-    
+    const model = await provider.load({
+      keyword,
+      publicKey: provider.getOwnerSid(),
+      groupId, version
+    })
+
     return model.cast()
   }
 }
