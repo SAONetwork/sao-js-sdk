@@ -10,12 +10,13 @@ export type ModelProviderConfig = {
 }
 
 export type ModelDef<T> = {
-    alias?: string | "",
+    alias?: string | undefined,
     data: T,
-    dataId?: string | "",
+    dataId?: string | undefined,
+    groupId?: string | undefined,
     tags?: string[] | [],
-    rule?: string | "",
-    extendInfo?: string | "",
+    rule?: string | undefined,
+    extendInfo?: string | undefined,
 }
 
 export type ModelConfig = {

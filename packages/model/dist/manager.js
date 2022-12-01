@@ -60,21 +60,28 @@ export class ModelManager {
         if (!provider.validate(proposal)) {
             throw new Error("invalid provider");
         }
-        await provider.create({
+        const model = await provider.create({
             Proposal: proposal,
             JwsSignature: clientProposal.signatures[0]
         }, 0, Array.from(dataBytes));
+        return model.dataId;
     }
     async updateModel(def, modelConfig = defaultModelConfig, ownerDid) {
         var provider = this.defaultModelProvider;
         if (ownerDid !== undefined) {
             provider = this.getModelProvider(ownerDid);
         }
-        if (def.dataId === undefined || def.dataId === null || def.dataId === "") {
-            throw new Error("Invalid dataId: " + def.dataId);
+        var keyword = def.dataId;
+        if (keyword === undefined) {
+            keyword = def.alias;
+            if (keyword === undefined) {
+                throw new Error("Neither dataId nor alias is specified.");
+            }
         }
         const origin = (await provider.load({
-            keyword: def.dataId
+            keyword,
+            publicKey: provider.getOwnerSid(),
+            groupId: def.groupId
         })).cast();
         const patch = jsonpatch.compare(origin, def.data);
         console.log("Patch: ", stringify(patch));
@@ -109,39 +116,47 @@ export class ModelManager {
         if (!provider.validate(proposal)) {
             throw new Error("invalid provider");
         }
-        await provider.update({
+        const model = await provider.update({
             Proposal: proposal,
             JwsSignature: clientProposal.signatures[0]
         }, 0, Array.from(dataBytes));
+        return model.dataId;
     }
-    async loadModel(keyword, ownerDid) {
-        var provider = this.defaultModelProvider;
-        if (ownerDid !== undefined) {
-            provider = this.getModelProvider(ownerDid);
-        }
-        const model = await provider.load({
-            keyword
-        });
-        return model.cast();
-    }
-    async loadModelByCommitId(keyword, commitId, ownerDid) {
+    async loadModel(keyword, ownerDid, groupId) {
         var provider = this.defaultModelProvider;
         if (ownerDid !== undefined) {
             provider = this.getModelProvider(ownerDid);
         }
         const model = await provider.load({
             keyword,
+            publicKey: provider.getOwnerSid(),
+            groupId
+        });
+        console.log(String(model.content));
+        return model.cast();
+    }
+    async loadModelByCommitId(keyword, commitId, ownerDid, groupId) {
+        var provider = this.defaultModelProvider;
+        if (ownerDid !== undefined) {
+            provider = this.getModelProvider(ownerDid);
+        }
+        const model = await provider.load({
+            keyword,
+            publicKey: provider.getOwnerSid(),
+            groupId,
             commitId
         });
         return model.cast();
     }
-    async loadModelByVersion(keyword, version, ownerDid) {
+    async loadModelByVersion(keyword, version, ownerDid, groupId) {
         var provider = this.defaultModelProvider;
         if (ownerDid !== undefined) {
             provider = this.getModelProvider(ownerDid);
         }
         const model = await provider.load({
             keyword,
+            publicKey: provider.getOwnerSid(),
+            groupId,
             version
         });
         return model.cast();
