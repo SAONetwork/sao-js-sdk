@@ -1,6 +1,7 @@
 import './App.css';
 import { useEffect, useState } from "react";
 import { SidManager, SaoKeplrAccountProvider, CosmosDidStore } from "@js-sao-did/sid";
+import { ModelManager } from "@js-sao-did/model";
 import { DirectSecp256k1Wallet } from '@cosmjs/proto-signing';
 import { Window as KeplrWindow } from '@keplr-wallet/types';
 import { fromHex } from "@cosmjs/encoding";
@@ -8,6 +9,13 @@ import { GetNodeApiClient } from "@js-sao-did/api-client";
 
 declare global {
   interface Window extends KeplrWindow {}
+}
+
+const defaultModelConfig = {
+  duration: 365,
+  replica: 1,
+  timeout: 60 * 60 * 24,
+  operation: 1,
 }
 
 // place shell afraid apart solve kidney notice mean match april clown system
@@ -129,8 +137,24 @@ export default function App() {
     });
   };
 
+  const testNodeApi1 = () => {
+    const modelManager = new ModelManager({
+      ownerDid: did,
+      chainApiUrl: "http://127.0.0.1:1317",
+      chainApiToken: "",
+      nodeApiUrl: "http://127.0.0.1:8888/rpc/v0",
+      nodeApiToken: "TOKEN",
+      platformId: "30293f0f-3e0f-4b3c-aff1-890a2fdf063b",
+    }, manager);
 
-  const testNodeApi = () => {
+
+    modelManager.createModel({
+      alias: "test_model",
+      data: {abd: 111},
+    })
+  }
+
+  const testNodeApi2 = () => {
     const nodeApiClient = GetNodeApiClient({
       baseURL: "http://127.0.0.1:8888/rpc/v0",
       headers: {
@@ -165,7 +189,8 @@ export default function App() {
         {log.map(l => 
           (<p key={new Date().toString()}>{l}</p>)
         )}
-      <button onClick={testNodeApi}>Tesk Node Api</button><br/>
+      <button onClick={testNodeApi1}>Tesk Model Create</button><br/>
+      <button onClick={testNodeApi2}>Tesk Node Load</button><br/>
     </div>
   );
 }
