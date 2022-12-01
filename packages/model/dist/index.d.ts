@@ -5,8 +5,13 @@ export declare class Model {
     alias: string;
     commitId?: string;
     version?: string;
-    content: number[];
-    constructor(dataId: string, alias: string, content: number[]);
+    content?: number[];
+    cid?: string;
+    constructor(dataId: string, alias: string);
+    setCommitId(commitId: string): void;
+    setVersion(version: string): void;
+    setContent(content: number[]): void;
+    setCid(cid: string): void;
     cast(): any;
     toString(): string;
 }
