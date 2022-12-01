@@ -9,6 +9,9 @@ export class Model {
     version?: string;
     content?: number[];
     cid?: string;
+    tags?: string[];
+    rule?: string;
+    extendInfo?: string;
 
     constructor(dataId: string, alias: string) {
         this.dataId = dataId;
@@ -28,7 +31,19 @@ export class Model {
     }
 
     setCid(cid: string) {
-        this.cid = cid
+        this.cid = cid;
+    }
+
+    setTags(tags: string[]) {
+        this.tags = [...tags];
+    }
+
+    setRule(rule: string) {
+        this.rule = rule;
+    }
+
+    setExtendInfo(extendInfo: string) {
+        this.extendInfo = extendInfo;
     }
 
     cast(): any {
