@@ -1,4 +1,5 @@
 import { AccountAuth, BindingProof, ChainApiClientConfig } from './types';
+import { JWE } from "did-jwt";
 export declare class ChainApiClient {
     private signer;
     private client;
@@ -16,4 +17,6 @@ export declare class ChainApiClient {
     GetAllAccountAuth(did: string): Promise<any>;
     UpdateSidDocument(keys: Record<string, string>, rootDocId?: string): Promise<any>;
     ListSidDocumentVersions(rootDocId: string): Promise<any>;
+    getPastSeeds(did: string): Promise<any>;
+    addPastSeed(did: string, seed: JWE): Promise<any>;
 }

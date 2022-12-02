@@ -8,6 +8,7 @@ import * as u8a from 'uint8arrays';
 import stringify from 'fast-json-stable-stringify';
 import { MsgUpdateSidDocumentResponse } from "SaoNetwork-sao-client-ts/dist/saonetwork.sao.did/types/sao/did/tx";
 import { TxMsgData } from "SaoNetwork-sao-client-ts/dist/cosmos.tx.v1beta1/types/cosmos/base/abci/v1beta1/abci";
+import { JWE } from "did-jwt";
 
 export class ChainApiClient {
   private signer: OfflineSigner
@@ -145,4 +146,21 @@ export class ChainApiClient {
   async ListSidDocumentVersions(rootDocId: string): Promise<any> {
     return this.didClient.querySidDocumentVersion(rootDocId);
   }
+
+  async getPastSeeds(did: string): Promise<any> {
+    return this.didClient.queryPastSeeds(did);
+  }
+
+  async addPastSeed(did: string, seed: JWE): Promise<any> {
+    const accounts = await this.signer.getAccounts();
+    const txResult = this.client.SaonetworkSaoDid.tx.sendMsgAddPastSeed({
+      value: {
+        creator: accounts[0].address,
+        did, 
+        pastSeed: stringify(seed),
+      }
+    });
+    return txResult;
+  }
+
 }
