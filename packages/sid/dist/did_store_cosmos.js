@@ -186,7 +186,7 @@ export class CosmosDidStore {
     }
     async getOldSeeds(did) {
         try {
-            const resp = await this.chainApiClient.getPastSeeds(did);
+            const resp = await this.chainApiClient.getPastSeeds(did + ':');
             if (resp.status === 200) {
                 var seedJWEs = [];
                 resp.data.pastSeeds.seeds.forEach((s)=>{
