@@ -117,6 +117,16 @@ export class ChainApiClient {
         });
         return txResult;
     }
+    async updatePaymentAddress(accountId) {
+        const accounts = await this.signer.getAccounts();
+        const txResult = this.client.SaonetworkSaoDid.tx.sendMsgUpdatePaymentAddress({
+            value: {
+                creator: accounts[0].address,
+                accountId: accountId
+            }
+        });
+        return txResult;
+    }
     constructor(config){
         const api = config.apiURL || process.env.COSMOS_API_URL || 'http://localhost:1317';
         const rpc = config.rpcURL || process.env.COSMOS_RPC_URL || 'http://localhost:26657';

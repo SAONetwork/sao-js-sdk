@@ -52,4 +52,6 @@ export interface DidStore {
 
     addOldSeed(did: string, seed: JWE): Promise<void>
 
+    updatePaymentAddress(accountId: string): Promise<void>
+
 }
