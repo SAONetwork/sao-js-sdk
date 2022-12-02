@@ -11,6 +11,7 @@ export interface FullKeySeries {
     priv: KeySeries;
     seed: Uint8Array;
 }
+export declare function keyName(key: string): string;
 export declare class Keychain {
     private keysMap;
     private kidToDocid;

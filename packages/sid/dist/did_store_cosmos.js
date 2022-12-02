@@ -139,9 +139,9 @@ export class CosmosDidStore {
             });
         });
     }
-    async updateSidDocument(signingKey, encryptKey, rootDocId) {
+    async updateSidDocument(keys, rootDocId) {
         return new Promise((resolve, reject)=>{
-            this.chainApiClient.UpdateSidDocument(signingKey, encryptKey, rootDocId).then((txResult)=>{
+            this.chainApiClient.UpdateSidDocument(keys, rootDocId).then((txResult)=>{
                 console.log(txResult);
                 if (txResult.code != 0) {
                     console.log(`update sid document failed. tx=${txResult.transactionHash} code=${txResult.code}`);

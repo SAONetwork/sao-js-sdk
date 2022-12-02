@@ -170,9 +170,9 @@ export class CosmosDidStore implements DidStore {
     });
   }
 
-  async updateSidDocument(signingKey: string, encryptKey: string, rootDocId?: string): Promise<string> {
+  async updateSidDocument(keys: Record<string, string>, rootDocId?: string): Promise<string> {
     return new Promise((resolve, reject) => {
-      this.chainApiClient.UpdateSidDocument(signingKey, encryptKey, rootDocId).
+      this.chainApiClient.UpdateSidDocument(keys, rootDocId).
         then(txResult => {
           console.log(txResult);
 
