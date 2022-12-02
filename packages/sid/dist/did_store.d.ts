@@ -30,4 +30,5 @@ export interface DidStore {
     listSidDocumentVersions(rootDocId: string): Promise<Array<string>>;
     getOldSeeds(did: string): Promise<Array<JWE>>;
     addOldSeed(did: string, seed: JWE): Promise<void>;
+    updatePaymentAddress(accountId: string): Promise<void>;
 }

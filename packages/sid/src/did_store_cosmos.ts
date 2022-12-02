@@ -224,7 +224,7 @@ export class CosmosDidStore implements DidStore {
 
   async getOldSeeds(did: string): Promise<Array<JWE>> {
     try {
-      const resp = await this.chainApiClient.getPastSeeds(did);
+      const resp = await this.chainApiClient.getPastSeeds(did + ':');
       if (resp.status === 200) {
         var seedJWEs = [];
         resp.data.pastSeeds.seeds.forEach(s => {

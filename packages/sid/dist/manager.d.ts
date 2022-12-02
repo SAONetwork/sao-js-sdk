@@ -13,4 +13,5 @@ export declare class SidManager {
     unbind(): Promise<void>;
     listDids(): Array<string>;
     getSidProvider(did?: string): Promise<SidProvider | null>;
+    updatePaymentAddress(): Promise<void>;
 }

@@ -74,9 +74,9 @@ export class Keychain {
     getKeyFragment(docid = this.latestDocid, keyUsage = "sign") {
         const keys = this.keysMap[docid];
         if (keyUsage === "encrypt") {
-            return encodeKey(keys.pub.encrypt, 'x25519').slice(15);
+            return keyName(encodeKey(keys.pub.encrypt, 'x25519'));
         } else {
-            return encodeKey(keys.pub.signing, 'secp256k1').slice(15);
+            return keyName(encodeKey(keys.pub.signing, 'secp256k1'));
         }
     }
     async add(accountId, accountSecrect) {
