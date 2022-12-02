@@ -28,4 +28,6 @@ export interface DidStore {
     getAllAccountAuth(did: string): Promise<AccountAuth[]>;
     updateSidDocument(keys: Record<string, string>, rootDocId?: string): Promise<string>;
     listSidDocumentVersions(rootDocId: string): Promise<Array<string>>;
+    getOldSeeds(did: string): Promise<Array<JWE>>;
+    addOldSeed(did: string, seed: JWE): Promise<void>;
 }

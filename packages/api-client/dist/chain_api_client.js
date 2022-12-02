@@ -103,6 +103,20 @@ export class ChainApiClient {
     async ListSidDocumentVersions(rootDocId) {
         return this.didClient.querySidDocumentVersion(rootDocId);
     }
+    async getPastSeeds(did) {
+        return this.didClient.queryPastSeeds(did);
+    }
+    async addPastSeed(did, seed) {
+        const accounts = await this.signer.getAccounts();
+        const txResult = this.client.SaonetworkSaoDid.tx.sendMsgAddPastSeed({
+            value: {
+                creator: accounts[0].address,
+                did,
+                pastSeed: stringify(seed)
+            }
+        });
+        return txResult;
+    }
     constructor(config){
         const api = config.apiURL || process.env.COSMOS_API_URL || 'http://localhost:1317';
         const rpc = config.rpcURL || process.env.COSMOS_RPC_URL || 'http://localhost:26657';

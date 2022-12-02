@@ -184,6 +184,34 @@ export class CosmosDidStore {
             });
         });
     }
+    async getOldSeeds(did) {
+        try {
+            const resp = await this.chainApiClient.getPastSeeds(did);
+            if (resp.status === 200) {
+                var seedJWEs = [];
+                resp.data.pastSeeds.seeds.forEach((s)=>{
+                    seedJWEs.push(JSON.parse(s));
+                });
+                return seedJWEs;
+            } else {
+                throw new Error(`get past seeds for did ${did} failed.`);
+            }
+        } catch (err) {
+            if (err.response.status == 404) {
+                return [];
+            }
+            throw new Error(`get past seeds for did ${did} failed. err=${err}`);
+        }
+    }
+    async addOldSeed(did, seed) {
+        const txResult = await this.chainApiClient.addPastSeed(did, seed);
+        if (txResult.code != 0) {
+            console.log(`add old seed for did ${did} failed. hash=${txResult.hash} code=${txResult.code}`);
+            throw new Error(`add old seed for did ${did} failed. hash=${txResult.hash} code=${txResult.code}`);
+        } else {
+            console.log(`add old seed for did ${did}suceed.`);
+        }
+    }
     constructor(signer, apiURL, rpcURL, prefix){
         this.chainApiClient = new ChainApiClient({
             apiURL,

@@ -1,5 +1,6 @@
 import { DidStore } from "./did_store";
 import { OfflineSigner } from "@cosmjs/proto-signing";
+import { JWE } from "did-jwt";
 import { AccountAuth, BindingProof } from "@js-sao-did/api-client";
 export declare class CosmosDidStore implements DidStore {
     private chainApiClient;
@@ -18,4 +19,6 @@ export declare class CosmosDidStore implements DidStore {
     getAllAccountAuth(did: string): Promise<AccountAuth[]>;
     updateSidDocument(keys: Record<string, string>, rootDocId?: string): Promise<string>;
     listSidDocumentVersions(rootDocId: string): Promise<Array<string>>;
+    getOldSeeds(did: string): Promise<Array<JWE>>;
+    addOldSeed(did: string, seed: JWE): Promise<void>;
 }
