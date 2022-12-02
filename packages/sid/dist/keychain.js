@@ -55,7 +55,7 @@ export class Keychain {
         const encKid = keyName(encrypt);
         const docid = await didStore.updateSidDocument({
             [sigKid]: signing,
-            [encKid]: encKid
+            [encKid]: encrypt
         });
         const sid = `did:sid:${docid}`;
         const keychain = new Keychain(sid, didStore);
