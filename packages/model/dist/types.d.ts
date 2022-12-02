@@ -8,17 +8,19 @@ export type ModelProviderConfig = {
     platformId: string;
 };
 export type ModelDef<T> = {
-    alias: string;
+    alias?: string | undefined;
     data: T;
-    tags: string[] | undefined;
-    rule: string | undefined;
-    extendInfo: string | undefined;
+    dataId?: string | undefined;
+    groupId?: string | undefined;
+    tags?: string[] | [];
+    rule?: string | undefined;
+    extendInfo?: string | undefined;
 };
 export type ModelConfig = {
-    duration: number;
-    replica: number;
-    timeout: number;
-    operation: number;
+    duration?: number | 365;
+    replica?: number | 3;
+    timeout?: number | 300;
+    operation?: number | 1;
 };
 export type LoadReq = {
     user?: string | undefined;
@@ -47,5 +49,5 @@ export type Proposal = {
 };
 export type ClientOrderProposal = {
     Proposal: Proposal;
-    ClientSignature: JWSSignature;
+    JwsSignature: JWSSignature;
 };

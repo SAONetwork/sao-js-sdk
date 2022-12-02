@@ -32,16 +32,16 @@ function attachAPI<T extends APISchema>(
             apiPath = path as RequestPath;
             apiOptions = rest;
         }
-        hostApi[apiName] = (params: any, options: RequestOptions) => {
+        hostApi[apiName] = (params, options) => {
             const _params = { ...(params || {}) };
 
-            const [prefix, methodName] = apiPath.match(MATCH_METHOD) || ['GET ', 'GET'];
+            const [prefix, method] = apiPath.match(MATCH_METHOD) || ['GET ', 'GET'];
 
             let url = apiPath.replace(prefix, '');
 
             const matchParams = apiPath.match(MATCH_PATH_PARAMS);
             if (matchParams) {
-                matchParams.forEach((match: string) => {
+                matchParams.forEach((match) => {
                     const key = match.replace(':', '');
                     if (Reflect.has(_params, key)) {
                         url = url.replace(match, Reflect.get(_params, key));
@@ -49,12 +49,12 @@ function attachAPI<T extends APISchema>(
                     }
                 });
             }
-            const requestParams = USE_DATA_METHODS.includes(methodName)
+            const requestParams = USE_DATA_METHODS.includes(method)
                 ? { data: _params }
                 : { params: _params };
             return client.request({
                 url,
-                // method: methodName.toLowerCase(),
+                method: method.toLowerCase(),
                 ...requestParams,
                 ...apiOptions,
                 ...options,
@@ -71,9 +71,9 @@ export function createRequestClient<T extends APISchema>(requestConfig: CreateRe
     });
 
     client.interceptors.request.use((config) => {
-        const headerHandlers = (requestConfig.headerHandlers || []).map((handler: Function) => {
+        const headerHandlers = (requestConfig.headerHandlers || []).map((handler) => {
             return handler(config)
-                .then((_: AxiosRequestHeaders) => {
+                .then((mixHeaders: AxiosRequestHeaders) => {
                     // Object.assign(config.headers, mixHeaders);
                 })
                 .catch();

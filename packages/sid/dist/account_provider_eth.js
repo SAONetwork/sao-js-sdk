@@ -4,7 +4,7 @@ import { utf8ToHex } from "./utils";
 export class EthAccountProvider {
     static async new(provider) {
         const accounts = await provider.request({
-            method: 'eth_accounts'
+            method: 'eth_requestAccounts'
         });
         if (accounts.length === 0) {
             throw new Error("Please connect to metamask");
@@ -24,9 +24,10 @@ export class EthAccountProvider {
     }
     async accountId() {
         const chainId = await this.chainId();
+        const namespace = this.namespace();
         return new AccountId({
             address: this.address,
-            chainId: `${this.namespace}:${chainId}`
+            chainId: `${namespace}:${chainId}`
         });
     }
     sign(message) {

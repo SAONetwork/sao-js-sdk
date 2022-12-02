@@ -1,4 +1,3 @@
-import { JWS } from "@js-sao-did/common";
 import { CreateRequestClient, SaoNodeAPISchema } from '@js-sao-did/api-client';
 import { ClientOrderProposal, LoadReq, Proposal } from './types';
 export declare class Model {
@@ -6,8 +5,19 @@ export declare class Model {
     alias: string;
     commitId?: string;
     version?: string;
-    content: Uint8Array;
-    constructor(dataId: string, alias: string, content: Uint8Array);
+    content?: number[];
+    cid?: string;
+    tags?: string[];
+    rule?: string;
+    extendInfo?: string;
+    constructor(dataId: string, alias: string);
+    setCommitId(commitId: string): void;
+    setVersion(version: string): void;
+    setContent(content: number[]): void;
+    setCid(cid: string): void;
+    setTags(tags: string[]): void;
+    setRule(rule: string): void;
+    setExtendInfo(extendInfo: string): void;
     cast(): any;
     toString(): string;
 }
@@ -21,8 +31,11 @@ export declare class ModelProvider {
     getGroupId(): string;
     getNodeAddress(): string;
     validate(proposal: Proposal): boolean;
-    create(clientProposal: JWS, orderId: number, content: Uint8Array): Promise<Model>;
+    create(clientProposal: ClientOrderProposal, orderId: number, content: number[]): Promise<Model>;
+    update(clientProposal: ClientOrderProposal, orderId: number, patch: number[]): Promise<Model>;
     load(req: LoadReq): Promise<Model>;
-    update(clientProposal: ClientOrderProposal, orderId: number, patch: Uint8Array): Promise<Model>;
     renew(clientProposal: ClientOrderProposal, orderId: number): Promise<Model>;
 }
+export * from "./manager";
+export * from "./types";
+export * from "./utils";

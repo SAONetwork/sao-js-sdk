@@ -54,7 +54,7 @@ export class CosmosDidStore {
             });
         });
     }
-    async addAccountAuth(did, accountAuth) {
+    addAccountAuth(did, accountAuth) {
         return new Promise((resolve, reject)=>{
             this.chainApiClient.AddAccountAuth(did, accountAuth).then((result)=>{
                 if (result.code != 0) {
@@ -65,13 +65,13 @@ export class CosmosDidStore {
                     resolve();
                 }
             }).catch((error)=>{
-                reject("add account auth succeed, " + error);
+                reject("add account auth failed, " + error);
             });
         });
     }
-    async getAccountAuth(did, accountDid) {
+    async getAccountAuth(_, accountDid) {
         return new Promise((resolve, reject)=>{
-            this.chainApiClient.GetAccountAuth(did).then((resp)=>{
+            this.chainApiClient.GetAccountAuth(accountDid).then((resp)=>{
                 if (resp.status == 200) {
                     resolve({
                         accountDid: resp.data.accountAuth.accountDid,
@@ -106,7 +106,7 @@ export class CosmosDidStore {
                     console.log(`update account auths failed. tx=${txResult.transactionHash} code=${txResult.code}`);
                     reject(`update account auth did ${did} failed.`);
                 } else {
-                    console.log(`add account auth succeed. tx=${txResult.transactionHash}`);
+                    console.log(`update account auth succeed. tx=${txResult.transactionHash}`);
                     resolve();
                 }
             }).catch((error)=>{
