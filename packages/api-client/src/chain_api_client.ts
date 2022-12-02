@@ -163,4 +163,15 @@ export class ChainApiClient {
     return txResult;
   }
 
+  async updatePaymentAddress(accountId: string): Promise<any> {
+    const accounts = await this.signer.getAccounts();
+    const txResult = this.client.SaonetworkSaoDid.tx.sendMsgUpdatePaymentAddress({
+      value: {
+        creator: accounts[0].address,
+        accountId: accountId,
+      }
+    });
+    return txResult;
+  }
+
 }

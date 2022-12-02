@@ -252,4 +252,14 @@ export class CosmosDidStore implements DidStore {
     }
   }
 
+  async updatePaymentAddress(accountId: string): Promise<void> {
+    const txResult = await this.chainApiClient.updatePaymentAddress(accountId);
+    if (txResult.code != 0) {
+      console.log(`update payment address failed. hash=${txResult.hash} code=${txResult.code}`); 
+      throw new Error(`update payment address failed. hash=${txResult.hash} code=${txResult.code}`);
+    } else {
+      console.log(`update payment address for ${accountId} succeed.`);
+    }
+  }
+
 }

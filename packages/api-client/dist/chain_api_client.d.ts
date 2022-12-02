@@ -19,4 +19,5 @@ export declare class ChainApiClient {
     ListSidDocumentVersions(rootDocId: string): Promise<any>;
     getPastSeeds(did: string): Promise<any>;
     addPastSeed(did: string, seed: JWE): Promise<any>;
+    updatePaymentAddress(accountId: string): Promise<any>;
 }
