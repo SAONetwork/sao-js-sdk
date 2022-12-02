@@ -7,16 +7,47 @@ export class Model {
     alias: string;
     commitId?: string;
     version?: string;
-    content: Uint8Array;
+    content?: number[];
+    cid?: string;
+    tags?: string[];
+    rule?: string;
+    extendInfo?: string;
 
-    constructor(dataId: string, alias: string, content: Uint8Array) {
+    constructor(dataId: string, alias: string) {
         this.dataId = dataId;
         this.alias = alias;
+    }
+
+    setCommitId(commitId: string) {
+        this.commitId = commitId;
+    }
+
+    setVersion(version: string) {
+        this.version = version;
+    }
+
+    setContent(content: number[]) {
         this.content = content;
     }
 
+    setCid(cid: string) {
+        this.cid = cid;
+    }
+
+    setTags(tags: string[]) {
+        this.tags = [...tags];
+    }
+
+    setRule(rule: string) {
+        this.rule = rule;
+    }
+
+    setExtendInfo(extendInfo: string) {
+        this.extendInfo = extendInfo;
+    }
+
     cast(): any {
-        return JSON.parse(Uint8ArrayToString(this.content))
+        return JSON.parse(String(this.content))
     }
 
     toString(): string {
@@ -37,8 +68,12 @@ export class ModelProvider {
 
         this.nodeAddress = ""
         this.nodeApiClient.jsonRpcApi(BuildNodeAddressReqParams()).then((res: any) => {
-            this.nodeAddress = res.data
-        }).catch((err:Error) => {
+            try {
+                this.nodeAddress = res.data.result
+            } catch (e) {
+                console.error(e)
+            }
+        }).catch((err: Error) => {
             console.error(err)
         })
     }
@@ -59,78 +94,74 @@ export class ModelProvider {
         return proposal.groupId === this.groupId && proposal.owner === this.ownerSid
     }
 
-    async create(clientProposal: JWS, orderId: number, content: Uint8Array): Promise<Model> {
-        return new Promise((resolve, reject) => {
-            this.nodeApiClient.jsonRpcApi(BuildCreateReqParams(
-                clientProposal,
-                orderId,
-                content
-            )).then((res: any) => {
-                try {
-                    const model = JSON.parse(res)
-                    resolve(new Model(model.dataId, model.alias, model.Content))
-                } catch {
-                    reject("not found");
-                }
-            }).catch((err: Error) => {
-                reject(err);
-            })
+    async create(clientProposal: ClientOrderProposal, orderId: number, content: number[]): Promise<Model> {
+        const res = await this.nodeApiClient.jsonRpcApi(BuildCreateReqParams(
+            clientProposal,
+            orderId,
+            content
+        ));
 
-        });
+        if (res.data.result) {
+            var model = new Model(res.data.result.DataId, res.data.result.Alias);
+            model.setCid(res.data.result.Cid);
+
+            return model
+        } else if (res.data.error) {
+            throw new Error(res.data.error.message)
+        } else {
+            throw new Error("unknown error")
+        }
+    }
+
+    async update(clientProposal: ClientOrderProposal, orderId: number, patch: number[]): Promise<Model> {
+        const res = await this.nodeApiClient.jsonRpcApi(BuildUpdateReqParams(
+            clientProposal,
+            orderId,
+            patch
+        ));
+        if (res.data.result) {
+            var model = new Model(res.data.result.DataId, res.data.result.Alias);
+            model.setCid(res.data.result.Cid);
+
+            return model
+        } else if (res.data.error) {
+            throw new Error(res.data.error.message)
+        } else {
+            throw new Error("unknown error")
+        }
     }
 
     async load(req: LoadReq): Promise<Model> {
-        return new Promise((resolve, reject) => {
-            this.nodeApiClient.jsonRpcApi(BuildLoadReqParams(req)).then((res: any) => {
-                try {
-                    const model = JSON.parse(res)
-                    resolve(new Model(model.dataId, model.alias, model.Content))
-                } catch {
-                    reject("not found");
-                }
-            }).catch((err: Error) => {
-                reject(err);
-            })
+        if (req.groupId === undefined) {
+            req.groupId = this.groupId
+        }
 
-        });
-    }
+        if (req.publicKey === undefined) {
+            req.publicKey = this.ownerSid
+        }
 
-    async update(clientProposal: ClientOrderProposal, orderId: number, patch: Uint8Array): Promise<Model> {
-        return new Promise((resolve, reject) => {
-            this.nodeApiClient.jsonRpcApi(BuildUpdateReqParams(
-                clientProposal,
-                orderId,
-                patch
-            )).then((res: any) => {
-                try {
-                    const model = JSON.parse(res)
-                    resolve(new Model(model.dataId, model.alias, model.Content))
-                } catch {
-                    reject("not found");
-                }
-            }).catch((err: Error) => {
-                reject(err);
-            })
+        const res = await this.nodeApiClient.jsonRpcApi(BuildLoadReqParams(req));
 
-        });
+        if (res.data.result) {
+            var model = new Model(res.data.result.DataId, res.data.result.Alias);
+            model.setCid(res.data.result.Cid);
+            model.setContent(res.data.result.Content);
+            model.setCommitId(res.data.result.CommitId);
+            model.setVersion(res.data.result.Version);
+
+            return model
+        } else if (res.data.error) {
+            throw new Error(res.data.error.message)
+        } else {
+            throw new Error("unknown error")
+        }
     }
 
     async renew(clientProposal: ClientOrderProposal, orderId: number): Promise<Model> {
-        return new Promise((resolve, reject) => {
-            this.nodeApiClient.jsonRpcApi(BuildRenewReqParams(
-                clientProposal,
-                orderId,
-            )).then((res: any) => {
-                try {
-                    const model = JSON.parse(res)
-                    resolve(new Model(model.dataId, model.alias, model.Content))
-                } catch {
-                    reject("not found");
-                }
-            }).catch((err: Error) => {
-                reject(err);
-            })
-
-        });
+        throw new Error("comming soon...");
     }
 }
+
+export * from "./manager";
+export * from "./types";
+export * from "./utils"

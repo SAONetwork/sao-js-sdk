@@ -1,5 +1,6 @@
 import multihashing from 'multihashing-async';
 import CID from 'cids';
+import { v4 as uuid } from "uuid";
 export const Uint8ArrayToString = (dataArray)=>{
     var dataString = "";
     for(var i = 0; i < dataArray.length; i++){
@@ -16,7 +17,7 @@ export const stringToUint8Array = (dataString)=>{
     return tmpUint8Array;
 };
 export const GenerateDataId = ()=>{
-    return "";
+    return uuid();
 };
 export const CalculateCid = async (content)=>{
     const hash = await multihashing(content, 'sha2-256');
