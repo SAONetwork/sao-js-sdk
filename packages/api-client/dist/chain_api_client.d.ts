@@ -14,6 +14,6 @@ export declare class ChainApiClient {
     RemoveBinding(accountId: string): Promise<any>;
     UpdateAccountAuths(did: string, updates: AccountAuth[], removes: string[]): Promise<any>;
     GetAllAccountAuth(did: string): Promise<any>;
-    UpdateSidDocument(signingKey: string, encryptKey: string, rootDocId?: string): Promise<any>;
+    UpdateSidDocument(keys: Record<string, string>, rootDocId?: string): Promise<any>;
     ListSidDocumentVersions(rootDocId: string): Promise<any>;
 }

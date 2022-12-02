@@ -74,13 +74,19 @@ export class ChainApiClient {
     async GetAllAccountAuth(did) {
         return await this.didClient.queryGetAllAccountAuths(did + ":");
     }
-    async UpdateSidDocument(signingKey, encryptKey, rootDocId) {
+    async UpdateSidDocument(keys, rootDocId) {
         const account = await this.signer.getAccounts();
+        var pubkeys = [];
+        Object.keys(keys).forEach((k)=>{
+            pubkeys.push({
+                name: k,
+                value: keys[k]
+            });
+        });
         const txResult = await this.client.SaonetworkSaoDid.tx.sendMsgUpdateSidDocument({
             value: {
                 creator: account[0].address,
-                signingKey: signingKey,
-                encryptKey: encryptKey,
+                keys: pubkeys,
                 rootDocId: rootDocId
             }
         });

@@ -4522,7 +4522,7 @@ JSONStream@^1.0.4:
 
 "SaoNetwork-sao-client-ts@https://github.com/rleor/sao-ts-client.git":
   version "0.0.1"
-  resolved "git+ssh://git@github.com/rleor/sao-ts-client.git#e24106cbc543cdc3346c7de21cf80a7e28265aee"
+  resolved "https://github.com/rleor/sao-ts-client.git#6a5255b11759f5192c26205d2daf1b1d58845ae9"
   dependencies:
     "@cosmjs/launchpad" "0.27.0"
     "@cosmjs/proto-signing" "0.27.0"

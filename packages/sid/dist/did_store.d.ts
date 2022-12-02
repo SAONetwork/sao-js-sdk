@@ -26,6 +26,6 @@ export interface DidStore {
     getAccountAuth(did: string, accountDid: string): Promise<AccountAuth | null>;
     updateAccountAuths(did: string, update: Array<AccountAuth>, remove: Array<string>): Promise<void>;
     getAllAccountAuth(did: string): Promise<AccountAuth[]>;
-    updateSidDocument(signingKey: string, encryptKey: string, rootDocId?: string): Promise<string>;
+    updateSidDocument(keys: Record<string, string>, rootDocId?: string): Promise<string>;
     listSidDocumentVersions(rootDocId: string): Promise<Array<string>>;
 }

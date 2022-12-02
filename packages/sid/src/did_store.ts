@@ -44,7 +44,7 @@ export interface DidStore {
     getAllAccountAuth(did: string): Promise<AccountAuth[]>
 
     // @return document id.
-    updateSidDocument(signingKey: string, encryptKey: string, rootDocId?: string): Promise<string>
+    updateSidDocument(keys: Record<string, string>, rootDocId?: string): Promise<string>
 
     listSidDocumentVersions(rootDocId: string): Promise<Array<string>>
 

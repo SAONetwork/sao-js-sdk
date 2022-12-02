@@ -7,6 +7,10 @@ import { accountSecretToDid, encodeKey, parseJWEKids } from './utils';
 import { DID } from 'dids';
 import { getResolver } from 'key-did-resolver';
 const ROOT_PATH = "10000";
+const keyNameLen = 10;
+export function keyName(key) {
+    return key.slice(-keyNameLen);
+}
 export class Keychain {
     static async load(didStore, seed, did) {
         const fullKeySeries = this.generateKeys(seed);
@@ -16,10 +20,12 @@ export class Keychain {
         const latestVersion = versions[versions.length - 1];
         keychain.latestDocid = latestVersion;
         keychain.keysMap[keychain.latestDocid] = fullKeySeries;
-        const encKid = encodeKey(fullKeySeries.pub.encrypt, 'x25519').slice(-15);
-        keychain.kidToDocid[encKid] = keychain.latestDocid;
-        const sigKid = encodeKey(fullKeySeries.pub.signing, 'secp256k1').slice(-15);
+        const signing = encodeKey(fullKeySeries.pub.encrypt, 'x25519');
+        const sigKid = keyName(signing);
         keychain.kidToDocid[sigKid] = keychain.latestDocid;
+        const encrypt = encodeKey(fullKeySeries.pub.signing, 'secp256k1');
+        const encKid = keyName(encrypt);
+        keychain.kidToDocid[encKid] = keychain.latestDocid;
         return keychain;
     }
     static async create(didStore) {
@@ -27,18 +33,25 @@ export class Keychain {
         const fullKeySeries = this.generateKeys(seed);
         const signing = encodeKey(fullKeySeries.pub.signing, 'secp256k1');
         const encrypt = encodeKey(fullKeySeries.pub.encrypt, 'x25519');
-        const docid = await didStore.updateSidDocument(signing, encrypt);
+        const sigKid = keyName(signing);
+        const encKid = keyName(encrypt);
+        const docid = await didStore.updateSidDocument({
+            [sigKid]: signing,
+            [encKid]: encKid
+        });
         const sid = `did:sid:${docid}`;
         const keychain = new Keychain(sid, didStore);
         keychain.latestDocid = docid;
         keychain.keysMap[docid] = fullKeySeries;
-        keychain.kidToDocid[encrypt.slice(-15)] = docid;
-        keychain.kidToDocid[signing.slice(-15)] = docid;
+        keychain.kidToDocid[encKid] = keychain.latestDocid;
+        keychain.kidToDocid[sigKid] = keychain.latestDocid;
         return keychain;
     }
     getSigner(docid = this.latestDocid) {
         const keys = this.keysMap[docid] || this.keysMap[this.latestDocid];
-        return ES256KSigner(keys.priv.signing);
+        return ES256KSigner(keys.priv.signing, false, {
+            canonical: true
+        });
     }
     getKeyFragment(docid = this.latestDocid, keyUsage = "sign") {
         const keys = this.keysMap[docid];
@@ -93,8 +106,13 @@ export class Keychain {
         const seed = randomBytes(32);
         const newKeySeries = Keychain.generateKeys(seed);
         const signing = encodeKey(newKeySeries.pub.signing, 'secp256k1');
+        const sigKid = keyName(signing);
         const encrypt = encodeKey(newKeySeries.pub.encrypt, 'x25519');
-        const docid = await this.didStore.updateSidDocument(signing, encrypt, rootDocId);
+        const encKid = keyName(encrypt);
+        const docid = await this.didStore.updateSidDocument({
+            [sigKid]: signing,
+            [encKid]: encrypt
+        }, rootDocId);
         console.log("new docid:", docid);
         this.keysMap[docid] = newKeySeries;
         this.latestDocid = docid;
