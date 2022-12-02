@@ -21,4 +21,5 @@ export declare class CosmosDidStore implements DidStore {
     listSidDocumentVersions(rootDocId: string): Promise<Array<string>>;
     getOldSeeds(did: string): Promise<Array<JWE>>;
     addOldSeed(did: string, seed: JWE): Promise<void>;
+    updatePaymentAddress(accountId: string): Promise<void>;
 }

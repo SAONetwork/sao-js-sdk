@@ -212,6 +212,15 @@ export class CosmosDidStore {
             console.log(`add old seed for did ${did}suceed.`);
         }
     }
+    async updatePaymentAddress(accountId) {
+        const txResult = await this.chainApiClient.updatePaymentAddress(accountId);
+        if (txResult.code != 0) {
+            console.log(`update payment address failed. hash=${txResult.hash} code=${txResult.code}`);
+            throw new Error(`update payment address failed. hash=${txResult.hash} code=${txResult.code}`);
+        } else {
+            console.log(`update payment address for ${accountId} succeed.`);
+        }
+    }
     constructor(signer, apiURL, rpcURL, prefix){
         this.chainApiClient = new ChainApiClient({
             apiURL,

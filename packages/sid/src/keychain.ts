@@ -91,7 +91,7 @@ export class Keychain {
         const encKid = keyName(encrypt);
         const docid = await didStore.updateSidDocument({
             [sigKid]: signing,
-            [encKid]: encKid,
+            [encKid]: encrypt,
         });
         const sid = `did:sid:${docid}`;
         const keychain = new Keychain(sid, didStore);
@@ -111,9 +111,9 @@ export class Keychain {
     getKeyFragment(docid: string = this.latestDocid, keyUsage: string = "sign"): string {
         const keys = this.keysMap[docid]
         if (keyUsage === "encrypt") {
-            return encodeKey(keys.pub.encrypt, 'x25519').slice(15);
+            return keyName(encodeKey(keys.pub.encrypt, 'x25519'));
         } else {
-            return encodeKey(keys.pub.signing, 'secp256k1').slice(15);
+            return keyName(encodeKey(keys.pub.signing, 'secp256k1'));
         }
     }
 
