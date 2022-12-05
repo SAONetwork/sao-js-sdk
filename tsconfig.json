@@ -6,10 +6,10 @@
       "baseUrl": ".",
       "typeRoots": ["./node_modules/@types"],
       "paths": {
-        "@js-sao-did/common": ["packages/common/src"],
-        "@js-sao-did/api-client": ["packages/api-client/src"],
-        "@js-sao-did/model": ["packages/model/src"],
-        "@js-sao-did/sid": ["packages/sid/src"]
+        "@sao-js-sdk/common": ["packages/common/src"],
+        "@sao-js-sdk/api-client": ["packages/api-client/src"],
+        "@sao-js-sdk/model": ["packages/model/src"],
+        "@sao-js-sdk/sid": ["packages/sid/src"]
       }
     }
 }

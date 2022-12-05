@@ -1,5 +1,5 @@
 {
-  "name": "@js-sao-did/sid",
+  "name": "@sao-js-sdk/sid",
   "version": "0.0.4",
   "description": "sao did that support binds multiple wallets",
   "author": "LeoR <leo@sao.network>",
