@@ -65,17 +65,11 @@ export class ModelProvider {
         this.ownerSid = ownerSid;
         this.groupId = groupId;
         this.nodeApiClient = nodeApiClient;
+    }
 
-        this.nodeAddress = ""
-        this.nodeApiClient.jsonRpcApi(BuildNodeAddressReqParams()).then((res: any) => {
-            try {
-                this.nodeAddress = res.data.result
-            } catch (e) {
-                console.error(e)
-            }
-        }).catch((err: Error) => {
-            console.error(err)
-        })
+    async init() {
+        const res = await this.nodeApiClient.jsonRpcApi(BuildNodeAddressReqParams());
+        this.nodeAddress = res.data.result
     }
 
     getOwnerSid(): string {
