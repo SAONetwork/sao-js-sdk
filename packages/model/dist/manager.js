@@ -57,6 +57,8 @@ export class ModelManager {
         const clientProposal = await sidProvider.createJWS({
             payload: u8a.toString(stringToUint8Array(stringify(proposal)), 'base64url')
         });
+        console.log("sig:", clientProposal.signatures[0]);
+        console.log("payload:", stringify(proposal));
         if (!provider.validate(proposal)) {
             throw new Error("invalid provider");
         }

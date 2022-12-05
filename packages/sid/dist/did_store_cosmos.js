@@ -186,7 +186,7 @@ export class CosmosDidStore {
     }
     async getOldSeeds(did) {
         try {
-            const resp = await this.chainApiClient.getPastSeeds(did);
+            const resp = await this.chainApiClient.getPastSeeds(did + ':');
             if (resp.status === 200) {
                 var seedJWEs = [];
                 resp.data.pastSeeds.seeds.forEach((s)=>{
@@ -210,6 +210,15 @@ export class CosmosDidStore {
             throw new Error(`add old seed for did ${did} failed. hash=${txResult.hash} code=${txResult.code}`);
         } else {
             console.log(`add old seed for did ${did}suceed.`);
+        }
+    }
+    async updatePaymentAddress(accountId) {
+        const txResult = await this.chainApiClient.updatePaymentAddress(accountId);
+        if (txResult.code != 0) {
+            console.log(`update payment address failed. hash=${txResult.hash} code=${txResult.code}`);
+            throw new Error(`update payment address failed. hash=${txResult.hash} code=${txResult.code}`);
+        } else {
+            console.log(`update payment address for ${accountId} succeed.`);
         }
     }
     constructor(signer, apiURL, rpcURL, prefix){

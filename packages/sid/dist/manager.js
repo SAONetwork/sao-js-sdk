@@ -70,6 +70,13 @@ export class SidManager {
             }
         }
     }
+    async updatePaymentAddress() {
+        const accountId = await this.accountProvider.accountId();
+        if (!accountId.toString().startsWith("cosmos:sao")) {
+            throw new Error(`only cosmos:sao account can be used for payment`);
+        }
+        await this.didStore.updatePaymentAddress(accountId.toString());
+    }
     constructor(accountProvider, didStore){
         this.accountProvider = accountProvider;
         this.didStore = didStore;
