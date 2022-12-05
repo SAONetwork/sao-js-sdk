@@ -37,6 +37,10 @@ export class ModelManager {
     return this.modelProviders[ownerDid];
   }
 
+  async init() {
+    await this.defaultModelProvider.init();
+  }
+
   addModelProvider(config: ModelProviderConfig) {
     const nodeApiClient = GetNodeApiClient({
       baseURL: config.nodeApiUrl,
