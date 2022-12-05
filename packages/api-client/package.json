@@ -1,5 +1,5 @@
 {
-  "name": "@js-sao-did/api-client",
+  "name": "@sao-js-sdk/api-client",
   "version": "0.0.3",
   "description": "sao api client",
   "author": "Not@All <well@sao.network>",
@@ -20,7 +20,7 @@
   "dependencies": {
     "@js-sao-did/common": "^0.0.0",
     "axios": "1.2.0",
-    "SaoNetwork-sao-client-ts": "https://github.com/rleor/sao-ts-client.git"
+    "sao-chain-client": "^0.0.1"
   },
   "jest": {
     "moduleDirectories": ["node_modules", "src"],
