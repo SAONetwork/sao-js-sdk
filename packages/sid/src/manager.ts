@@ -27,7 +27,7 @@ export class SidManager {
         await this.prepareSidProvider(did);
     }
 
-    private async prepareSidProvider(did?: string): Promise<void> {
+    private async prepareSidProvider(did?: string, lazy: boolean = true): Promise<void> {
         const account = await this.accountProvider.accountId();
         const bindingDid = await this.didStore.getBinding(account.toString());
         console.log(`binding did for ${account.toString()}: ${bindingDid}`);
@@ -35,8 +35,14 @@ export class SidManager {
             if (this.sidProviders[bindingDid]) {
                 return
             }
-            const sidProvider = await SidProvider.recoverFromAccount(this.didStore, this.accountProvider, bindingDid);
-            this.sidProviders[sidProvider.sid] = sidProvider;
+
+            if (lazy) {
+                const sidProvider = SidProvider.lazyInit(this.didStore, this.accountProvider, bindingDid);
+                this.sidProviders[sidProvider.sid] = sidProvider;
+            } else {
+                const sidProvider = await SidProvider.recoverFromAccount(this.didStore, this.accountProvider, bindingDid);
+                this.sidProviders[sidProvider.sid] = sidProvider;
+            }
         } else {
             if (did) {
                 await this.bind(account.toString(), did);

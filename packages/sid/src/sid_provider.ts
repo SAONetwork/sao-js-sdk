@@ -9,12 +9,16 @@ import { DidStore } from "./did_store";
  * sid provider
  */
 export class SidProvider {
-    keychain: Keychain
+    keychain: Keychain | null
     sid: string
+    didStore: DidStore
+    accountProvider: AccountProvider
 
-    private constructor(keychain: Keychain, sid: string) {
+    private constructor(keychain: Keychain, sid: string, didStore: DidStore, accountProvider: AccountProvider) {
         this.keychain = keychain;
         this.sid = sid;
+        this.didStore = didStore;
+        this.accountProvider = accountProvider;
     }
 
     /**
@@ -33,23 +37,39 @@ export class SidProvider {
         const bindingProof = await accountProvider.generateBindingProof(did);
         await didStore.addBinding(bindingProof);
 
-        return new SidProvider(keychain, did);
+        return new SidProvider(keychain, did, didStore, accountProvider);
     }
 
     static async recoverFromAccount(didStore: DidStore, accountProvider: AccountProvider, did: string): Promise<SidProvider> {
-        const account = await accountProvider.accountId()
-        const accountSecret = await generateAccountSecret(accountProvider);
-        const accountDid = await accountSecretToDid(accountSecret);
-        const accountAuth = await didStore.getAccountAuth(did, accountDid.id);
-        if (!accountAuth) {
-            throw new Error("account auth is missing.");
+        const sidProvider = this.lazyInit(didStore, accountProvider, did);
+        await sidProvider.recoverKeychain();
+        return sidProvider;
+    }
+
+    static lazyInit(didStore: DidStore, accountProvider: AccountProvider, did: string): SidProvider {
+        return new SidProvider(null, did, didStore, accountProvider);
+    }
+
+    private async recoverKeychain() {
+        if (this.keychain == null) {
+            console.log("keychain is not initialized. init lazily");
+
+            const accountSecret = await generateAccountSecret(this.accountProvider);
+            const accountDid = await accountSecretToDid(accountSecret);
+            const accountAuth = await this.didStore.getAccountAuth(this.sid, accountDid.id);
+            if (!accountAuth) {
+                throw new Error("account auth is missing.");
+            }
+            const seed = await accountDid.decryptJWE(accountAuth.accountEncryptedSeed);
+            this.keychain = await Keychain.load(this.didStore, seed, this.sid);
+        } else {
+            console.log("keychain is ready.");
         }
-        const seed = await accountDid.decryptJWE(accountAuth.accountEncryptedSeed);
-        const keychain = await Keychain.load(didStore, seed, did);
-        return new SidProvider(keychain, did);
     }
 
     private async sign(payload: Record<string, any> | string, didWithFragment: string, protectedHeader: Record<string, any> = {}): Promise<JWS> {
+        this.recoverKeychain();
+
         let [did, keyFragment] = didWithFragment.split('#');
         if (did !== this.sid) {
             throw new Error(`current sid is ${this.sid}, invalid did: ${did}.`);
