@@ -1,8 +1,8 @@
 import * as jsonpatch from 'fast-json-patch';
 import * as u8a from 'uint8arrays';
 import stringify from 'fast-json-stable-stringify';
-import { GetNodeApiClient } from '@js-sao-did/api-client'
-import { SidManager } from '@js-sao-did/sid'
+import { GetNodeApiClient } from '@sao-js-sdk/api-client'
+import { SidManager } from '@sao-js-sdk/sid'
 import { ModelConfig, ModelDef, ModelProviderConfig, Proposal } from './types'
 import { CalculateCid, GenerateDataId, stringToUint8Array } from './utils'
 import { ModelProvider } from ".";

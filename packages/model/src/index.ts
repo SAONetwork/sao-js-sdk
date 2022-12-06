@@ -1,5 +1,5 @@
-import { JWS } from "@js-sao-did/common";
-import { BuildCreateReqParams, BuildLoadReqParams, BuildNodeAddressReqParams, BuildRenewReqParams, BuildUpdateReqParams, CreateRequestClient, SaoNodeAPISchema } from '@js-sao-did/api-client'
+import { JWS } from "@sao-js-sdk/common";
+import { BuildCreateReqParams, BuildLoadReqParams, BuildNodeAddressReqParams, BuildRenewReqParams, BuildUpdateReqParams, CreateRequestClient, SaoNodeAPISchema } from '@sao-js-sdk/api-client'
 import { ClientOrderProposal, LoadReq, Proposal } from './types'
 import { Uint8ArrayToString } from './utils';
 export class Model {

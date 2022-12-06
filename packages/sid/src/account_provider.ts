@@ -1,6 +1,9 @@
 import { AccountId } from "caip";
-import { BindingProof } from '@js-sao-did/api-client';
+import { BindingProof } from '@sao-js-sdk/common';
 
+/**
+ * accounts that binds to sid should implement this interface.
+ */
 export interface AccountProvider {
     /**
      * caip account id.
@@ -18,18 +21,4 @@ export interface AccountProvider {
      * @param did 
      */
     generateBindingProof(did: string): Promise<BindingProof>
-}
-
-export interface BindMessage {
-    message: string
-    timestamp?: number
-}
-
-export const getBindMessage = (did: string): BindMessage => {
-    const timestamp = Date.now();
-    const message = `Link this account to your did: ${did}\nTimestamp: ${timestamp}`;
-    return {
-        message,
-        timestamp
-    }
 }

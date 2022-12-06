@@ -1,13 +1,14 @@
-import { AccountAuth, BindingProof, BindingProofV1, ChainApiClientConfig } from './types';
+import { AccountAuth, ChainApiClientConfig } from './types';
+import { BindingProof, BindingProofV1 } from '@sao-js-sdk/common';
 import { OfflineSigner } from "@cosmjs/proto-signing";
-import { Api } from "SaoNetwork-sao-client-ts/dist/saonetwork.sao.did/rest";
-import { Client } from "SaoNetwork-sao-client-ts";
-import { queryClient as didQueryClient } from "SaoNetwork-sao-client-ts/dist/saonetwork.sao.did";
-import { queryClient as modelQueryClient } from "SaoNetwork-sao-client-ts/dist/saonetwork.sao.model";
+import { Api } from "sao-chain-client/dist/saonetwork.sao.did/rest";
+import { Client } from "sao-chain-client";
+import { queryClient as didQueryClient } from "sao-chain-client/dist/saonetwork.sao.did";
+import { queryClient as modelQueryClient } from "sao-chain-client/dist/saonetwork.sao.model";
 import * as u8a from 'uint8arrays';
 import stringify from 'fast-json-stable-stringify';
-import { MsgUpdateSidDocumentResponse } from "SaoNetwork-sao-client-ts/dist/saonetwork.sao.did/types/sao/did/tx";
-import { TxMsgData } from "SaoNetwork-sao-client-ts/dist/cosmos.tx.v1beta1/types/cosmos/base/abci/v1beta1/abci";
+import { MsgUpdateSidDocumentResponse } from "sao-chain-client/dist/saonetwork.sao.did/types/sao/did/tx";
+import { TxMsgData } from "sao-chain-client/dist/cosmos.tx.v1beta1/types/cosmos/base/abci/v1beta1/abci";
 import { JWE } from "did-jwt";
 
 export class ChainApiClient {

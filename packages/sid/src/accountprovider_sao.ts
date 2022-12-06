@@ -1,6 +1,6 @@
 import { AccountId } from "caip";
 import { AccountProvider } from "./account_provider";
-import { BindingProof } from '@js-sao-did/api-client';
+import { BindingProof } from '@sao-js-sdk/common';
 import { makeSignDoc, OfflineDirectSigner } from "@cosmjs/proto-signing"; 
 import * as u8a from 'uint8arrays';
 

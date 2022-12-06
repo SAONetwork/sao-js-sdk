@@ -7,7 +7,7 @@ import { DID } from 'dids';
 import { Ed25519Provider } from 'key-did-provider-ed25519';
 import { getResolver as getKeyResolver } from 'key-did-resolver';
 import stringify from 'fast-json-stable-stringify';
-import {JWS} from '@js-sao-did/common';
+import {JWS} from '@sao-js-sdk/common';
 import { JWE } from 'did-jwt'; 
 
 const multicodecPubkeyTable: Record<string, number> = {

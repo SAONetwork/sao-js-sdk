@@ -1,4 +1,4 @@
-import { BindingProof } from '@js-sao-did/api-client';
+import { BindingProof } from '@sao-js-sdk/common';
 import { JWE } from "did-jwt";
 
 export interface AccountAuth {

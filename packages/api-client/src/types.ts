@@ -69,7 +69,6 @@ export type AccountAuth = {
   sidEncryptedAccount: JWE;
 }
 
-export const BindingProofV1 = 1;
 
 export type Result = {
   status: number,
@@ -79,12 +78,4 @@ export type Result = {
 export type TxResult = {
   code: number,
   transactionHash: string,
-}
-
-export type BindingProof = {
-  accountId: string
-  timestamp?: number
-  did: string
-  signature: string
-  message: string
 }

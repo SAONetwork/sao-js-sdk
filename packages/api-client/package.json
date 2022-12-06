@@ -1,6 +1,6 @@
 {
   "name": "@sao-js-sdk/api-client",
-  "version": "0.0.3",
+  "version": "0.0.0",
   "description": "sao api client",
   "author": "Not@All <well@sao.network>",
   "homepage": "",
@@ -18,7 +18,7 @@
     "test": "yarn node --experimental-vm-modules $(yarn bin jest)"
   },
   "dependencies": {
-    "@js-sao-did/common": "^0.0.0",
+    "@sao-js-sdk/common": "^0.0.0",
     "axios": "1.2.0",
     "sao-chain-client": "^0.0.1"
   },
