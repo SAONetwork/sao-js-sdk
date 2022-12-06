@@ -1,4 +1,4 @@
-import { JWSSignature } from '@js-sao-did/common'
+import { JWSSignature } from '@sao-js-sdk/common'
 
 export type ModelProviderConfig = {
     ownerDid: string;

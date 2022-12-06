@@ -2,7 +2,8 @@ import { DidStore } from "./did_store";
 import { OfflineSigner } from "@cosmjs/proto-signing";
 import { JWE } from "did-jwt";
 
-import { AccountAuth, ChainApiClient, BindingProof } from "@js-sao-did/api-client"
+import { AccountAuth, ChainApiClient,  } from "@sao-js-sdk/api-client"
+import { BindingProof } from "@sao-js-sdk/common";
 export class CosmosDidStore implements DidStore {
   private chainApiClient: ChainApiClient
 

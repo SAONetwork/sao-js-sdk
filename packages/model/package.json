@@ -18,8 +18,9 @@
     "test": "yarn node --experimental-vm-modules $(yarn bin jest)"
   },
   "dependencies": {
-    "@js-sao-did/api-client": "0.0.3",
-    "@js-sao-did/common": "0.0.0",
+    "@sao-js-sdk/api-client": "^0.0.0",
+    "@sao-js-sdk/common": "^0.0.0",
+    "@sao-js-sdk/sid": "^0.0.0",
     "cids": "^1.1.9",
     "fast-json-patch": "3.1.1",
     "multihashing-async": "^2.1.4"

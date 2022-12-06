@@ -1,5 +1,5 @@
 import { DidStore, Binding, AccountAuth  } from "../src/did_store";
-import { Account, BindingProof } from "@js-sao-did/sid";
+import { Account, BindingProof } from "@sao-js-sdk/sid";
 
 function guid() {
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {

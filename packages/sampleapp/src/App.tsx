@@ -1,11 +1,11 @@
 import './App.css';
 import { useEffect, useState } from "react";
-import { SidManager, SaoKeplrAccountProvider, CosmosDidStore } from "@js-sao-did/sid";
-import { ModelManager } from "@js-sao-did/model";
+import { SidManager, SaoKeplrAccountProvider, CosmosDidStore } from "@sao-js-sdk/sid";
+import { ModelManager } from "@sao-js-sdk/model";
 import { DirectSecp256k1Wallet } from '@cosmjs/proto-signing';
 import { Window as KeplrWindow } from '@keplr-wallet/types';
 import { fromHex } from "@cosmjs/encoding";
-import { GetNodeApiClient } from "@js-sao-did/api-client";
+import { GetNodeApiClient } from "@sao-js-sdk/api-client";
 
 declare global {
   interface Window extends KeplrWindow {}
