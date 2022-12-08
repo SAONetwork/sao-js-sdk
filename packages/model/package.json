@@ -18,12 +18,9 @@
     "test": "yarn node --experimental-vm-modules $(yarn bin jest)"
   },
   "dependencies": {
-    "@aws-crypto/sha256-js": "^2.0.2",
     "@sao-js-sdk/api-client": "^0.0.0",
     "@sao-js-sdk/common": "^0.0.0",
     "@sao-js-sdk/sid": "^0.0.0",
-    "@types/varint": "^6.0.1",
-    "cids": "^1.1.9",
     "fast-json-patch": "3.1.1"
   },
   "jest": {

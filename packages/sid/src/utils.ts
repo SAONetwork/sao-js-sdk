@@ -1,14 +1,14 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment */
 import { AccountProvider } from './account_provider';
 import * as u8a from 'uint8arrays';
-import {hash} from '@stablelib/sha256';
 import {fromString} from 'uint8arrays';
 import { DID } from 'dids';
 import { Ed25519Provider } from 'key-did-provider-ed25519';
 import { getResolver as getKeyResolver } from 'key-did-resolver';
 import stringify from 'fast-json-stable-stringify';
 import {JWS} from '@sao-js-sdk/common';
-import { JWE } from 'did-jwt'; 
+import { JWE } from 'did-jwt';
+import { Hash } from '@sao-js-sdk/common';
 
 const multicodecPubkeyTable: Record<string, number> = {
     secp256k1: 0xe7,
@@ -34,7 +34,7 @@ export async function generateAccountSecret(accountProvider: AccountProvider): P
     const message = " allows " + account.toString() + " to control the did";
     console.log(`generate account secret: sign msg: ${message}`);
     const signedMessage = await accountProvider.sign(message);
-    return hash(fromString(signedMessage.slice(2)));
+    return Hash(fromString(signedMessage.slice(2)));
 }
 
 export async function accountSecretToDid(accountSecret: Uint8Array): Promise<DID> {
