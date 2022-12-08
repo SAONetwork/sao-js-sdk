@@ -20,7 +20,7 @@
     "build:types": "tsc --emitDeclarationOnly --skipLibCheck",
     "build": "yarn build:clean && yarn build:types && yarn build:js",
     "format": "npx prettier --write \"src/**/*.ts\"",
-    "lint": "eslint --ignore-pattern \"src/**/*.test.[jt]s\" \"src/**/*.[jt]s\""
+    "lint": "eslint --fix --ignore-pattern \"src/**/*.test.[jt]s\" \"src/**/*.[jt]s\""
   },
   "dependencies": {
     "@aws-crypto/sha256-browser": "^2.0.2",
