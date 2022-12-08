@@ -1,6 +1,6 @@
 import { AccountId } from "caip";
 import { AccountProvider } from "./account_provider";
-import { BindingProof } from '@sao-js-sdk/common';
+import {BindingProof, getBindMessage} from '@sao-js-sdk/common';
 import { makeSignDoc, OfflineDirectSigner } from "@cosmjs/proto-signing"; 
 import * as u8a from 'uint8arrays';
 
@@ -52,9 +52,8 @@ export class SaoAccountProvider implements AccountProvider {
         }
     }
 
-    async generateBindingProof(did: string): Promise<BindingProof> {
-        const timestamp = Date.now();
-        const message = `Link this account to your did: ${did}\nTimestamp: ${timestamp}`;
+    async generateBindingProof(did: string, timestamp: number): Promise<BindingProof> {
+        const message = getBindMessage(did, timestamp)
         const signed = await this.sign(message);
         const accountId = await this.accountId();
         return {

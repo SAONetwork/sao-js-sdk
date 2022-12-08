@@ -17,8 +17,9 @@ export interface AccountProvider {
     sign(message: string): Promise<string>
 
     /**
-     * 
-     * @param did 
+     *
+     * @param did
+     * @param timestamp
      */
-    generateBindingProof(did: string): Promise<BindingProof>
+    generateBindingProof(did: string, timestamp: number): Promise<BindingProof>
 }

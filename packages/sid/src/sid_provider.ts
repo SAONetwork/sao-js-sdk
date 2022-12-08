@@ -29,13 +29,24 @@ export class SidProvider {
      * @returns 
      */
     static async newFromAccount(didStore: DidStore, accountProvider: AccountProvider): Promise<SidProvider> {
+        // const account = await accountProvider.accountId()
+        // const accountSecret = await generateAccountSecret(accountProvider);
+        const timestamp = Date.now()
+        const keychain = await Keychain.create(didStore, timestamp);
+
+        // keys
+        const keys = keychain.getPubKeys()
+
+        // account auth
         const account = await accountProvider.accountId()
         const accountSecret = await generateAccountSecret(accountProvider);
-        const keychain = await Keychain.create(didStore);
-        await keychain.add(account.toString(), accountSecret);
+        const accountAuth = await keychain.add(account.toString(), accountSecret)
+
+        // proofs
         const did = keychain.did;
-        const bindingProof = await accountProvider.generateBindingProof(did);
-        await didStore.addBinding(bindingProof);
+        const bindingProof = await accountProvider.generateBindingProof(did, timestamp);
+
+        await didStore.binding(keychain.did.slice(8) ,keys,bindingProof,accountAuth)
 
         return new SidProvider(keychain, did, didStore, accountProvider);
     }

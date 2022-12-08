@@ -23,7 +23,10 @@
     "sao-chain-client": "^0.0.1"
   },
   "jest": {
-    "moduleDirectories": ["node_modules", "src"],
+    "moduleDirectories": [
+      "node_modules",
+      "src"
+    ],
     "extensionsToTreatAsEsm": [
       ".ts"
     ],

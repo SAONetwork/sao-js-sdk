@@ -58,13 +58,13 @@ export class SaoKeplrAccountProvider implements AccountProvider {
         return resp.signature;
     }
 
-    async generateBindingProof(did: string): Promise<BindingProof> {
-        const bm = getBindMessage(did);
-        const signed = await this.sign(bm.message);
+    async generateBindingProof(did: string, timestamp: number): Promise<BindingProof> {
+        const msg = getBindMessage(did, timestamp);
+        const signed = await this.sign(msg);
         const accountId = await this.accountId();
         return {
-            timestamp: bm.timestamp,
-            message: bm.message,
+            timestamp: timestamp,
+            message: msg,
             did,
             signature: signed,
             accountId: accountId.toString()
