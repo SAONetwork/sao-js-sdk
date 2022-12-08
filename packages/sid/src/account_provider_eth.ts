@@ -46,8 +46,8 @@ export class EthAccountProvider implements AccountProvider {
         });
     }
 
-    async generateBindingProof(did: string): Promise<BindingProof> {
-        const {message, timestamp} =  getBindMessage(did);
+    async generateBindingProof(did: string, timestamp: number): Promise<BindingProof> {
+        const message =  getBindMessage(did, timestamp);
         const signature = await this.provider.request({
             method: 'personal_sign',
             params: [utf8ToHex(message), this.address]

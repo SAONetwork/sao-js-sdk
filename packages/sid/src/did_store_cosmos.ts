@@ -16,21 +16,26 @@ export class CosmosDidStore implements DidStore {
     })
   }
 
+  async binding(rootDocId: string, keys: Record<string, string>, proof: BindingProof, accountAuth: AccountAuth): Promise<void> {
+    const txResult = await this.chainApiClient.Binding(rootDocId, keys, proof, accountAuth)
+    if (txResult.code != 0) {
+      console.log(`bind account failed. tx=${txResult.transactionHash} code=${txResult.code}`);
+      throw new Error(`bind account ${proof.accountId} -> did ${proof.did} failed.`)
+    } else {
+      console.log(`bind account ${proof.accountId} -> did ${proof.did} succeed. tx=${txResult.transactionHash}`);
+      return
+    }
+  }
+
   async addBinding(proof: BindingProof): Promise<void> {
-    return new Promise((resovle, reject) => {
-      this.chainApiClient.AddBinding(proof)
-        .then((txResult) => {
-          if (txResult.code != 0) {
-            console.log(`bind account failed. tx=${txResult.transactionHash} code=${txResult.code}`);
-            reject(`bind account ${proof.accountId} -> did ${proof.did} failed.`)
-          } else {
-            console.log(`bind account ${proof.accountId} -> did ${proof.did} succeed. tx=${txResult.transactionHash}`);
-            resovle();
-          }
-        }).catch(err => {
-          reject(err)
-        })
-    })
+    const txResult = await this.chainApiClient.AddBinding(proof)
+    if (txResult.code != 0) {
+      console.log(`bind account failed. tx=${txResult.transactionHash} code=${txResult.code}`);
+      throw new Error(`bind account ${proof.accountId} -> did ${proof.did} failed.`)
+    } else {
+      console.log(`bind account ${proof.accountId} -> did ${proof.did} succeed. tx=${txResult.transactionHash}`);
+      return
+    }
   }
 
   /**
@@ -39,83 +44,67 @@ export class CosmosDidStore implements DidStore {
    * @returns binded did
    */
   async getBinding(accountId: string): Promise<string | null> {
-    return new Promise((resolve, reject) => {
-      this.chainApiClient.GetBinding(accountId)
+    return await this.chainApiClient.GetBinding(accountId)
         .then(res => {
           if (res.status === 200) {
-            resolve(res.data?.didBindingProofs?.proof?.did || null);
+            return res.data?.didBindingProof?.proof?.did || null
           } else {
-            reject("failed to query binding for accountid: " + accountId);
+            throw new Error("failed to query binding for accountid: " + accountId);
           }
         }).catch(err => {
           console.log(err);
           // const ae = err as AxiosError
           if (err.response.status === 404) {
             console.log()
-            resolve(null);
+            return null
           } else {
-            reject("failed to query binding for accountid: " + accountId + ", !!!" + err.response.status)
+            throw new Error("failed to query binding for accountid: " + accountId + ", !!!" + err.response.status)
           }
         })
-    })
   }
 
   async removeBinding(accountId: string): Promise<void> {
-    return new Promise((resolve, reject) => {
-      this.chainApiClient.RemoveBinding(accountId)
-        .then(txResult => {
-          if (txResult.code != 0) {
-            console.log(`unbind account failed. tx=${txResult.transactionHash} code=${txResult.code}`);
-            reject(`unbind account ${accountId} failed.`);
-          } else {
-            console.log(`unbind account succeed. tx=${txResult.transactionHash}`);
-            resolve();
-          }
-        }).catch(error => {
-          reject(`unbind account ${accountId} failed, ` + error);
-        })
-    });
+    const txResult = await this.chainApiClient.RemoveBinding(accountId)
+    if (txResult.code != 0) {
+      console.log(`unbind account failed. tx=${txResult.transactionHash} code=${txResult.code}`);
+      throw new Error(`unbind account ${accountId} failed.`);
+    } else {
+      console.log(`unbind account succeed. tx=${txResult.transactionHash}`);
+      return
+    }
   }
 
-  addAccountAuth(did: string, accountAuth: AccountAuth): Promise<void> {
-    return new Promise((resolve, reject) => {
-      this.chainApiClient.AddAccountAuth(did, accountAuth)
-        .then(result => {
-          if (result.code != 0) {
-            console.log(`add account auth failed. tx=${result.transactionHash} code=${result.code}`);
-            reject(`add account auth did ${did} -> accountdid ${accountAuth.accountDid} failed.`);
-          } else {
-            console.log(`add account auth succeed. tx=${result.transactionHash}`);
-            resolve()
-          }
-        }).catch(error => {
-          reject("add account auth failed, " + error);
-        })
-    });
+  async addAccountAuth(did: string, accountAuth: AccountAuth): Promise<void> {
+    const result = await this.chainApiClient.AddAccountAuth(did, accountAuth)
+    if (result.code != 0) {
+      console.log(`add account auth failed. tx=${result.transactionHash} code=${result.code}`);
+      throw new Error(`add account auth did ${did} -> accountdid ${accountAuth.accountDid} failed.`);
+    } else {
+      console.log(`add account auth succeed. tx=${result.transactionHash}`);
+      return
+    }
   }
 
   async getAccountAuth(_: string, accountDid: string): Promise<AccountAuth | null> {
-    return new Promise((resolve, reject) => {
-      this.chainApiClient.GetAccountAuth(accountDid)
+    return await this.chainApiClient.GetAccountAuth(accountDid)
         .then(resp => {
           if (resp.status == 200) {
-            resolve({
+            return {
               accountDid: resp.data.accountAuth.accountDid,
               sidEncryptedAccount: JSON.parse(resp.data.accountAuth.sidEncryptedAccount) as JWE,
               accountEncryptedSeed: JSON.parse(resp.data.accountAuth.accountEncryptedSeed) as JWE
-            });
+            }
           } else {
-            reject('failed to account auth for accountdid ' + accountDid);
+            throw new Error('failed to account auth for accountdid ' + accountDid);
           }
         }).catch(err => {
           console.log(err);
           // const ae = err as AxiosError
           if (err.response.status === 404) {
-            resolve(null);
+            return null
           }
-          reject(`failed to account auth for accountdid ${accountDid}. error: ${err}`);
+          throw new Error(`failed to account auth for accountdid ${accountDid}. error: ${err}`);
         });
-    });
   }
 
   async updateAccountAuths(did: string, update: AccountAuth[], remove: string[]): Promise<void> {
@@ -128,25 +117,18 @@ export class CosmosDidStore implements DidStore {
       });
     });
 
-    return new Promise((resolve, reject) => {
-      this.chainApiClient.UpdateAccountAuths(did, update, remove)
-        .then(txResult => {
-          if (txResult.code != 0) {
-            console.log(`update account auths failed. tx=${txResult.transactionHash} code=${txResult.code}`);
-            reject(`update account auth did ${did} failed.`);
-          } else {
-            console.log(`update account auth succeed. tx=${txResult.transactionHash}`);
-            resolve()
-          }
-        }).catch(error => {
-          reject(`update account auth did ${did} failed, ` + error);
-        })
-    })
+    const txResult = await this.chainApiClient.UpdateAccountAuths(did, update, remove)
+    if (txResult.code != 0) {
+      console.log(`update account auths failed. tx=${txResult.transactionHash} code=${txResult.code}`);
+      throw new Error(`update account auth did ${did} failed.`);
+    } else {
+      console.log(`update account auth succeed. tx=${txResult.transactionHash}`);
+      return
+    }
   }
 
   async getAllAccountAuth(did: string): Promise<AccountAuth[]> {
-    return new Promise((resolve, reject) => {
-      this.chainApiClient.GetAllAccountAuth(did)
+    return await this.chainApiClient.GetAllAccountAuth(did)
         .then(resp => {
           if (resp.status === 200) {
             var auths: AccountAuth[] = [];
@@ -157,18 +139,17 @@ export class CosmosDidStore implements DidStore {
                 accountEncryptedSeed: JSON.parse(a.accountEncryptedSeed) as JWE
               });
             });
-            resolve(auths);
+            return auths
           } else {
-            reject('failed to get all account auths for did ' + did);
+            throw new Error('failed to get all account auths for did ' + did);
           }
         }).catch(err => {
           // const ae = err as AxiosError
           if (err.response.status === 404) {
             return [];
           }
-          reject(`failed to get all account auths for did: ${did}, ` + err);
+          throw new Error(`failed to get all account auths for did: ${did}, ` + err);
         })
-    });
   }
 
   async updateSidDocument(keys: Record<string, string>, rootDocId?: string): Promise<string> {
@@ -253,8 +234,8 @@ export class CosmosDidStore implements DidStore {
     }
   }
 
-  async updatePaymentAddress(accountId: string): Promise<void> {
-    const txResult = await this.chainApiClient.updatePaymentAddress(accountId);
+  async updatePaymentAddress(accountId: string, did: string): Promise<void> {
+    const txResult = await this.chainApiClient.updatePaymentAddress(accountId, did);
     if (txResult.code != 0) {
       console.log(`update payment address failed. hash=${txResult.hash} code=${txResult.code}`); 
       throw new Error(`update payment address failed. hash=${txResult.hash} code=${txResult.code}`);

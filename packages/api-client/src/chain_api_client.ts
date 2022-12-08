@@ -72,6 +72,47 @@ export class ChainApiClient {
     return this.didClient.queryAccountAuth(accountDid + ':');
   }
 
+  async Binding(rootDocId: string, keys: Record<string, string>, proof: BindingProof, accountAuth: AccountAuth): Promise<any> {
+    const account = await this.signer.getAccounts();
+    var pubkeys = [];
+    Object.keys(keys).forEach(k => {
+      pubkeys.push({
+        name: k,
+        value: keys[k]
+      });
+    });
+
+    const accountDid = accountAuth.accountDid;
+    const accountEncryptedSeed = stringify(accountAuth.accountEncryptedSeed);
+    const sidEncryptedAccount = stringify(accountAuth.sidEncryptedAccount);
+
+    const txResult = await this.client.SaonetworkSaoDid.tx.sendMsgBinding({
+      value: {
+        creator: account[0].address,
+        accountId: proof.accountId,
+        rootDocId: rootDocId,
+        keys: pubkeys,
+        accountAuth:
+            {
+              accountDid,
+              accountEncryptedSeed,
+              sidEncryptedAccount,
+            },
+        proof: {
+          message: proof.message,
+          signature: proof.signature,
+          account: proof.accountId,
+          did: proof.did,
+          timestamp: proof.timestamp,
+          // TODO:
+          version: BindingProofV1,
+        }
+      },
+    });
+
+    return txResult;
+  }
+
   async AddBinding(proof: BindingProof): Promise<any> {
     const account = await this.signer.getAccounts();
     const txResult = await this.client.SaonetworkSaoDid.tx.sendMsgAddBinding({
@@ -94,7 +135,7 @@ export class ChainApiClient {
   }
 
   async GetBinding(accountId: string): Promise<any> {
-    return this.didClient.queryDidBindingProofs(accountId + ':');
+    return this.didClient.queryDidBindingProof(accountId + ':');
   }
 
   async RemoveBinding(accountId: string): Promise<any> {
@@ -164,12 +205,13 @@ export class ChainApiClient {
     return txResult;
   }
 
-  async updatePaymentAddress(accountId: string): Promise<any> {
+  async updatePaymentAddress(accountId: string, did: string): Promise<any> {
     const accounts = await this.signer.getAccounts();
     const txResult = this.client.SaonetworkSaoDid.tx.sendMsgUpdatePaymentAddress({
       value: {
         creator: accounts[0].address,
         accountId: accountId,
+        did: did
       }
     });
     return txResult;

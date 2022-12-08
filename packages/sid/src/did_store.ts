@@ -20,6 +20,8 @@ export interface DidStore {
      */
     addBinding(proof: BindingProof): Promise<void>
 
+    binding(rootDocId: string, keys: Record<string, string>, proof: BindingProof, accountAuth: AccountAuth): Promise<void>
+
     /**
      * 
      * @param accountId 
@@ -52,6 +54,6 @@ export interface DidStore {
 
     addOldSeed(did: string, seed: JWE): Promise<void>
 
-    updatePaymentAddress(accountId: string): Promise<void>
+    updatePaymentAddress(accountId: string, did: string): Promise<void>
 
 }

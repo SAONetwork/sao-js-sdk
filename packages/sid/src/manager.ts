@@ -55,13 +55,18 @@ export class SidManager {
     }
 
     private async bind(accountId: string, did: string): Promise<void> {
+        if (!did.startsWith("did:sid:")){
+            throw new Error(`${did} is not a sid.`)
+        }
         if (!this.sidProviders[did]) {
             throw new Error(`${did} provider is not managed.`);
         }
-        const proof = await this.accountProvider.generateBindingProof(did);
-        await this.didStore.addBinding(proof);
+        const rootDocId = did.slice(8)
+        const timestamp = Date.now()
+        const proof = await this.accountProvider.generateBindingProof(did, timestamp);
         const accountSecret = await generateAccountSecret(this.accountProvider);
-        await this.sidProviders[did].keychain.add(accountId, accountSecret);
+        const accountAuth = await this.sidProviders[did].keychain.add(accountId, accountSecret);
+        await this.didStore.binding(rootDocId,{},proof,accountAuth)
     }
 
     async unbind(): Promise<void> {
@@ -97,12 +102,20 @@ export class SidManager {
         }
     }
 
-    async updatePaymentAddress(): Promise<void> {
+    async updatePaymentAddress(did?: string): Promise<void> {
         const accountId = await this.accountProvider.accountId();
         if (!accountId.toString().startsWith("cosmos:sao")) {
             throw new Error(`only cosmos:sao account can be used for payment`);
         }
-        await this.didStore.updatePaymentAddress(accountId.toString());
+
+        if (!did){
+            did = await this.didStore.getBinding(accountId.toString())
+            if (!did) {
+                throw new Error(`${accountId.toString()} is not binding`)
+            }
+        }
+
+        await this.didStore.updatePaymentAddress(accountId.toString(), did);
     }
 
 }

@@ -25,20 +25,15 @@ export interface BindMessage {
     timestamp?: number
 }
 
-export const getBindMessage = (did: string): BindMessage => {
-    const timestamp = Date.now();
-    const message = `Link this account to your did: ${did}\nTimestamp: ${timestamp}`;
-    return {
-        message,
-        timestamp
-    }
+export const getBindMessage = (did: string, timestamp: number): string => {
+    return `Link this account to your did: ${did}\nTimestamp: ${timestamp.toString(10)}`;
 }
 
 // binding proof
 export const BindingProofV1 = 1;
 export type BindingProof = {
   accountId: string
-  timestamp?: number
+  timestamp: number
   did: string
   signature: string
   message: string
