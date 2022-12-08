@@ -45,6 +45,11 @@
     "url": "git@github.com:SaoNetwork/sao-js-sdk.git",
     "directory": "packages/sid"
   },
+  "husky": {
+    "hooks": {
+      "pre-commit": "echo hello; return 1"
+    }
+  },
   "jest": {
     "moduleDirectories": [
       "node_modules",
