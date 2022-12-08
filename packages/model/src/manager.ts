@@ -1,10 +1,10 @@
-import * as jsonpatch from 'fast-json-patch';
-import * as u8a from 'uint8arrays';
-import stringify from 'fast-json-stable-stringify';
-import { GetNodeApiClient } from '@sao-js-sdk/api-client'
-import { SidManager } from '@sao-js-sdk/sid'
-import { ModelConfig, ModelDef, ModelProviderConfig, Proposal } from './types'
-import { CalculateCid, GenerateDataId, stringToUint8Array } from '@sao-js-sdk/common'
+import * as jsonpatch from "fast-json-patch";
+import * as u8a from "uint8arrays";
+import stringify from "fast-json-stable-stringify";
+import { GetNodeApiClient } from "@sao-js-sdk/api-client";
+import { SidManager } from "@sao-js-sdk/sid";
+import { ModelConfig, ModelDef, ModelProviderConfig, Proposal } from "./types";
+import { CalculateCid, GenerateDataId, stringToUint8Array } from "@sao-js-sdk/common";
 import { ModelProvider } from ".";
 
 const defaultModelConfig: ModelConfig = {
@@ -12,22 +12,22 @@ const defaultModelConfig: ModelConfig = {
   replica: 1,
   timeout: 60 * 60 * 24,
   operation: 1,
-}
+};
 export class ModelManager {
-  private defaultModelProvider: ModelProvider
-  private modelProviders: Record<string, ModelProvider>
-  private sidManager: SidManager
+  private defaultModelProvider: ModelProvider;
+  private modelProviders: Record<string, ModelProvider>;
+  private sidManager: SidManager;
 
   constructor(config: ModelProviderConfig, sidManager: SidManager) {
     const nodeApiClient = GetNodeApiClient({
       baseURL: config.nodeApiUrl,
       headers: {
-        Authorization: 'Bearer ' + config.nodeApiToken,
-      }
+        Authorization: "Bearer " + config.nodeApiToken,
+      },
     });
 
     this.defaultModelProvider = new ModelProvider(config.ownerDid, config.platformId, nodeApiClient);
-    this.modelProviders = {}
+    this.modelProviders = {};
     this.modelProviders[config.ownerDid] = this.defaultModelProvider;
 
     this.sidManager = sidManager;
@@ -45,26 +45,30 @@ export class ModelManager {
     const nodeApiClient = GetNodeApiClient({
       baseURL: config.nodeApiUrl,
       headers: {
-        Authorization: 'Bearer ' + config.nodeApiToken,
-      }
+        Authorization: "Bearer " + config.nodeApiToken,
+      },
     });
 
     const provider = new ModelProvider(config.ownerDid, config.platformId, nodeApiClient);
     this.modelProviders[config.ownerDid] = provider;
   }
 
-  async createModel<T>(def: ModelDef<T>, modelConfig: ModelConfig = defaultModelConfig, ownerDid?: string): Promise<string> {
-    var provider = this.defaultModelProvider
+  async createModel<T>(
+    def: ModelDef<T>,
+    modelConfig: ModelConfig = defaultModelConfig,
+    ownerDid?: string
+  ): Promise<string> {
+    let provider = this.defaultModelProvider;
     if (ownerDid !== undefined) {
-      provider = this.getModelProvider(ownerDid)
+      provider = this.getModelProvider(ownerDid);
     }
     console.log("NodeAddress: ", provider.getNodeAddress());
 
-    const dataBytes = stringToUint8Array(stringify(def.data))
+    const dataBytes = stringToUint8Array(stringify(def.data));
 
-    const dataId = GenerateDataId()
-    const cid = await CalculateCid(dataBytes)
-    var proposal: Proposal = {
+    const dataId = GenerateDataId();
+    const cid = await CalculateCid(dataBytes);
+    const proposal: Proposal = {
       owner: provider.getOwnerSid(),
       provider: provider.getNodeAddress(),
       groupId: provider.getGroupId(),
@@ -80,22 +84,22 @@ export class ModelManager {
       extendInfo: def.extendInfo,
       size: dataBytes.length,
       operation: modelConfig.operation,
-    }
+    };
 
     const sidProvider = await this.sidManager.getSidProvider();
     if (sidProvider === null) {
-      throw new Error("failed to get sid provider")
+      throw new Error("failed to get sid provider");
     }
 
     const clientProposal = await sidProvider.createJWS({
-      payload: u8a.toString(stringToUint8Array(stringify(proposal)), 'base64url'),
-    })
+      payload: u8a.toString(stringToUint8Array(stringify(proposal)), "base64url"),
+    });
 
     console.log("sig:", clientProposal.signatures[0]);
     console.log("payload:", stringify(proposal));
 
     if (!provider.validate(proposal)) {
-      throw new Error("invalid provider")
+      throw new Error("invalid provider");
     }
 
     const model = await provider.create(
@@ -104,30 +108,35 @@ export class ModelManager {
         JwsSignature: clientProposal.signatures[0],
       },
       0,
-      Array.from(dataBytes),);
+      Array.from(dataBytes)
+    );
 
-    return model.dataId
+    return model.dataId;
   }
 
-  async updateModel<T>(def: ModelDef<T>, modelConfig: ModelConfig = defaultModelConfig, ownerDid?: string): Promise<string> {
-    var provider = this.defaultModelProvider
+  async updateModel<T>(
+    def: ModelDef<T>,
+    modelConfig: ModelConfig = defaultModelConfig,
+    ownerDid?: string
+  ): Promise<string> {
+    let provider = this.defaultModelProvider;
     if (ownerDid !== undefined) {
-      provider = this.getModelProvider(ownerDid)
+      provider = this.getModelProvider(ownerDid);
     }
 
-    var keyword = def.dataId
+    let keyword = def.dataId;
     if (keyword === undefined) {
-      keyword = def.alias
+      keyword = def.alias;
       if (keyword === undefined) {
-        throw new Error("Neither dataId nor alias is specified.")
+        throw new Error("Neither dataId nor alias is specified.");
       }
     }
 
-    const originModel = (await provider.load({
+    const originModel = await provider.load({
       keyword,
       publicKey: provider.getOwnerSid(),
       groupId: def.groupId,
-    }))
+    });
 
     const origin = originModel.cast();
 
@@ -139,7 +148,7 @@ export class ModelManager {
     const targetDataBytes = stringToUint8Array(stringify(target));
     const cid = await CalculateCid(targetDataBytes);
 
-    var proposal: Proposal = {
+    const proposal: Proposal = {
       owner: provider.getOwnerSid(),
       provider: provider.getNodeAddress(),
       groupId: provider.getGroupId(),
@@ -155,73 +164,77 @@ export class ModelManager {
       extendInfo: originModel.extendInfo,
       size: dataBytes.length,
       operation: modelConfig.operation,
-    }
+    };
 
     const sidProvider = await this.sidManager.getSidProvider();
     if (sidProvider === null) {
-      throw new Error("failed to get sid provider")
+      throw new Error("failed to get sid provider");
     }
     const clientProposal = await sidProvider.createJWS({
-      payload: u8a.toString(stringToUint8Array(stringify(proposal)), 'base64url'),
-    })
+      payload: u8a.toString(stringToUint8Array(stringify(proposal)), "base64url"),
+    });
 
     if (!provider.validate(proposal)) {
-      throw new Error("invalid provider")
+      throw new Error("invalid provider");
     }
 
     const model = await provider.update(
       {
         Proposal: proposal,
         JwsSignature: clientProposal.signatures[0],
-      }, 0,
-      Array.from(dataBytes));
-    return model.dataId
+      },
+      0,
+      Array.from(dataBytes)
+    );
+    return model.dataId;
   }
 
   async loadModel<T>(keyword: string, ownerDid?: string, groupId?: string): Promise<T> {
-    var provider = this.defaultModelProvider
+    let provider = this.defaultModelProvider;
     if (ownerDid !== undefined) {
-      provider = this.getModelProvider(ownerDid)
+      provider = this.getModelProvider(ownerDid);
     }
 
     const model = await provider.load({
       keyword,
       publicKey: provider.getOwnerSid(),
       groupId,
-    })
+    });
 
     console.log(String(model.content));
 
-    return model.cast()
+    return model.cast();
   }
 
   async loadModelByCommitId<T>(keyword: string, commitId: string, ownerDid?: string, groupId?: string): Promise<T> {
-    var provider = this.defaultModelProvider
+    let provider = this.defaultModelProvider;
     if (ownerDid !== undefined) {
-      provider = this.getModelProvider(ownerDid)
+      provider = this.getModelProvider(ownerDid);
     }
 
     const model = await provider.load({
       keyword,
       publicKey: provider.getOwnerSid(),
-      groupId, commitId
-    })
+      groupId,
+      commitId,
+    });
 
-    return model.cast()
+    return model.cast();
   }
 
   async loadModelByVersion<T>(keyword: string, version: string, ownerDid?: string, groupId?: string): Promise<T> {
-    var provider = this.defaultModelProvider
+    let provider = this.defaultModelProvider;
     if (ownerDid !== undefined) {
-      provider = this.getModelProvider(ownerDid)
+      provider = this.getModelProvider(ownerDid);
     }
 
     const model = await provider.load({
       keyword,
       publicKey: provider.getOwnerSid(),
-      groupId, version
-    })
+      groupId,
+      version,
+    });
 
-    return model.cast()
+    return model.cast();
   }
 }

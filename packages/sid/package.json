@@ -18,6 +18,8 @@
     "build:js": "swc src -d ./dist --config-file ../../.swcrc",
     "build:types": "tsc --emitDeclarationOnly --skipLibCheck",
     "build": "yarn build:clean && yarn build:types && yarn build:js",
+    "format": "prettier --write \"src/**/*.ts\"",
+    "lint": "eslint --ignore-pattern \"src/**/*.test.[jt]s\" \"src/**/*.[jt]s\"",
     "test": "yarn node --experimental-vm-modules $(yarn bin jest)"
   },
   "dependencies": {
