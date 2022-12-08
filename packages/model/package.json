@@ -17,7 +17,7 @@
     "build": "yarn build:clean && yarn build:types && yarn build:js",
     "test": "yarn node --experimental-vm-modules $(yarn bin jest)",
     "format": "npx prettier --write \"src/**/*.ts\"",
-    "lint": "eslint --ignore-pattern \"src/**/*.test.[jt]s\" \"src/**/*.[jt]s\""
+    "lint": "eslint --fix --ignore-pattern \"src/**/*.test.[jt]s\" \"src/**/*.[jt]s\""
   },
   "dependencies": {
     "@sao-js-sdk/api-client": "^0.0.0",
