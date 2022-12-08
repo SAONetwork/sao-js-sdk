@@ -6,7 +6,7 @@
   ],
   "husky": {
     "hooks": {
-      "pre-commit": "yarn workspaces run lint-staged"
+      "pre-commit": "echo \"hello\""
     }
   },
   "devDependencies": {
