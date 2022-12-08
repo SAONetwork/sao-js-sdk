@@ -1,7 +1,7 @@
 import { JWS } from "@sao-js-sdk/common";
-import { BuildCreateReqParams, BuildLoadReqParams, BuildNodeAddressReqParams, BuildRenewReqParams, BuildUpdateReqParams, CreateRequestClient, SaoNodeAPISchema } from '@sao-js-sdk/api-client'
-import { ClientOrderProposal, LoadReq, Proposal } from './types'
-import { Uint8ArrayToString } from './utils';
+import { BuildCreateReqParams, BuildLoadReqParams, BuildNodeAddressReqParams, BuildRenewReqParams, BuildUpdateReqParams, CreateRequestClient, SaoNodeAPISchema } from '@sao-js-sdk/api-client';
+import { ClientOrderProposal, LoadReq, Proposal } from './types';
+import { Uint8ArrayToString } from '@sao-js-sdk/common';
 export class Model {
     dataId: string;
     alias: string;
@@ -158,4 +158,3 @@ export class ModelProvider {
 
 export * from "./manager";
 export * from "./types";
-export * from "./utils"

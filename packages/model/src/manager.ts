@@ -4,7 +4,7 @@ import stringify from 'fast-json-stable-stringify';
 import { GetNodeApiClient } from '@sao-js-sdk/api-client'
 import { SidManager } from '@sao-js-sdk/sid'
 import { ModelConfig, ModelDef, ModelProviderConfig, Proposal } from './types'
-import { CalculateCid, GenerateDataId, stringToUint8Array } from './utils'
+import { CalculateCid, GenerateDataId, stringToUint8Array } from '@sao-js-sdk/common'
 import { ModelProvider } from ".";
 
 const defaultModelConfig: ModelConfig = {
