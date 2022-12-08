@@ -1,7 +1,6 @@
 {
   "packages/**/src/*.{js,ts}": [
     "yarn workspaces run format",
-    "yarn workspaces run lint",
-    "git add"
+    "yarn workspaces run lint"
   ]
 }

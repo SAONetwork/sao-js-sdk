@@ -1,6 +1,6 @@
 import { Keychain } from "./keychain";
 import { AccountProvider } from "./account_provider";
-import { accountSecretToDid, generateAccountSecret, toJWS, toStableObject } from "./utils";
+import { accountSecretToDid, generateAccountSecret, getSidIdentifier, toJWS, toStableObject } from "./utils";
 import { createJWS } from "did-jwt";
 import { AuthenticateParam, CreateJWSParam, JWS } from "@sao-js-sdk/common";
 import { DidStore } from "./did_store";
@@ -46,7 +46,7 @@ export class SidProvider {
     const did = keychain.did;
     const bindingProof = await accountProvider.generateBindingProof(did, timestamp);
 
-    await didStore.binding(keychain.did.slice(8), keys, bindingProof, accountAuth);
+    await didStore.binding(getSidIdentifier(keychain.did), keys, bindingProof, accountAuth);
 
     return new SidProvider(keychain, did, didStore, accountProvider);
   }
@@ -65,6 +65,9 @@ export class SidProvider {
     return new SidProvider(null, did, didStore, accountProvider);
   }
 
+  /**
+   * if keychain is not initialized, recover keychain from current account provider.
+   */
   private async recoverKeychain() {
     if (this.keychain == null) {
       console.log("keychain is not initialized. init lazily");
