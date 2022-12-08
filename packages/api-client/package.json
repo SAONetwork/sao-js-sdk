@@ -20,6 +20,7 @@
   "dependencies": {
     "@sao-js-sdk/common": "^0.0.0",
     "axios": "1.2.0",
+    "did-jwt":"7.0.0",
     "sao-chain-client": "^0.0.1"
   },
   "jest": {

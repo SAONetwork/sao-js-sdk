@@ -79,7 +79,7 @@ export class SidProvider {
     }
 
     private async sign(payload: Record<string, any> | string, didWithFragment: string, protectedHeader: Record<string, any> = {}): Promise<JWS> {
-        this.recoverKeychain();
+        await this.recoverKeychain();
 
         let [did, keyFragment] = didWithFragment.split('#');
         if (did !== this.sid) {
