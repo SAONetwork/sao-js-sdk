@@ -1,31 +1,30 @@
-import {Sha256} from '@aws-crypto/sha256-browser';
+import { Sha256 } from "@aws-crypto/sha256-browser";
 import varint from "varint";
 import { concat } from "uint8arrays/concat";
-import CID from 'cids';
+import CID from "cids";
 import { v4 as uuid } from "uuid";
 
 export const Uint8ArrayToString = (dataArray: Uint8Array) => {
-    var dataString = "";
-    for (var i = 0; i < dataArray.length; i++) {
-        dataString += String.fromCharCode(dataArray[i]);
-    }
+  let dataString = "";
+  for (let i = 0; i < dataArray.length; i++) {
+    dataString += String.fromCharCode(dataArray[i]);
+  }
 
-    return dataString
-}
+  return dataString;
+};
 
 export const stringToUint8Array = (dataString: string) => {
-    var dataArray = []
-    for (var i = 0, j = dataString.length; i < j; ++i) {
-        dataArray.push(dataString.charCodeAt(i));
-    }
+  const dataArray = [];
+  for (let i = 0, j = dataString.length; i < j; ++i) {
+    dataArray.push(dataString.charCodeAt(i));
+  }
 
-    var tmpUint8Array = new Uint8Array(dataArray);
-    return tmpUint8Array
-}
+  return new Uint8Array(dataArray);
+};
 
 export const GenerateDataId = () => {
-    return uuid();
-}
+  return uuid();
+};
 
 // /**
 //  * @type {Crypto}
@@ -36,36 +35,32 @@ export const GenerateDataId = () => {
 //     // @ts-ignore - unknown property
 //     (self.msCrypto);
 
-
 export const Hash = async (content: Uint8Array) => {
-    const hasher = new Sha256();
-    hasher.update(content);
-    const hash = await hasher.digest();
-    console.log("Hash:", hash)
+  const hasher = new Sha256();
+  hasher.update(content);
+  const hash = await hasher.digest();
+  console.log("Hash:", hash);
 
-    // const buffer = await crypto.subtle.digest({ name: "SHA-256" }, content);
-    return new Uint8Array(hash);
+  // const buffer = await crypto.subtle.digest({ name: "SHA-256" }, content);
+  return new Uint8Array(hash);
 };
 
 export const MultiHash = async (content: Uint8Array) => {
-    const digest = await Hash(content);
-    const code = varint.encode(0x12);
-    const length = varint.encode(0x20);
-    const hash = concat(
-        [code, length, digest],
-        code.length + length.length + digest.length
-    );
+  const digest = await Hash(content);
+  const code = varint.encode(0x12);
+  const length = varint.encode(0x20);
+  const hash = concat([code, length, digest], code.length + length.length + digest.length);
 
-    console.log("MultiHash:", hash)
+  console.log("MultiHash:", hash);
 
-    return hash;
+  return hash;
 };
 
 export const CalculateCid = async (content: Uint8Array) => {
-    const hash = await MultiHash(content);
+  const hash = await MultiHash(content);
 
-    const cid = new CID(1, "raw", hash);
-    console.log("CID:", cid)
+  const cid = new CID(1, "raw", hash);
+  console.log("CID:", cid);
 
-    return cid.toString();
+  return cid.toString();
 };

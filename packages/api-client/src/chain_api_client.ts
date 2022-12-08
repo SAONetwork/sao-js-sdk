@@ -1,25 +1,25 @@
-import { AccountAuth, ChainApiClientConfig } from './types';
-import { BindingProof, BindingProofV1 } from '@sao-js-sdk/common';
+import { AccountAuth, ChainApiClientConfig } from "./types";
+import { BindingProof, BindingProofV1 } from "@sao-js-sdk/common";
 import { OfflineSigner } from "@cosmjs/proto-signing";
 import { Api } from "sao-chain-client/dist/saonetwork.sao.did/rest";
 import { Client } from "sao-chain-client";
 import { queryClient as didQueryClient } from "sao-chain-client/dist/saonetwork.sao.did";
 import { queryClient as modelQueryClient } from "sao-chain-client/dist/saonetwork.sao.model";
-import * as u8a from 'uint8arrays';
-import stringify from 'fast-json-stable-stringify';
+import * as u8a from "uint8arrays";
+import stringify from "fast-json-stable-stringify";
 import { MsgUpdateSidDocumentResponse } from "sao-chain-client/dist/saonetwork.sao.did/types/sao/did/tx";
 import { TxMsgData } from "sao-chain-client/dist/cosmos.tx.v1beta1/types/cosmos/base/abci/v1beta1/abci";
 import { JWE } from "did-jwt";
 
 export class ChainApiClient {
-  private signer: OfflineSigner
-  private client: InstanceType<typeof Client>
-  private didClient: Api<unknown>
-  private modelClient: Api<unknown>
+  private signer: OfflineSigner;
+  private client: InstanceType<typeof Client>;
+  private didClient: Api<unknown>;
+  private modelClient: Api<unknown>;
 
   constructor(config: ChainApiClientConfig) {
-    const api = config.apiURL || process.env.COSMOS_API_URL || 'http://localhost:1317';
-    const rpc = config.rpcURL || process.env.COSMOS_RPC_URL || 'http://localhost:26657';
+    const api = config.apiURL || process.env.COSMOS_API_URL || "http://localhost:1317";
+    const rpc = config.rpcURL || process.env.COSMOS_RPC_URL || "http://localhost:26657";
     const addressPrefix = config.prefix || "cosmos";
 
     console.log("cosmos did store: ");
@@ -27,11 +27,14 @@ export class ChainApiClient {
     console.log("rpc url: ", rpc);
     console.log("prefix: ", addressPrefix);
 
-    this.client = new Client({
-      apiURL: api,
-      rpcURL: rpc,
-      prefix: addressPrefix
-    }, config.signer);
+    this.client = new Client(
+      {
+        apiURL: api,
+        rpcURL: rpc,
+        prefix: addressPrefix,
+      },
+      config.signer
+    );
 
     this.signer = config.signer;
     this.didClient = didQueryClient({ addr: api });
@@ -39,11 +42,11 @@ export class ChainApiClient {
   }
 
   async GetTx(transactionHash: string): Promise<any> {
-    return this.client.CosmosTxV1Beta1.query.serviceGetTx(transactionHash)
+    return this.client.CosmosTxV1Beta1.query.serviceGetTx(transactionHash);
   }
 
   async Decode(data: string): Promise<any> {
-    const decoded = u8a.fromString(data.toLowerCase(), 'base16');
+    const decoded = u8a.fromString(data.toLowerCase(), "base16");
     return MsgUpdateSidDocumentResponse.decode(TxMsgData.decode(decoded).msgResponses[0].value);
   }
 
@@ -63,22 +66,27 @@ export class ChainApiClient {
           accountEncryptedSeed,
           sidEncryptedAccount,
         },
-      }
+      },
     });
     return txResult;
   }
 
   async GetAccountAuth(accountDid: string): Promise<any> {
-    return this.didClient.queryAccountAuth(accountDid + ':');
+    return this.didClient.queryAccountAuth(accountDid + ":");
   }
 
-  async Binding(rootDocId: string, keys: Record<string, string>, proof: BindingProof, accountAuth: AccountAuth): Promise<any> {
+  async Binding(
+    rootDocId: string,
+    keys: Record<string, string>,
+    proof: BindingProof,
+    accountAuth: AccountAuth
+  ): Promise<any> {
     const account = await this.signer.getAccounts();
-    var pubkeys = [];
-    Object.keys(keys).forEach(k => {
+    const pubkeys = [];
+    Object.keys(keys).forEach((k) => {
       pubkeys.push({
         name: k,
-        value: keys[k]
+        value: keys[k],
       });
     });
 
@@ -92,12 +100,11 @@ export class ChainApiClient {
         accountId: proof.accountId,
         rootDocId: rootDocId,
         keys: pubkeys,
-        accountAuth:
-            {
-              accountDid,
-              accountEncryptedSeed,
-              sidEncryptedAccount,
-            },
+        accountAuth: {
+          accountDid,
+          accountEncryptedSeed,
+          sidEncryptedAccount,
+        },
         proof: {
           message: proof.message,
           signature: proof.signature,
@@ -106,7 +113,7 @@ export class ChainApiClient {
           timestamp: proof.timestamp,
           // TODO:
           version: BindingProofV1,
-        }
+        },
       },
     });
 
@@ -127,7 +134,7 @@ export class ChainApiClient {
           timestamp: proof.timestamp,
           // TODO:
           version: BindingProofV1,
-        }
+        },
       },
     });
 
@@ -135,7 +142,7 @@ export class ChainApiClient {
   }
 
   async GetBinding(accountId: string): Promise<any> {
-    return this.didClient.queryDidBindingProof(accountId + ':');
+    return this.didClient.queryDidBindingProof(accountId + ":");
   }
 
   async RemoveBinding(accountId: string): Promise<any> {
@@ -143,8 +150,8 @@ export class ChainApiClient {
     const txResult = await this.client.SaonetworkSaoDid.tx.sendMsgUnbinding({
       value: {
         creator: account[0].address,
-        accountId
-      }
+        accountId,
+      },
     });
     return txResult;
   }
@@ -156,31 +163,31 @@ export class ChainApiClient {
         creator: account[0].address,
         did: did,
         update: updates,
-        removes
-      }
+        removes,
+      },
     });
-    return txResult
+    return txResult;
   }
 
   async GetAllAccountAuth(did: string): Promise<any> {
-      return await this.didClient.queryGetAllAccountAuths(did + ":");
+    return await this.didClient.queryGetAllAccountAuths(did + ":");
   }
 
   async UpdateSidDocument(keys: Record<string, string>, rootDocId?: string): Promise<any> {
     const account = await this.signer.getAccounts();
-    var pubkeys = [];
-    Object.keys(keys).forEach(k => {
+    const pubkeys = [];
+    Object.keys(keys).forEach((k) => {
       pubkeys.push({
         name: k,
-        value: keys[k]
+        value: keys[k],
       });
     });
     const txResult = await this.client.SaonetworkSaoDid.tx.sendMsgUpdateSidDocument({
       value: {
         creator: account[0].address,
         keys: pubkeys,
-        rootDocId: rootDocId
-      }
+        rootDocId: rootDocId,
+      },
     });
     return txResult;
   }
@@ -198,9 +205,9 @@ export class ChainApiClient {
     const txResult = this.client.SaonetworkSaoDid.tx.sendMsgAddPastSeed({
       value: {
         creator: accounts[0].address,
-        did, 
+        did,
         pastSeed: stringify(seed),
-      }
+      },
     });
     return txResult;
   }
@@ -211,10 +218,9 @@ export class ChainApiClient {
       value: {
         creator: accounts[0].address,
         accountId: accountId,
-        did: did
-      }
+        did: did,
+      },
     });
     return txResult;
   }
-
 }
