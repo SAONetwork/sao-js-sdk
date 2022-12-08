@@ -39,7 +39,7 @@ export const BuildNodeAddressReqParams = () => {
   return request;
 };
 
-export const BuildLoadReqParams = (param: Array<any>) => {
+export const BuildLoadReqParams = (param: any) => {
   const request: JsonRpcRequest = Object.create(null);
 
   request.id = 0;
