@@ -11,6 +11,7 @@ import {
   UpdatePermissionProposal,
   OrderRenewProposal,
   PermissionProposal,
+  ClientOrderProposal,
 } from "@sao-js-sdk/api-client";
 import { SidManager } from "@sao-js-sdk/sid";
 import { ModelConfig, ModelDef, ModelProviderConfig } from "./types";
@@ -161,15 +162,14 @@ export class ModelManager {
       gateway: "",
     });
 
-    const model = await provider.create(
-      query,
-      {
-        Proposal: proposal,
-        JwsSignature: clientProposal.signatures[0],
-      },
-      0,
-      Array.from(dataBytes)
-    );
+    const clientOrderProposal: ClientOrderProposal = {
+      Proposal: proposal,
+      JwsSignature: clientProposal.signatures[0],
+    };
+
+    const orderId = await provider.store(clientOrderProposal);
+
+    const model = await provider.create(query, clientOrderProposal, orderId, Array.from(dataBytes));
 
     return model.dataId;
   }
@@ -242,15 +242,14 @@ export class ModelManager {
       throw new Error("invalid provider");
     }
 
-    const model = await provider.update(
-      query,
-      {
-        Proposal: proposal,
-        JwsSignature: clientProposal.signatures[0],
-      },
-      0,
-      Array.from(dataBytes)
-    );
+    const clientOrderProposal: ClientOrderProposal = {
+      Proposal: proposal,
+      JwsSignature: clientProposal.signatures[0],
+    };
+
+    const orderId = await provider.store(clientOrderProposal);
+
+    const model = await provider.update(query, clientOrderProposal, orderId, Array.from(dataBytes));
     return model.dataId;
   }
 
