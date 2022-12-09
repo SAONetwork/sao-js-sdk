@@ -4,6 +4,7 @@ import stringify from "fast-json-stable-stringify";
 import { GetNodeApiClient } from "@sao-js-sdk/api-client";
 import { SidManager } from "@sao-js-sdk/sid";
 import { ModelConfig, ModelDef, ModelProviderConfig, Proposal } from "./types";
+import {Proposal as SaoProposal} from "sao-chain-client/dist/saonetwork.sao.sao"
 import { CalculateCid, GenerateDataId, stringToUint8Array } from "@sao-js-sdk/common";
 import { ModelProvider } from ".";
 
@@ -92,7 +93,7 @@ export class ModelManager {
     }
 
     const clientProposal = await sidProvider.createJWS({
-      payload: u8a.toString(stringToUint8Array(stringify(proposal)), "base64url"),
+      payload: u8a.toString(SaoProposal.encode(SaoProposal.fromPartial(proposal)).finish(),"base64url"),
     });
 
     console.log("sig:", clientProposal.signatures[0]);
@@ -171,7 +172,7 @@ export class ModelManager {
       throw new Error("failed to get sid provider");
     }
     const clientProposal = await sidProvider.createJWS({
-      payload: u8a.toString(stringToUint8Array(stringify(proposal)), "base64url"),
+      payload: u8a.toString(SaoProposal.encode(SaoProposal.fromPartial(proposal)).finish(),"base64url"),
     });
 
     if (!provider.validate(proposal)) {

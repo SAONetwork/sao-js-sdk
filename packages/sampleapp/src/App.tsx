@@ -137,18 +137,25 @@ export default function App() {
     });
   };
 
-  const testNodeApi1 = () => {
+  const testNodeApi1 = async () => {
+    const sp = await manager.getSidProvider()
+    if (sp === null) {
+        alert("you need to connect sao did");
+        return;
+    }
+
     const modelManager = new ModelManager({
-      ownerDid: did,
+      ownerDid: sp.sid,
       chainApiUrl: "http://127.0.0.1:1317",
       chainApiToken: "",
       nodeApiUrl: "http://127.0.0.1:8888/rpc/v0",
       nodeApiToken: "TOKEN",
       platformId: "30293f0f-3e0f-4b3c-aff1-890a2fdf063b",
     }, manager);
+    await modelManager.init()
 
 
-    modelManager.createModel({
+    await modelManager.createModel({
       alias: "test_model",
       data: {abd: 111},
     })
