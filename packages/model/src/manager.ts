@@ -15,7 +15,12 @@ import {
 } from "@sao-js-sdk/api-client";
 import { SidManager } from "@sao-js-sdk/sid";
 import { ModelConfig, ModelDef, ModelProviderConfig } from "./types";
-import {Proposal as SaoProposal} from "sao-chain-client/dist/saonetwork.sao.sao"
+import {
+  Proposal as SaoProposal,
+  QueryProposal as SaoQueryProposal,
+  RenewProposal as SaoRenewProposal ,
+  PermissionProposal as SaoPermissionProposal,
+} from "sao-chain-client/dist/saonetwork.sao.sao"
 import { CalculateCid, GenerateDataId, stringToUint8Array } from "@sao-js-sdk/common";
 import { ModelProvider } from ".";
 
@@ -93,7 +98,7 @@ export class ModelManager {
     }
 
     const clientProposal = await sidProvider.createJWS({
-      payload: u8a.toString(stringToUint8Array(stringify(proposal)), "base64url"),
+      payload: u8a.toString(SaoQueryProposal.encode(SaoQueryProposal.fromPartial(proposal)).finish(), "base64url"),
     });
 
     console.log("sig:", clientProposal.signatures[0]);
@@ -339,7 +344,7 @@ export class ModelManager {
     }
 
     const permissionProposal = await sidProvider.createJWS({
-      payload: u8a.toString(stringToUint8Array(stringify(proposal)), "base64url"),
+      payload: u8a.toString(SaoPermissionProposal.encode(SaoPermissionProposal.fromPartial(proposal)).finish(), "base64url"),
     });
 
     console.log("sig:", permissionProposal.signatures[0]);
@@ -378,7 +383,7 @@ export class ModelManager {
     }
 
     const renewProposal = await sidProvider.createJWS({
-      payload: u8a.toString(stringToUint8Array(stringify(proposal)), "base64url"),
+      payload: u8a.toString(SaoRenewProposal.encode(SaoRenewProposal.fromPartial(proposal).finish()), "base64url"),
     });
 
     console.log("sig:", renewProposal.signatures[0]);
