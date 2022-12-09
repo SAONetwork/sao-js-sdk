@@ -1,9 +1,13 @@
 import { JWSSignature } from "@sao-js-sdk/common";
+import { OfflineSigner } from "@cosmjs/proto-signing";
 
 export type ModelProviderConfig = {
   ownerDid: string;
   chainApiUrl: string;
   chainApiToken: string;
+  chainRpcUrl: string;
+  chainPrefix: string;
+  signer: OfflineSigner;
   nodeApiUrl: string;
   nodeApiToken: string;
   platformId: string;
@@ -26,11 +30,13 @@ export type ModelConfig = {
   operation?: number | 1;
 };
 
-export type LoadReq = {
-  user?: string | undefined;
+export type QueryProposal = {
+  owner: string;
   keyword: string;
-  publicKey?: string;
-  groupId?: string | undefined;
+  groupId?: string;
+  type_?: number | undefined;
+  lastValidHeight: number;
+  gateway: string;
   commitId?: string | undefined;
   version?: string | undefined;
 };
@@ -53,7 +59,24 @@ export type Proposal = {
   operation: number;
 };
 
+export type PermissionProposal = {
+  owner: string;
+  dataId: string;
+  ReadonlyDids?: string[] | undefined;
+  ReadwriteDids?: string[] | undefined;
+}
+
+export type QueryMetadataProposal = {
+	Proposal: QueryProposal
+  JwsSignature: JWSSignature;
+}
+
 export type ClientOrderProposal = {
   Proposal: Proposal;
+  JwsSignature: JWSSignature;
+};
+
+export type UpdatePermissionProposal = {
+  Proposal: PermissionProposal;
   JwsSignature: JWSSignature;
 };

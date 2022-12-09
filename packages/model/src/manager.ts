@@ -1,14 +1,14 @@
 import * as jsonpatch from "fast-json-patch";
 import * as u8a from "uint8arrays";
 import stringify from "fast-json-stable-stringify";
-import { GetNodeApiClient } from "@sao-js-sdk/api-client";
+import { GetNodeApiClient, ChainApiClient } from "@sao-js-sdk/api-client";
 import { SidManager } from "@sao-js-sdk/sid";
-import { ModelConfig, ModelDef, ModelProviderConfig, Proposal } from "./types";
+import { QueryMetadataProposal, ModelConfig, ModelDef, ModelProviderConfig, Proposal, QueryProposal } from "./types";
 import { CalculateCid, GenerateDataId, stringToUint8Array } from "@sao-js-sdk/common";
 import { ModelProvider } from ".";
 
 const defaultModelConfig: ModelConfig = {
-  duration: 365,
+  duration: 365 * 60 * 60 * 24 * 1000000000,
   replica: 1,
   timeout: 60 * 60 * 24,
   operation: 1,
@@ -17,13 +17,21 @@ export class ModelManager {
   private defaultModelProvider: ModelProvider;
   private modelProviders: Record<string, ModelProvider>;
   private sidManager: SidManager;
+  private chainApiClient: ChainApiClient;
 
   constructor(config: ModelProviderConfig, sidManager: SidManager) {
     const nodeApiClient = GetNodeApiClient({
-      baseURL: config.nodeApiUrl,
+      baseURL: config.nodeApiUrl || process.env.SAO_NODE_API_URL || "http://localhost:8888",
       headers: {
         Authorization: "Bearer " + config.nodeApiToken,
       },
+    });
+
+    this.chainApiClient = new ChainApiClient({
+      apiURL: config.chainApiUrl,
+      rpcURL: config.chainRpcUrl,
+      prefix: config.chainPrefix || "cosmos",
+      signer: config.signer,
     });
 
     this.defaultModelProvider = new ModelProvider(config.ownerDid, config.platformId, nodeApiClient);
@@ -51,6 +59,32 @@ export class ModelManager {
 
     const provider = new ModelProvider(config.ownerDid, config.platformId, nodeApiClient);
     this.modelProviders[config.ownerDid] = provider;
+  }
+
+  async buildQueryRequest(proposal: QueryProposal) {
+    const lastValidHeight = 100;
+    const peerInfo = "";
+
+    proposal.lastValidHeight = lastValidHeight;
+    proposal.gateway = peerInfo;
+
+    const sidProvider = await this.sidManager.getSidProvider();
+    if (sidProvider === null) {
+      throw new Error("failed to get sid provider");
+    }
+
+    const clientProposal = await sidProvider.createJWS({
+      payload: u8a.toString(stringToUint8Array(stringify(proposal)), "base64url"),
+    });
+
+    console.log("sig:", clientProposal.signatures[0]);
+    console.log("payload:", stringify(proposal));
+
+    const queryMetadataProposal: QueryMetadataProposal = {
+      Proposal: proposal,
+      JwsSignature: clientProposal.signatures[0],
+    };
+    return queryMetadataProposal;
   }
 
   async createModel<T>(
@@ -102,7 +136,16 @@ export class ModelManager {
       throw new Error("invalid provider");
     }
 
+    const query = await this.buildQueryRequest({
+      owner: proposal.owner,
+      keyword: proposal.dataId,
+      groupId: def.groupId || provider.getGroupId(),
+      lastValidHeight: 0,
+      gateway: "",
+    });
+
     const model = await provider.create(
+      query,
       {
         Proposal: proposal,
         JwsSignature: clientProposal.signatures[0],
@@ -132,11 +175,15 @@ export class ModelManager {
       }
     }
 
-    const originModel = await provider.load({
+    const query = await this.buildQueryRequest({
+      owner: ownerDid,
       keyword,
-      publicKey: provider.getOwnerSid(),
-      groupId: def.groupId,
+      groupId: def.groupId || provider.getGroupId(),
+      lastValidHeight: 0,
+      gateway: "",
     });
+
+    const originModel = await provider.load(query);
 
     const origin = originModel.cast();
 
@@ -179,6 +226,7 @@ export class ModelManager {
     }
 
     const model = await provider.update(
+      query,
       {
         Proposal: proposal,
         JwsSignature: clientProposal.signatures[0],
@@ -195,11 +243,15 @@ export class ModelManager {
       provider = this.getModelProvider(ownerDid);
     }
 
-    const model = await provider.load({
+    const query = await this.buildQueryRequest({
+      owner: ownerDid,
       keyword,
-      publicKey: provider.getOwnerSid(),
-      groupId,
+      groupId: groupId || provider.getGroupId(),
+      lastValidHeight: 0,
+      gateway: "",
     });
+
+    const model = await provider.load(query);
 
     console.log(String(model.content));
 
@@ -212,12 +264,16 @@ export class ModelManager {
       provider = this.getModelProvider(ownerDid);
     }
 
-    const model = await provider.load({
+    const query = await this.buildQueryRequest({
+      owner: ownerDid,
       keyword,
-      publicKey: provider.getOwnerSid(),
-      groupId,
+      groupId: groupId || provider.getGroupId(),
       commitId,
+      lastValidHeight: 0,
+      gateway: "",
     });
+
+    const model = await provider.load(query);
 
     return model.cast();
   }
@@ -228,12 +284,16 @@ export class ModelManager {
       provider = this.getModelProvider(ownerDid);
     }
 
-    const model = await provider.load({
+    const query = await this.buildQueryRequest({
+      owner: ownerDid,
       keyword,
-      publicKey: provider.getOwnerSid(),
-      groupId,
+      groupId: groupId || provider.getGroupId(),
       version,
+      lastValidHeight: 0,
+      gateway: "",
     });
+
+    const model = await provider.load(query);
 
     return model.cast();
   }
