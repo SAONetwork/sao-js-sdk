@@ -50,6 +50,10 @@ export class ChainApiClient {
     return MsgUpdateSidDocumentResponse.decode(TxMsgData.decode(decoded).msgResponses[0].value);
   }
 
+  async LastValidHeight(): Promise<any> {
+    return this.client.CosmosTxV1Beta1.query.ls
+  }
+
   async AddAccountAuth(did: string, accountAuth: AccountAuth): Promise<any> {
     const account = await this.signer.getAccounts();
 

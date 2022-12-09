@@ -39,25 +39,26 @@ export const BuildNodeAddressReqParams = () => {
   return request;
 };
 
-export const BuildLoadReqParams = (param: any) => {
+export const BuildLoadReqParams = (query: any) => {
   const request: JsonRpcRequest = Object.create(null);
 
   request.id = 0;
   request.jsonrpc = "2.0";
   request.method = "Sao.Load";
   request.params = [];
-  request.params.push(param);
+  request.params.push(query);
 
   return request;
 };
 
-export const BuildCreateReqParams = (proposal: any, orderId: number, content: number[]) => {
+export const BuildCreateReqParams = (query: any, proposal: any, orderId: number, content: number[]) => {
   const request: JsonRpcRequest = Object.create(null);
 
   request.id = 0;
   request.jsonrpc = "2.0";
   request.method = "Sao.Create";
   request.params = [];
+  request.params.push(query);
   request.params.push(proposal);
   request.params.push(orderId);
   request.params.push(content);
@@ -65,26 +66,28 @@ export const BuildCreateReqParams = (proposal: any, orderId: number, content: nu
   return request;
 };
 
-export const BuildCreateFileReqParams = (proposal: any, orderId: number) => {
+export const BuildCreateFileReqParams = (query: any, proposal: any, orderId: number) => {
   const request: JsonRpcRequest = Object.create(null);
 
   request.id = 0;
   request.jsonrpc = "2.0";
   request.method = "Sao.CreateFile";
   request.params = [];
+  request.params.push(query);
   request.params.push(proposal);
   request.params.push(orderId);
 
   return request;
 };
 
-export const BuildUpdateReqParams = (proposal: any, orderId: number, patch: number[]) => {
+export const BuildUpdateReqParams = (query: any, proposal: any, orderId: number, patch: number[]) => {
   const request: JsonRpcRequest = Object.create(null);
 
   request.id = 0;
   request.jsonrpc = "2.0";
   request.method = "Sao.Update";
   request.params = [];
+  request.params.push(query);
   request.params.push(proposal);
   request.params.push(orderId);
   request.params.push(patch);
@@ -92,29 +95,28 @@ export const BuildUpdateReqParams = (proposal: any, orderId: number, patch: numb
   return request;
 };
 
-export const BuildRenewReqParams = (proposal: any, orderId: number) => {
+export const BuildRenewReqParams = (query: any, proposal: any, orderId: number) => {
   const request: JsonRpcRequest = Object.create(null);
 
   request.id = 0;
   request.jsonrpc = "2.0";
   request.method = "Sao.Renew";
   request.params = [];
+  request.params.push(query);
   request.params.push(proposal);
   request.params.push(orderId);
 
   return request;
 };
 
-export const BuildShowCommitsReqParams = (owner: string, key: string, group: string) => {
+export const BuildShowCommitsReqParams = (query: any) => {
   const request: JsonRpcRequest = Object.create(null);
 
   request.id = 0;
   request.jsonrpc = "2.0";
   request.method = "Sao.ShowCommits";
   request.params = [];
-  request.params.push(owner);
-  request.params.push(key);
-  request.params.push(group);
+  request.params.push(query);
 
   return request;
 };

@@ -6,7 +6,7 @@ import {
   CreateRequestClient,
   SaoNodeAPISchema,
 } from "@sao-js-sdk/api-client";
-import { ClientOrderProposal, LoadReq, Proposal } from "./types";
+import { ClientOrderProposal, QueryMetadataProposal, Proposal } from "./types";
 export class Model {
   dataId: string;
   alias: string;
@@ -93,8 +93,8 @@ export class ModelProvider {
     return proposal.groupId === this.groupId && proposal.owner === this.ownerSid;
   }
 
-  async create(clientProposal: ClientOrderProposal, orderId: number, content: number[]): Promise<Model> {
-    const res = await this.nodeApiClient.jsonRpcApi(BuildCreateReqParams(clientProposal, orderId, content));
+  async create(query: QueryMetadataProposal, clientProposal: ClientOrderProposal, orderId: number, content: number[]): Promise<Model> {
+    const res = await this.nodeApiClient.jsonRpcApi(BuildCreateReqParams(query, clientProposal, orderId, content));
 
     if (res.data.result) {
       const model = new Model(res.data.result.DataId, res.data.result.Alias);
@@ -108,8 +108,8 @@ export class ModelProvider {
     }
   }
 
-  async update(clientProposal: ClientOrderProposal, orderId: number, patch: number[]): Promise<Model> {
-    const res = await this.nodeApiClient.jsonRpcApi(BuildUpdateReqParams(clientProposal, orderId, patch));
+  async update(query: QueryMetadataProposal, clientProposal: ClientOrderProposal, orderId: number, patch: number[]): Promise<Model> {
+    const res = await this.nodeApiClient.jsonRpcApi(BuildUpdateReqParams(query, clientProposal, orderId, patch));
     if (res.data.result) {
       const model = new Model(res.data.result.DataId, res.data.result.Alias);
       model.setCid(res.data.result.Cid);
@@ -122,16 +122,8 @@ export class ModelProvider {
     }
   }
 
-  async load(req: LoadReq): Promise<Model> {
-    if (req.groupId === undefined) {
-      req.groupId = this.groupId;
-    }
-
-    if (req.publicKey === undefined) {
-      req.publicKey = this.ownerSid;
-    }
-
-    const res = await this.nodeApiClient.jsonRpcApi(BuildLoadReqParams(req));
+  async load(query: QueryMetadataProposal): Promise<Model> {
+    const res = await this.nodeApiClient.jsonRpcApi(BuildLoadReqParams(query));
 
     if (res.data.result) {
       const model = new Model(res.data.result.DataId, res.data.result.Alias);
