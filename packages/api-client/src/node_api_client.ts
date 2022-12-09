@@ -95,20 +95,6 @@ export const BuildUpdateReqParams = (query: any, proposal: any, orderId: number,
   return request;
 };
 
-export const BuildRenewReqParams = (query: any, proposal: any, orderId: number) => {
-  const request: JsonRpcRequest = Object.create(null);
-
-  request.id = 0;
-  request.jsonrpc = "2.0";
-  request.method = "Sao.Renew";
-  request.params = [];
-  request.params.push(query);
-  request.params.push(proposal);
-  request.params.push(orderId);
-
-  return request;
-};
-
 export const BuildShowCommitsReqParams = (query: any) => {
   const request: JsonRpcRequest = Object.create(null);
 

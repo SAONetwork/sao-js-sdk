@@ -1,3 +1,4 @@
+import { ChainApiClient } from "@sao-js-sdk/api-client";
 import {
   BuildCreateReqParams,
   BuildLoadReqParams,
@@ -5,8 +6,13 @@ import {
   BuildUpdateReqParams,
   CreateRequestClient,
   SaoNodeAPISchema,
+  ClientOrderProposal,
+  QueryMetadataProposal,
+  Proposal,
+  UpdatePermissionProposal,
+  OrderRenewProposal,
 } from "@sao-js-sdk/api-client";
-import { ClientOrderProposal, QueryMetadataProposal, Proposal } from "./types";
+
 export class Model {
   dataId: string;
   alias: string;
@@ -65,11 +71,18 @@ export class ModelProvider {
   private groupId: string;
   private nodeAddress: string;
   private nodeApiClient: CreateRequestClient<SaoNodeAPISchema>;
+  private chainApiClient: ChainApiClient;
 
-  public constructor(ownerSid: string, groupId: string, nodeApiClient: CreateRequestClient<SaoNodeAPISchema>) {
+  public constructor(
+    ownerSid: string,
+    groupId: string,
+    nodeApiClient: CreateRequestClient<SaoNodeAPISchema>,
+    chainApiClient: ChainApiClient
+  ) {
     this.ownerSid = ownerSid;
     this.groupId = groupId;
     this.nodeApiClient = nodeApiClient;
+    this.chainApiClient = chainApiClient;
   }
 
   async init() {
@@ -93,7 +106,12 @@ export class ModelProvider {
     return proposal.groupId === this.groupId && proposal.owner === this.ownerSid;
   }
 
-  async create(query: QueryMetadataProposal, clientProposal: ClientOrderProposal, orderId: number, content: number[]): Promise<Model> {
+  async create(
+    query: QueryMetadataProposal,
+    clientProposal: ClientOrderProposal,
+    orderId: number,
+    content: number[]
+  ): Promise<Model> {
     const res = await this.nodeApiClient.jsonRpcApi(BuildCreateReqParams(query, clientProposal, orderId, content));
 
     if (res.data.result) {
@@ -108,7 +126,12 @@ export class ModelProvider {
     }
   }
 
-  async update(query: QueryMetadataProposal, clientProposal: ClientOrderProposal, orderId: number, patch: number[]): Promise<Model> {
+  async update(
+    query: QueryMetadataProposal,
+    clientProposal: ClientOrderProposal,
+    orderId: number,
+    patch: number[]
+  ): Promise<Model> {
     const res = await this.nodeApiClient.jsonRpcApi(BuildUpdateReqParams(query, clientProposal, orderId, patch));
     if (res.data.result) {
       const model = new Model(res.data.result.DataId, res.data.result.Alias);
@@ -140,8 +163,26 @@ export class ModelProvider {
     }
   }
 
-  async renew(clientProposal: ClientOrderProposal, orderId: number): Promise<Model> {
-    throw new Error(`comming soon...${clientProposal} ${orderId}`);
+  async updatePermission(request: UpdatePermissionProposal): Promise<void> {
+    const txResult = await this.chainApiClient.UpdatePermission(request);
+    if (txResult.code != 0) {
+      console.log(`update permission failed. tx=${txResult.transactionHash} code=${txResult.code}`);
+      throw new Error(`update permission failed failed, DataId: ${request.Proposal.dataId}`);
+    } else {
+      console.log(`update permission failed succeed, DataId: ${request.Proposal.dataId}`);
+      return;
+    }
+  }
+
+  async renew(request: OrderRenewProposal): Promise<void> {
+    const txResult = await this.chainApiClient.Renew(request);
+    if (txResult.code != 0) {
+      console.log(`update permission failed. tx=${txResult.transactionHash} code=${txResult.code}`);
+      throw new Error(`update permission failed failed, DataIds: ${request.Proposal.data}`);
+    } else {
+      console.log(`update permission failed succeed, DataIds: ${request.Proposal.data}`);
+      return;
+    }
   }
 }
 
