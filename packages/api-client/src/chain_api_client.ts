@@ -236,10 +236,10 @@ export class ChainApiClient {
     return txResult;
   }
 
-  // model
+  // sao
   async UpdatePermission(request: UpdatePermissionProposal): Promise<any> {
     const account = await this.signer.getAccounts();
-    const txResult = await this.client.SaonetworkSaoDid.tx.sendMsgUpdataPermission({
+    const txResult = await this.client.SaonetworkSaoSao.tx.sendMsgUpdataPermission({
       value: {
         creator: account[0].address,
         proposal: request.Proposal,
@@ -249,10 +249,9 @@ export class ChainApiClient {
     return txResult;
   }
 
-  // order
   async Store(request: ClientOrderProposal): Promise<any> {
     const account = await this.signer.getAccounts();
-    const txResult = await this.client.SaonetworkSaoDid.tx.sendMsgStore({
+    const txResult = await this.client.SaonetworkSaoSao.tx.sendMsgStore({
       value: {
         creator: account[0].address,
         proposal: request.Proposal,
@@ -264,7 +263,7 @@ export class ChainApiClient {
 
   async Renew(request: OrderRenewProposal): Promise<any> {
     const account = await this.signer.getAccounts();
-    const txResult = await this.client.SaonetworkSaoDid.tx.sendMsgRenew({
+    const txResult = await this.client.SaonetworkSaoSao.tx.sendMsgRenew({
       value: {
         creator: account[0].address,
         proposal: request.Proposal,
