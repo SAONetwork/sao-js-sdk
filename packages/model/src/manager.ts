@@ -1,9 +1,19 @@
 import * as jsonpatch from "fast-json-patch";
 import * as u8a from "uint8arrays";
 import stringify from "fast-json-stable-stringify";
-import { GetNodeApiClient, ChainApiClient } from "@sao-js-sdk/api-client";
+import {
+  GetNodeApiClient,
+  ChainApiClient,
+  QueryMetadataProposal,
+  Proposal,
+  QueryProposal,
+  RenewProposal,
+  UpdatePermissionProposal,
+  OrderRenewProposal,
+  PermissionProposal,
+} from "@sao-js-sdk/api-client";
 import { SidManager } from "@sao-js-sdk/sid";
-import { QueryMetadataProposal, ModelConfig, ModelDef, ModelProviderConfig, Proposal, QueryProposal } from "./types";
+import { ModelConfig, ModelDef, ModelProviderConfig } from "./types";
 import { CalculateCid, GenerateDataId, stringToUint8Array } from "@sao-js-sdk/common";
 import { ModelProvider } from ".";
 
@@ -27,14 +37,14 @@ export class ModelManager {
       },
     });
 
-    this.chainApiClient = new ChainApiClient({
+    const chainApiClient = new ChainApiClient({
       apiURL: config.chainApiUrl,
       rpcURL: config.chainRpcUrl,
       prefix: config.chainPrefix || "cosmos",
       signer: config.signer,
     });
 
-    this.defaultModelProvider = new ModelProvider(config.ownerDid, config.platformId, nodeApiClient);
+    this.defaultModelProvider = new ModelProvider(config.ownerDid, config.platformId, nodeApiClient, chainApiClient);
     this.modelProviders = {};
     this.modelProviders[config.ownerDid] = this.defaultModelProvider;
 
@@ -57,7 +67,14 @@ export class ModelManager {
       },
     });
 
-    const provider = new ModelProvider(config.ownerDid, config.platformId, nodeApiClient);
+    const chainApiClient = new ChainApiClient({
+      apiURL: config.chainApiUrl,
+      rpcURL: config.chainRpcUrl,
+      prefix: config.chainPrefix || "cosmos",
+      signer: config.signer,
+    });
+
+    const provider = new ModelProvider(config.ownerDid, config.platformId, nodeApiClient, chainApiClient);
     this.modelProviders[config.ownerDid] = provider;
   }
 
@@ -103,7 +120,7 @@ export class ModelManager {
     const dataId = GenerateDataId();
     const cid = await CalculateCid(dataBytes);
     const proposal: Proposal = {
-      owner: provider.getOwnerSid(),
+      owner: ownerDid || provider.getOwnerSid(),
       provider: provider.getNodeAddress(),
       groupId: provider.getGroupId(),
       duration: modelConfig.duration,
@@ -176,7 +193,7 @@ export class ModelManager {
     }
 
     const query = await this.buildQueryRequest({
-      owner: ownerDid,
+      owner: ownerDid || provider.getOwnerSid(),
       keyword,
       groupId: def.groupId || provider.getGroupId(),
       lastValidHeight: 0,
@@ -196,7 +213,7 @@ export class ModelManager {
     const cid = await CalculateCid(targetDataBytes);
 
     const proposal: Proposal = {
-      owner: provider.getOwnerSid(),
+      owner: ownerDid || provider.getOwnerSid(),
       provider: provider.getNodeAddress(),
       groupId: provider.getGroupId(),
       duration: modelConfig.duration,
@@ -244,7 +261,7 @@ export class ModelManager {
     }
 
     const query = await this.buildQueryRequest({
-      owner: ownerDid,
+      owner: ownerDid || provider.getOwnerSid(),
       keyword,
       groupId: groupId || provider.getGroupId(),
       lastValidHeight: 0,
@@ -265,7 +282,7 @@ export class ModelManager {
     }
 
     const query = await this.buildQueryRequest({
-      owner: ownerDid,
+      owner: ownerDid || provider.getOwnerSid(),
       keyword,
       groupId: groupId || provider.getGroupId(),
       commitId,
@@ -285,7 +302,7 @@ export class ModelManager {
     }
 
     const query = await this.buildQueryRequest({
-      owner: ownerDid,
+      owner: ownerDid || provider.getOwnerSid(),
       keyword,
       groupId: groupId || provider.getGroupId(),
       version,
@@ -296,5 +313,84 @@ export class ModelManager {
     const model = await provider.load(query);
 
     return model.cast();
+  }
+
+  async updateModelPermission(
+    dataId: string,
+    readonlyDids?: string[],
+    readwriteDids?: string[],
+    ownerDid?: string
+  ): Promise<string> {
+    let provider = this.defaultModelProvider;
+    if (ownerDid !== undefined) {
+      provider = this.getModelProvider(ownerDid);
+    }
+
+    const proposal: PermissionProposal = {
+      owner: ownerDid || provider.getOwnerSid(),
+      dataId,
+      readonlyDids,
+      readwriteDids,
+    };
+
+    const sidProvider = await this.sidManager.getSidProvider();
+    if (sidProvider === null) {
+      throw new Error("failed to get sid provider");
+    }
+
+    const permissionProposal = await sidProvider.createJWS({
+      payload: u8a.toString(stringToUint8Array(stringify(proposal)), "base64url"),
+    });
+
+    console.log("sig:", permissionProposal.signatures[0]);
+    console.log("payload:", stringify(proposal));
+
+    const request: UpdatePermissionProposal = {
+      Proposal: proposal,
+      JwsSignature: permissionProposal.signatures[0],
+    };
+
+    await provider.updatePermission(request);
+
+    return;
+  }
+
+  async renewModel(
+    dataIds: string[],
+    modelConfig: ModelConfig = defaultModelConfig,
+    ownerDid?: string
+  ): Promise<string> {
+    let provider = this.defaultModelProvider;
+    if (ownerDid !== undefined) {
+      provider = this.getModelProvider(ownerDid);
+    }
+
+    const proposal: RenewProposal = {
+      owner: ownerDid || provider.getOwnerSid(),
+      duration: modelConfig.duration,
+      timeout: modelConfig.timeout,
+      data: dataIds,
+    };
+
+    const sidProvider = await this.sidManager.getSidProvider();
+    if (sidProvider === null) {
+      throw new Error("failed to get sid provider");
+    }
+
+    const renewProposal = await sidProvider.createJWS({
+      payload: u8a.toString(stringToUint8Array(stringify(proposal)), "base64url"),
+    });
+
+    console.log("sig:", renewProposal.signatures[0]);
+    console.log("payload:", stringify(proposal));
+
+    const request: OrderRenewProposal = {
+      Proposal: proposal,
+      JwsSignature: renewProposal.signatures[0],
+    };
+
+    await provider.renew(request);
+
+    return;
   }
 }
