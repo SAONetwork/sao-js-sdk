@@ -53,7 +53,7 @@ export class CosmosDidStore implements DidStore {
       .GetBinding(accountId)
       .then((res) => {
         if (res.status === 200) {
-          return res.data?.didBindingProof?.proof?.did || null;
+          return res.data?.DidBindingProof?.proof?.did;
         } else {
           throw new Error("failed to query binding for accountid: " + accountId);
         }
