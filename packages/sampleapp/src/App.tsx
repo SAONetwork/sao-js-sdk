@@ -144,10 +144,16 @@ export default function App() {
         return;
     }
 
+    const signer = await window.keplr!.getOfflineSignerOnlyAmino("sao")
+
+
     const modelManager = new ModelManager({
       ownerDid: sp.sid,
       chainApiUrl: "http://127.0.0.1:1317",
       chainApiToken: "",
+      chainRpcUrl: "http://127.0.0.1:26657",
+      chainPrefix: "cosmos",
+      signer: signer,
       nodeApiUrl: "http://127.0.0.1:8888/rpc/v0",
       nodeApiToken: "TOKEN",
       platformId: "30293f0f-3e0f-4b3c-aff1-890a2fdf063b",
@@ -162,27 +168,7 @@ export default function App() {
   }
 
   const testNodeApi2 = () => {
-    const nodeApiClient = GetNodeApiClient({
-      baseURL: "http://127.0.0.1:8888/rpc/v0",
-      headers: {
-        Authorization: 'Bearer ' + "666"
-      }
-    });
 
-    nodeApiClient.jsonRpcApi({
-      "jsonrpc": "2.0",
-      "method": "Sao.Load",
-      "params": [{
-        KeyWord: 'my_profile',
-        PublicKey: 'did:key:zQ3shbtQnPhe4jfBGFHXY8Z1bJg8CyV9EykYeq5dCjBbZRzTt',
-        GroupId: '6add3cb0-34da-482e-9285-0b626120c485',
-      }],
-      "id": 1,
-    }).then(res => {
-      console.log(res)
-    }).catch((err) => {
-      console.log(err)
-    })
   }
 
   return (

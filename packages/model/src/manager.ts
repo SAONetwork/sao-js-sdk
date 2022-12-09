@@ -18,9 +18,9 @@ import { ModelConfig, ModelDef, ModelProviderConfig } from "./types";
 import {
   Proposal as SaoProposal,
   QueryProposal as SaoQueryProposal,
-  RenewProposal as SaoRenewProposal ,
+  RenewProposal as SaoRenewProposal,
   PermissionProposal as SaoPermissionProposal,
-} from "sao-chain-client/dist/saonetwork.sao.sao"
+} from "sao-chain-client/dist/saonetwork.sao.sao";
 import { CalculateCid, GenerateDataId, stringToUint8Array } from "@sao-js-sdk/common";
 import { ModelProvider } from ".";
 
@@ -102,7 +102,10 @@ export class ModelManager {
     });
 
     console.log("sig:", clientProposal.signatures[0]);
-    console.log("payload:", stringify(proposal));
+    console.log(
+      "payload:",
+      u8a.toString(SaoQueryProposal.encode(SaoQueryProposal.fromPartial(proposal)).finish(), "base64url")
+    );
 
     const queryMetadataProposal: QueryMetadataProposal = {
       Proposal: proposal,
@@ -150,7 +153,7 @@ export class ModelManager {
     }
 
     const clientProposal = await sidProvider.createJWS({
-      payload: u8a.toString(SaoProposal.encode(SaoProposal.fromPartial(proposal)).finish(),"base64url"),
+      payload: u8a.toString(SaoProposal.encode(SaoProposal.fromPartial(proposal)).finish(), "base64url"),
     });
 
     console.log("sig:", clientProposal.signatures[0]);
@@ -241,7 +244,7 @@ export class ModelManager {
       throw new Error("failed to get sid provider");
     }
     const clientProposal = await sidProvider.createJWS({
-      payload: u8a.toString(SaoProposal.encode(SaoProposal.fromPartial(proposal)).finish(),"base64url"),
+      payload: u8a.toString(SaoProposal.encode(SaoProposal.fromPartial(proposal)).finish(), "base64url"),
     });
 
     if (!provider.validate(proposal)) {
@@ -344,7 +347,10 @@ export class ModelManager {
     }
 
     const permissionProposal = await sidProvider.createJWS({
-      payload: u8a.toString(SaoPermissionProposal.encode(SaoPermissionProposal.fromPartial(proposal)).finish(), "base64url"),
+      payload: u8a.toString(
+        SaoPermissionProposal.encode(SaoPermissionProposal.fromPartial(proposal)).finish(),
+        "base64url"
+      ),
     });
 
     console.log("sig:", permissionProposal.signatures[0]);
