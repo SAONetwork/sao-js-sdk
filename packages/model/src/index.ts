@@ -145,6 +145,21 @@ export class ModelProvider {
     }
   }
 
+  async store(request: ClientOrderProposal): Promise<number> {
+    const txResult = await this.chainApiClient.Store(request);
+    if (txResult.code != 0) {
+      console.log(`store failed. tx=${txResult.transactionHash} code=${txResult.code}`);
+      throw new Error(`store failed, DataId: ${request.Proposal.dataId}`);
+    } else {
+      console.log(`store succeed, DataId: ${request.Proposal.dataId}`);
+
+      const res = await this.chainApiClient.GetTx(txResult.transactionHash);
+      const orderId = await this.chainApiClient.Decode(res.data.tx_response.data);
+
+      return orderId;
+    }
+  }
+
   async load(query: QueryMetadataProposal): Promise<Model> {
     const res = await this.nodeApiClient.jsonRpcApi(BuildLoadReqParams(query));
 
@@ -169,7 +184,7 @@ export class ModelProvider {
       console.log(`update permission failed. tx=${txResult.transactionHash} code=${txResult.code}`);
       throw new Error(`update permission failed failed, DataId: ${request.Proposal.dataId}`);
     } else {
-      console.log(`update permission failed succeed, DataId: ${request.Proposal.dataId}`);
+      console.log(`update permission succeed, DataId: ${request.Proposal.dataId}`);
       return;
     }
   }
@@ -177,10 +192,10 @@ export class ModelProvider {
   async renew(request: OrderRenewProposal): Promise<void> {
     const txResult = await this.chainApiClient.Renew(request);
     if (txResult.code != 0) {
-      console.log(`update permission failed. tx=${txResult.transactionHash} code=${txResult.code}`);
-      throw new Error(`update permission failed failed, DataIds: ${request.Proposal.data}`);
+      console.log(`renew failed. tx=${txResult.transactionHash} code=${txResult.code}`);
+      throw new Error(`renew failed, DataIds: ${request.Proposal.data}`);
     } else {
-      console.log(`update permission failed succeed, DataIds: ${request.Proposal.data}`);
+      console.log(`renew succeed, DataIds: ${request.Proposal.data}`);
       return;
     }
   }

@@ -1,4 +1,10 @@
-import { AccountAuth, ChainApiClientConfig, OrderRenewProposal, UpdatePermissionProposal } from "./chain_types";
+import {
+  AccountAuth,
+  ChainApiClientConfig,
+  ClientOrderProposal,
+  OrderRenewProposal,
+  UpdatePermissionProposal,
+} from "./chain_types";
 import { BindingProof, BindingProofV1 } from "@sao-js-sdk/common";
 import { OfflineSigner } from "@cosmjs/proto-signing";
 import { Api } from "sao-chain-client/dist/saonetwork.sao.did/rest";
@@ -244,6 +250,18 @@ export class ChainApiClient {
   }
 
   // order
+  async Store(request: ClientOrderProposal): Promise<any> {
+    const account = await this.signer.getAccounts();
+    const txResult = await this.client.SaonetworkSaoDid.tx.sendMsgStore({
+      value: {
+        creator: account[0].address,
+        proposal: request.Proposal,
+        jwsSignature: request.JwsSignature,
+      },
+    });
+    return txResult;
+  }
+
   async Renew(request: OrderRenewProposal): Promise<any> {
     const account = await this.signer.getAccounts();
     const txResult = await this.client.SaonetworkSaoDid.tx.sendMsgRenew({
