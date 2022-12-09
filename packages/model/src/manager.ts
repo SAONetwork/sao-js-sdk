@@ -25,7 +25,7 @@ import { CalculateCid, GenerateDataId, stringToUint8Array } from "@sao-js-sdk/co
 import { ModelProvider } from ".";
 
 const defaultModelConfig: ModelConfig = {
-  duration: 365 * 60 * 60 * 24 * 1000000000,
+  duration: 365 * 60 * 60 * 24,
   replica: 1,
   timeout: 60 * 60 * 24,
   operation: 1,
