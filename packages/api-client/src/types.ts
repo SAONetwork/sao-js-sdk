@@ -6,8 +6,6 @@ import {
   HeadersDefaults,
   RawAxiosRequestHeaders,
 } from "axios";
-import { JWE } from "did-jwt";
-import { OfflineSigner } from "@cosmjs/proto-signing";
 
 type RemoveIndexSignature<Obj extends Record<string, any>> = {
   [Key in keyof Obj as Key extends `${infer Str}` ? Str : never]: Obj[Key];
@@ -61,27 +59,4 @@ export type NodeApiClientConfig<T extends APISchema> = {
   apis?: {
     [K in keyof RemoveIndexSignature<T>]: APIConfig;
   };
-};
-
-export type ChainApiClientConfig = {
-  apiURL: string;
-  rpcURL: string;
-  prefix: string;
-  signer: OfflineSigner;
-};
-
-export type AccountAuth = {
-  accountDid: string;
-  accountEncryptedSeed: JWE;
-  sidEncryptedAccount: JWE;
-};
-
-export type Result = {
-  status: number;
-  data: string;
-};
-
-export type TxResult = {
-  code: number;
-  transactionHash: string;
 };

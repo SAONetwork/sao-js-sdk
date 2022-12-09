@@ -49,25 +49,22 @@ export class CosmosDidStore implements DidStore {
    * @returns binded did
    */
   async getBinding(accountId: string): Promise<string | null> {
-    return await this.chainApiClient
-      .GetBinding(accountId)
-      .then((res) => {
-        if (res.status === 200) {
-          return res.data?.DidBindingProof?.proof?.did;
-        } else {
-          throw new Error("failed to query binding for accountid: " + accountId);
-        }
-      })
-      .catch((err) => {
-        console.log(err);
-        // const ae = err as AxiosError
-        if (err.response.status === 404) {
-          console.log();
-          return null;
-        } else {
-          throw new Error("failed to query binding for accountid: " + accountId + ", !!!" + err.response.status);
-        }
-      });
+    try {
+      const res = await this.chainApiClient.GetBinding(accountId);
+      if (res.status === 200) {
+        return res.data?.DidBindingProof?.proof?.did || null;
+      } else {
+        throw new Error("failed to query binding for accountid: " + accountId);
+      }
+    } catch (err) {
+      console.log(err);
+      if (err.response.status === 404) {
+        console.log();
+        return null;
+      } else {
+        throw new Error("failed to query binding for accountid: " + accountId + ", !!!" + err.response.status);
+      }
+    }
   }
 
   async removeBinding(accountId: string): Promise<void> {
@@ -93,27 +90,25 @@ export class CosmosDidStore implements DidStore {
   }
 
   async getAccountAuth(_: string, accountDid: string): Promise<AccountAuth | null> {
-    return await this.chainApiClient
-      .GetAccountAuth(accountDid)
-      .then((resp) => {
-        if (resp.status == 200) {
-          return {
-            accountDid: resp.data.accountAuth.accountDid,
-            sidEncryptedAccount: JSON.parse(resp.data.accountAuth.sidEncryptedAccount) as JWE,
-            accountEncryptedSeed: JSON.parse(resp.data.accountAuth.accountEncryptedSeed) as JWE,
-          };
-        } else {
-          throw new Error("failed to account auth for accountdid " + accountDid);
-        }
-      })
-      .catch((err) => {
-        console.log(err);
-        // const ae = err as AxiosError
-        if (err.response.status === 404) {
-          return null;
-        }
-        throw new Error(`failed to account auth for accountdid ${accountDid}. error: ${err}`);
-      });
+    try {
+      const resp = await this.chainApiClient.GetAccountAuth(accountDid);
+      if (resp.status == 200) {
+        return {
+          accountDid: resp.data.accountAuth.accountDid,
+          sidEncryptedAccount: JSON.parse(resp.data.accountAuth.sidEncryptedAccount) as JWE,
+          accountEncryptedSeed: JSON.parse(resp.data.accountAuth.accountEncryptedSeed) as JWE,
+        };
+      } else {
+        throw new Error("failed to account auth for accountdid " + accountDid);
+      }
+    } catch (err) {
+      console.log(err);
+      // const ae = err as AxiosError
+      if (err.response.status === 404) {
+        return null;
+      }
+      throw new Error(`failed to account auth for accountdid ${accountDid}. error: ${err}`);
+    }
   }
 
   async updateAccountAuths(did: string, update: AccountAuth[], remove: string[]): Promise<void> {
@@ -137,90 +132,67 @@ export class CosmosDidStore implements DidStore {
   }
 
   async getAllAccountAuth(did: string): Promise<AccountAuth[]> {
-    return await this.chainApiClient
-      .GetAllAccountAuth(did)
-      .then((resp) => {
-        if (resp.status === 200) {
-          const auths: AccountAuth[] = [];
-          resp.data.accountAuths.forEach((a) => {
-            auths.push({
-              accountDid: a.accountDid,
-              sidEncryptedAccount: JSON.parse(a.sidEncryptedAccount) as JWE,
-              accountEncryptedSeed: JSON.parse(a.accountEncryptedSeed) as JWE,
-            });
+    try {
+      const resp = await this.chainApiClient.GetAllAccountAuth(did);
+      if (resp.status === 200) {
+        const auths: AccountAuth[] = [];
+        resp.data.accountAuths.forEach((a) => {
+          auths.push({
+            accountDid: a.accountDid,
+            sidEncryptedAccount: JSON.parse(a.sidEncryptedAccount) as JWE,
+            accountEncryptedSeed: JSON.parse(a.accountEncryptedSeed) as JWE,
           });
-          return auths;
-        } else {
-          throw new Error("failed to get all account auths for did " + did);
-        }
-      })
-      .catch((err) => {
-        // const ae = err as AxiosError
-        if (err.response.status === 404) {
-          return [];
-        }
-        throw new Error(`failed to get all account auths for did: ${did}, ` + err);
-      });
+        });
+        return auths;
+      } else {
+        throw new Error("failed to get all account auths for did " + did);
+      }
+    } catch (err) {
+      // const ae = err as AxiosError
+      if (err.response.status === 404) {
+        return [];
+      }
+      throw new Error(`failed to get all account auths for did: ${did}, ` + err);
+    }
   }
 
   async updateSidDocument(keys: Record<string, string>, rootDocId?: string): Promise<string> {
-    return new Promise((resolve, reject) => {
-      this.chainApiClient
-        .UpdateSidDocument(keys, rootDocId)
-        .then((txResult) => {
-          console.log(txResult);
+    const txResult = await this.chainApiClient.UpdateSidDocument(keys, rootDocId);
+    console.log(txResult);
 
-          if (txResult.code != 0) {
-            console.log(`update sid document failed. tx=${txResult.transactionHash} code=${txResult.code}`);
-            reject(`update sid document failed.`);
-          } else {
-            console.log(`update sid document succeed. tx=${txResult.transactionHash}`);
-            this.chainApiClient
-              .GetTx(txResult.transactionHash)
-              .then((res) => {
-                if (res.status === 200) {
-                  this.chainApiClient
-                    .Decode(res.data.tx_response.data)
-                    .then((r) => {
-                      resolve(r.docId);
-                    })
-                    .catch((e) => {
-                      reject(`update sid document failed, decode error, ` + e);
-                    });
-                } else {
-                  reject(`update sid document failed. ${res.statusText}`);
-                }
-              })
-              .catch((err) => {
-                reject(`update sid document failed, get transaction error, ` + err);
-              });
-          }
-        })
-        .catch((error) => {
-          reject(`update sid document failed, ` + error);
-        });
-    });
+    if (txResult.code != 0) {
+      console.log(`update sid document failed. tx=${txResult.transactionHash} code=${txResult.code}`);
+      throw new Error(`update sid document failed.`);
+    } else {
+      console.log(`update sid document succeed. tx=${txResult.transactionHash}`);
+
+      const res = await this.chainApiClient.GetTx(txResult.transactionHash);
+
+      if (res.status === 200) {
+        const r = await this.chainApiClient.Decode(res.data.tx_response.data);
+
+        return r.docId;
+      } else {
+        throw new Error(`update sid document failed. ${res.statusText}`);
+      }
+    }
   }
 
   async listSidDocumentVersions(rootDocId: string): Promise<Array<string>> {
-    return new Promise((resolve, reject) => {
-      this.chainApiClient
-        .ListSidDocumentVersions(rootDocId)
-        .then((resp) => {
-          if (resp.status === 200) {
-            resolve(resp.data.sidDocumentVersion.versionList);
-          } else {
-            reject(`failed to get all sid document for root doc id ${rootDocId}.`);
-          }
-        })
-        .catch((err) => {
-          // const ae = err as AxiosError
-          if (err.response.status === 404) {
-            return [];
-          }
-          reject(`failed to get all sid document for root doc id ${rootDocId}.`);
-        });
-    });
+    try {
+      const resp = await this.chainApiClient.ListSidDocumentVersions(rootDocId);
+      if (resp.status === 200) {
+        return resp.data.sidDocumentVersion.versionList;
+      } else {
+        throw new Error(`failed to get all sid document for root doc id ${rootDocId}.`);
+      }
+    } catch (err) {
+      // const ae = err as AxiosError
+      if (err.response.status === 404) {
+        return [];
+      }
+      throw new Error(`failed to get all sid document for root doc id ${rootDocId}.`);
+    }
   }
 
   async getOldSeeds(did: string): Promise<Array<JWE>> {

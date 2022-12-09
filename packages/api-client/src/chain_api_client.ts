@@ -1,4 +1,10 @@
-import { AccountAuth, ChainApiClientConfig } from "./types";
+import {
+  AccountAuth,
+  ChainApiClientConfig,
+  ClientOrderProposal,
+  OrderRenewProposal,
+  UpdatePermissionProposal,
+} from "./chain_types";
 import { BindingProof, BindingProofV1 } from "@sao-js-sdk/common";
 import { OfflineSigner } from "@cosmjs/proto-signing";
 import { Api } from "sao-chain-client/dist/saonetwork.sao.did/rest";
@@ -41,6 +47,7 @@ export class ChainApiClient {
     this.modelClient = modelQueryClient({ addr: api });
   }
 
+  // common
   async GetTx(transactionHash: string): Promise<any> {
     return this.client.CosmosTxV1Beta1.query.serviceGetTx(transactionHash);
   }
@@ -50,6 +57,11 @@ export class ChainApiClient {
     return MsgUpdateSidDocumentResponse.decode(TxMsgData.decode(decoded).msgResponses[0].value);
   }
 
+  async LastValidHeight(): Promise<any> {
+    return this.client.CosmosTxV1Beta1.query.ls;
+  }
+
+  // account
   async AddAccountAuth(did: string, accountAuth: AccountAuth): Promise<any> {
     const account = await this.signer.getAccounts();
 
@@ -219,6 +231,44 @@ export class ChainApiClient {
         creator: accounts[0].address,
         accountId: accountId,
         did: did,
+      },
+    });
+    return txResult;
+  }
+
+  // model
+  async UpdatePermission(request: UpdatePermissionProposal): Promise<any> {
+    const account = await this.signer.getAccounts();
+    const txResult = await this.client.SaonetworkSaoDid.tx.sendMsgUpdataPermission({
+      value: {
+        creator: account[0].address,
+        proposal: request.Proposal,
+        jwsSignature: request.JwsSignature,
+      },
+    });
+    return txResult;
+  }
+
+  // order
+  async Store(request: ClientOrderProposal): Promise<any> {
+    const account = await this.signer.getAccounts();
+    const txResult = await this.client.SaonetworkSaoDid.tx.sendMsgStore({
+      value: {
+        creator: account[0].address,
+        proposal: request.Proposal,
+        jwsSignature: request.JwsSignature,
+      },
+    });
+    return txResult;
+  }
+
+  async Renew(request: OrderRenewProposal): Promise<any> {
+    const account = await this.signer.getAccounts();
+    const txResult = await this.client.SaonetworkSaoDid.tx.sendMsgRenew({
+      value: {
+        creator: account[0].address,
+        proposal: request.Proposal,
+        jwsSignature: request.JwsSignature,
       },
     });
     return txResult;
