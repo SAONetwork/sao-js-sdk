@@ -176,11 +176,10 @@ export class ModelManager {
       JwsSignature: clientProposal.signatures[0],
     };
 
-    const orderId = await provider.store(clientOrderProposal);
+    // const orderId = await provider.store(clientOrderProposal);
+    // console.log("orderId:",orderId)
 
-    console.log("orderId:",orderId)
-
-    const model = await provider.create(query, clientOrderProposal, orderId, Array.from(dataBytes));
+    const model = await provider.create(query, clientOrderProposal, 0, Array.from(dataBytes));
 
     return model.dataId;
   }
@@ -258,9 +257,9 @@ export class ModelManager {
       JwsSignature: clientProposal.signatures[0],
     };
 
-    const orderId = await provider.store(clientOrderProposal);
+    // const orderId = await provider.store(clientOrderProposal);
 
-    const model = await provider.update(query, clientOrderProposal, orderId, Array.from(dataBytes));
+    const model = await provider.update(query, clientOrderProposal, 0, Array.from(dataBytes));
     return model.dataId;
   }
 
