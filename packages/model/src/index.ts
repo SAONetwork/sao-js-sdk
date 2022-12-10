@@ -154,9 +154,16 @@ export class ModelProvider {
       console.log(`store succeed, DataId: ${request.Proposal.dataId}`);
 
       const res = await this.chainApiClient.GetTx(txResult.transactionHash);
-      const orderId = await this.chainApiClient.Decode(res.data.tx_response.data);
+      console.log(res);
 
-      return orderId;
+      if (res.status === 200) {
+        const resp = await this.chainApiClient.DecodeOrderId(res.data.tx_response.data);
+        console.log(resp);
+
+        return resp.orderId;
+      } else {
+        throw new Error(`store failed. ${res.statusText}`);
+      }
     }
   }
 
