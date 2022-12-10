@@ -26,6 +26,14 @@ export const GenerateDataId = () => {
   return uuid();
 };
 
+export const IsUUID = (id: string):boolean => {
+  let s = id.match('^[0-9A-F]{8}-[0-9A-F]{4}-[4][0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$');
+  if (s === null) {
+    return false;
+  }
+  return true;
+}
+
 // /**
 //  * @type {Crypto}
 //  */

@@ -23,6 +23,7 @@ import {
 } from "sao-chain-client/dist/saonetwork.sao.sao";
 import { CalculateCid, GenerateDataId, stringToUint8Array } from "@sao-js-sdk/common";
 import { ModelProvider } from ".";
+import _m0 from "protobufjs/minimal";
 
 const defaultModelConfig: ModelConfig = {
   duration: 365 * 60 * 60 * 24,
@@ -34,7 +35,6 @@ export class ModelManager {
   private defaultModelProvider: ModelProvider;
   private modelProviders: Record<string, ModelProvider>;
   private sidManager: SidManager;
-  private chainApiClient: ChainApiClient;
 
   constructor(config: ModelProviderConfig, sidManager: SidManager) {
     const nodeApiClient = GetNodeApiClient({
@@ -85,9 +85,10 @@ export class ModelManager {
     this.modelProviders[config.ownerDid] = provider;
   }
 
-  async buildQueryRequest(proposal: QueryProposal) {
-    const lastValidHeight = 100;
-    const peerInfo = "";
+  async buildQueryRequest(provider: ModelProvider, proposal: QueryProposal) {
+    const lastHeight: number = await provider.getLatestHeight();
+    const lastValidHeight: number = 200 + lastHeight;
+    const peerInfo: string = await provider.getPeerInfo();
 
     proposal.lastValidHeight = lastValidHeight;
     proposal.gateway = peerInfo;
@@ -163,7 +164,7 @@ export class ModelManager {
       throw new Error("invalid provider");
     }
 
-    const query = await this.buildQueryRequest({
+    const query = await this.buildQueryRequest(provider, {
       owner: proposal.owner,
       keyword: proposal.dataId,
       groupId: def.groupId || provider.getGroupId(),
@@ -195,16 +196,19 @@ export class ModelManager {
     }
 
     let keyword = def.dataId;
+    let type_ = 1;
     if (keyword === undefined) {
       keyword = def.alias;
+      type_ = 2;
       if (keyword === undefined) {
         throw new Error("Neither dataId nor alias is specified.");
       }
     }
 
-    const query = await this.buildQueryRequest({
+    const query = await this.buildQueryRequest(provider, {
       owner: ownerDid || provider.getOwnerSid(),
       keyword,
+      type_,
       groupId: def.groupId || provider.getGroupId(),
       lastValidHeight: 0,
       gateway: "",
@@ -263,15 +267,16 @@ export class ModelManager {
     return model.dataId;
   }
 
-  async loadModel<T>(keyword: string, ownerDid?: string, groupId?: string): Promise<T> {
+  async loadModel<T>(keyword: string, type_?: number, ownerDid?: string, groupId?: string): Promise<T> {
     let provider = this.defaultModelProvider;
     if (ownerDid !== undefined) {
       provider = this.getModelProvider(ownerDid);
     }
 
-    const query = await this.buildQueryRequest({
+    const query = await this.buildQueryRequest(provider, {
       owner: ownerDid || provider.getOwnerSid(),
       keyword,
+      type_: type_ || 1,
       groupId: groupId || provider.getGroupId(),
       lastValidHeight: 0,
       gateway: "",
@@ -284,15 +289,22 @@ export class ModelManager {
     return model.cast();
   }
 
-  async loadModelByCommitId<T>(keyword: string, commitId: string, ownerDid?: string, groupId?: string): Promise<T> {
+  async loadModelByCommitId<T>(
+    keyword: string,
+    commitId: string,
+    type_?: number,
+    ownerDid?: string,
+    groupId?: string
+  ): Promise<T> {
     let provider = this.defaultModelProvider;
     if (ownerDid !== undefined) {
       provider = this.getModelProvider(ownerDid);
     }
 
-    const query = await this.buildQueryRequest({
+    const query = await this.buildQueryRequest(provider, {
       owner: ownerDid || provider.getOwnerSid(),
       keyword,
+      type_: type_ || 1,
       groupId: groupId || provider.getGroupId(),
       commitId,
       lastValidHeight: 0,
@@ -304,15 +316,22 @@ export class ModelManager {
     return model.cast();
   }
 
-  async loadModelByVersion<T>(keyword: string, version: string, ownerDid?: string, groupId?: string): Promise<T> {
+  async loadModelByVersion<T>(
+    keyword: string,
+    version: string,
+    type_?: number,
+    ownerDid?: string,
+    groupId?: string
+  ): Promise<T> {
     let provider = this.defaultModelProvider;
     if (ownerDid !== undefined) {
       provider = this.getModelProvider(ownerDid);
     }
 
-    const query = await this.buildQueryRequest({
+    const query = await this.buildQueryRequest(provider, {
       owner: ownerDid || provider.getOwnerSid(),
       keyword,
+      type_: type_ || 1,
       groupId: groupId || provider.getGroupId(),
       version,
       lastValidHeight: 0,
