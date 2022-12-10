@@ -178,6 +178,8 @@ export class ModelManager {
 
     const orderId = await provider.store(clientOrderProposal);
 
+    console.log("orderId:",orderId)
+
     const model = await provider.create(query, clientOrderProposal, orderId, Array.from(dataBytes));
 
     return model.dataId;

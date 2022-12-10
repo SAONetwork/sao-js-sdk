@@ -13,6 +13,7 @@ import { queryClient as didQueryClient } from "sao-chain-client/dist/saonetwork.
 import { queryClient as modelQueryClient } from "sao-chain-client/dist/saonetwork.sao.model";
 import * as u8a from "uint8arrays";
 import stringify from "fast-json-stable-stringify";
+import { MsgStoreResponse } from "sao-chain-client/dist/saonetwork.sao.sao/types/sao/sao/tx";
 import { MsgUpdateSidDocumentResponse } from "sao-chain-client/dist/saonetwork.sao.did/types/sao/did/tx";
 import { TxMsgData } from "sao-chain-client/dist/cosmos.tx.v1beta1/types/cosmos/base/abci/v1beta1/abci";
 import { JWE } from "did-jwt";
@@ -52,7 +53,12 @@ export class ChainApiClient {
     return this.client.CosmosTxV1Beta1.query.serviceGetTx(transactionHash);
   }
 
-  async Decode(data: string): Promise<any> {
+  async DecodeOrderId(data: string): Promise<any> {
+    const decoded = u8a.fromString(data.toLowerCase(), "base16");
+    return MsgStoreResponse.decode(TxMsgData.decode(decoded).msgResponses[0].value);
+  }
+
+  async DecodeSidDocument(data: string): Promise<any> {
     const decoded = u8a.fromString(data.toLowerCase(), "base16");
     return MsgUpdateSidDocumentResponse.decode(TxMsgData.decode(decoded).msgResponses[0].value);
   }

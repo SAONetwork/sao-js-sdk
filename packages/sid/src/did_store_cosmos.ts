@@ -169,7 +169,7 @@ export class CosmosDidStore implements DidStore {
       const res = await this.chainApiClient.GetTx(txResult.transactionHash);
 
       if (res.status === 200) {
-        const r = await this.chainApiClient.Decode(res.data.tx_response.data);
+        const r = await this.chainApiClient.DecodeSidDocument(res.data.tx_response.data);
 
         return r.docId;
       } else {
