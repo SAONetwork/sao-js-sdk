@@ -106,6 +106,14 @@ export class ModelProvider {
     return proposal.groupId === this.groupId && proposal.owner === this.ownerSid;
   }
 
+  async getLatestHeight(): Promise<number> {
+    return await this.chainApiClient.GetLatestBlockHeight();
+  }
+
+  async getPeerInfo(): Promise<string> {
+    return await this.chainApiClient.GetNodePeerInfo(this.nodeAddress);
+  }
+
   async create(
     query: QueryMetadataProposal,
     clientProposal: ClientOrderProposal,
