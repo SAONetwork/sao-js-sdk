@@ -166,7 +166,7 @@ export class ChainApiClient {
   }
 
   async GetBinding(accountId: string): Promise<any> {
-    return this.didClient.queryDidBingingProof(accountId + ":");
+    return this.didClient.queryDidBindingProof(accountId + ":");
   }
 
   async RemoveBinding(accountId: string): Promise<any> {
