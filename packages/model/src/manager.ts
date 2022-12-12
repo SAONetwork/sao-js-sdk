@@ -8,8 +8,10 @@ import {
   Proposal,
   QueryProposal,
   RenewProposal,
+  TerminateProposal,
   UpdatePermissionProposal,
   OrderRenewProposal,
+  OrderTerminateProposal,
   PermissionProposal,
   ClientOrderProposal,
 } from "@sao-js-sdk/api-client";
@@ -20,6 +22,7 @@ import {
   QueryProposal as SaoQueryProposal,
   RenewProposal as SaoRenewProposal,
   PermissionProposal as SaoPermissionProposal,
+  TerminateProposal as SaoTerminateProposal,
 } from "sao-chain-client/dist/saonetwork.sao.sao";
 import { CalculateCid, GenerateDataId, stringToUint8Array } from "@sao-js-sdk/common";
 import { ModelProvider } from ".";
@@ -421,6 +424,39 @@ export class ModelManager {
     };
 
     await provider.renew(request);
+
+    return;
+  }
+
+  async deleteModel(dataId: string, ownerDid?: string): Promise<string> {
+    let provider = this.defaultModelProvider;
+    if (ownerDid !== undefined) {
+      provider = this.getModelProvider(ownerDid);
+    }
+
+    const proposal: TerminateProposal = {
+      owner: ownerDid || provider.getOwnerSid(),
+      dataId,
+    };
+
+    const sidProvider = await this.sidManager.getSidProvider();
+    if (sidProvider === null) {
+      throw new Error("failed to get sid provider");
+    }
+
+    const terminateProposal = await sidProvider.createJWS({
+      payload: u8a.toString(SaoRenewProposal.encode(SaoTerminateProposal.fromPartial(proposal).finish()), "base64url"),
+    });
+
+    console.log("sig:", terminateProposal.signatures[0]);
+    console.log("payload:", stringify(proposal));
+
+    const request: OrderTerminateProposal = {
+      Proposal: proposal,
+      JwsSignature: terminateProposal.signatures[0],
+    };
+
+    await provider.terminate(request);
 
     return;
   }

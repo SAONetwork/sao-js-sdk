@@ -11,6 +11,7 @@ import {
   Proposal,
   UpdatePermissionProposal,
   OrderRenewProposal,
+  OrderTerminateProposal,
 } from "@sao-js-sdk/api-client";
 
 export class Model {
@@ -211,6 +212,17 @@ export class ModelProvider {
       throw new Error(`renew failed, DataIds: ${request.Proposal.data}`);
     } else {
       console.log(`renew succeed, DataIds: ${request.Proposal.data}`);
+      return;
+    }
+  }
+
+  async terminate(request: OrderTerminateProposal): Promise<void> {
+    const txResult = await this.chainApiClient.Terminate(request);
+    if (txResult.code != 0) {
+      console.log(`terminate failed. tx=${txResult.transactionHash} code=${txResult.code}`);
+      throw new Error(`terminate failed, DataIds: ${request.Proposal.dataId}`);
+    } else {
+      console.log(`terminate succeed, DataIds: ${request.Proposal.dataId}`);
       return;
     }
   }

@@ -23,7 +23,8 @@
     "@sao-js-sdk/common": "^0.0.0",
     "axios": "1.2.0",
     "did-jwt": "7.0.0",
-    "sao-chain-client": "0.0.1"
+    "sao-chain-client": "^0.0.1",
+    "v8-to-istanbul": "^9.0.1"
   },
   "jest": {
     "moduleDirectories": [
