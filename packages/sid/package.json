@@ -45,6 +45,7 @@
     "fast-json-stable-stringify": "^2.1.0",
     "key-did-provider-ed25519": "^2.0.0",
     "key-did-resolver": "^2.0.0",
+    "lru-cache": "^7.14.1",
     "uint8arrays": "^3.0.0"
   },
   "repository": {
