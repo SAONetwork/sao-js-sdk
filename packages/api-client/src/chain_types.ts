@@ -29,7 +29,7 @@ export type QueryProposal = {
   owner: string;
   keyword: string;
   groupId?: string;
-  type_?: number | undefined;
+  keywordType?: number | undefined;
   lastValidHeight: number;
   gateway: string;
   commitId?: string | undefined;

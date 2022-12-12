@@ -196,10 +196,10 @@ export class ModelManager {
     }
 
     let keyword = def.dataId;
-    let type_ = 1;
+    let keywordType = 1;
     if (keyword === undefined) {
       keyword = def.alias;
-      type_ = 2;
+      keywordType = 2;
       if (keyword === undefined) {
         throw new Error("Neither dataId nor alias is specified.");
       }
@@ -208,7 +208,7 @@ export class ModelManager {
     const query = await this.buildQueryRequest(provider, {
       owner: ownerDid || provider.getOwnerSid(),
       keyword,
-      type_,
+      keywordType,
       groupId: def.groupId || provider.getGroupId(),
       lastValidHeight: 0,
       gateway: "",
@@ -267,7 +267,7 @@ export class ModelManager {
     return model.dataId;
   }
 
-  async loadModel<T>(keyword: string, type_?: number, ownerDid?: string, groupId?: string): Promise<T> {
+  async loadModel<T>(keyword: string, keywordType?: number, ownerDid?: string, groupId?: string): Promise<T> {
     let provider = this.defaultModelProvider;
     if (ownerDid !== undefined) {
       provider = this.getModelProvider(ownerDid);
@@ -276,7 +276,7 @@ export class ModelManager {
     const query = await this.buildQueryRequest(provider, {
       owner: ownerDid || provider.getOwnerSid(),
       keyword,
-      type_: type_ || 1,
+      keywordType: keywordType || 1,
       groupId: groupId || provider.getGroupId(),
       lastValidHeight: 0,
       gateway: "",
@@ -292,7 +292,7 @@ export class ModelManager {
   async loadModelByCommitId<T>(
     keyword: string,
     commitId: string,
-    type_?: number,
+    keywordType?: number,
     ownerDid?: string,
     groupId?: string
   ): Promise<T> {
@@ -304,7 +304,7 @@ export class ModelManager {
     const query = await this.buildQueryRequest(provider, {
       owner: ownerDid || provider.getOwnerSid(),
       keyword,
-      type_: type_ || 1,
+      keywordType: keywordType || 1,
       groupId: groupId || provider.getGroupId(),
       commitId,
       lastValidHeight: 0,
@@ -319,7 +319,7 @@ export class ModelManager {
   async loadModelByVersion<T>(
     keyword: string,
     version: string,
-    type_?: number,
+    keywordType?: number,
     ownerDid?: string,
     groupId?: string
   ): Promise<T> {
@@ -331,7 +331,7 @@ export class ModelManager {
     const query = await this.buildQueryRequest(provider, {
       owner: ownerDid || provider.getOwnerSid(),
       keyword,
-      type_: type_ || 1,
+      keywordType: keywordType || 1,
       groupId: groupId || provider.getGroupId(),
       version,
       lastValidHeight: 0,
