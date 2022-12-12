@@ -3,6 +3,7 @@ import {
   ChainApiClientConfig,
   ClientOrderProposal,
   OrderRenewProposal,
+  OrderTerminateProposal,
   UpdatePermissionProposal,
 } from "./chain_types";
 import { BindingProof, BindingProofV1 } from "@sao-js-sdk/common";
@@ -276,6 +277,18 @@ export class ChainApiClient {
   async Renew(request: OrderRenewProposal): Promise<any> {
     const account = await this.signer.getAccounts();
     const txResult = await this.client.SaonetworkSaoSao.tx.sendMsgRenew({
+      value: {
+        creator: account[0].address,
+        proposal: request.Proposal,
+        jwsSignature: request.JwsSignature,
+      },
+    });
+    return txResult;
+  }
+
+  async Terminate(request: OrderTerminateProposal): Promise<any> {
+    const account = await this.signer.getAccounts();
+    const txResult = await this.client.SaonetworkSaoSao.tx.sendMsgTerminate({
       value: {
         creator: account[0].address,
         proposal: request.Proposal,

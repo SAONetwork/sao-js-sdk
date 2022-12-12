@@ -68,6 +68,11 @@ export type RenewProposal = {
   data: string[];
 };
 
+export type TerminateProposal = {
+  owner: string;
+  dataId: string;
+};
+
 export type QueryMetadataProposal = {
   Proposal: QueryProposal;
   JwsSignature: JWSSignature;
@@ -85,5 +90,10 @@ export type UpdatePermissionProposal = {
 
 export type OrderRenewProposal = {
   Proposal: RenewProposal;
+  JwsSignature: JWSSignature;
+};
+
+export type OrderTerminateProposal = {
+  Proposal: TerminateProposal;
   JwsSignature: JWSSignature;
 };
