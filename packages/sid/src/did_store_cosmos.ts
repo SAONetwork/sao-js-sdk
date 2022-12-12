@@ -7,13 +7,13 @@ import { BindingProof } from "@sao-js-sdk/common";
 
 const DefaultLruOptions = {
   max: 20,
-  ttl: 10 * 60 * 1000  //10 minites
-}
-const BindingCacheKey = "binding"
+  ttl: 10 * 60 * 1000, //10 minites
+};
+const BindingCacheKey = "binding";
 
 export class CosmosDidStore implements DidStore {
   private chainApiClient: ChainApiClient;
-  private cache: Record<string,LRUCache<string, any>>;
+  private cache: Record<string, LRUCache<string, any>>;
 
   constructor(signer: OfflineSigner, apiURL?: string, rpcURL?: string, prefix?: string) {
     this.chainApiClient = new ChainApiClient({
@@ -37,7 +37,7 @@ export class CosmosDidStore implements DidStore {
       throw new Error(`bind account ${proof.accountId} -> did ${proof.did} failed.`);
     } else {
       console.log(`bind account ${proof.accountId} -> did ${proof.did} succeed. tx=${txResult.transactionHash}`);
-      this.getCache(BindingCacheKey).set(proof.accountId,proof.did)
+      this.getCache(BindingCacheKey).set(proof.accountId, proof.did);
       return;
     }
   }
@@ -49,7 +49,7 @@ export class CosmosDidStore implements DidStore {
       throw new Error(`bind account ${proof.accountId} -> did ${proof.did} failed.`);
     } else {
       console.log(`bind account ${proof.accountId} -> did ${proof.did} succeed. tx=${txResult.transactionHash}`);
-      this.getCache(BindingCacheKey).set(proof.accountId,proof.did)
+      this.getCache(BindingCacheKey).set(proof.accountId, proof.did);
       return;
     }
   }
@@ -60,19 +60,18 @@ export class CosmosDidStore implements DidStore {
    * @returns binded did
    */
   async getBinding(accountId: string): Promise<string | null> {
-
-    const did = this.getCache(BindingCacheKey).get(accountId)
+    const did = this.getCache(BindingCacheKey).get(accountId);
 
     if (did) {
-      console.log("get binding from cache: ", accountId," : ", did)
-      return did
+      console.log("get binding from cache: ", accountId, " : ", did);
+      return did;
     }
-    console.log("get binding from remote")
+    console.log("get binding from remote");
 
     try {
       const res = await this.chainApiClient.GetBinding(accountId);
       if (res.status === 200) {
-        this.getCache(BindingCacheKey).set(accountId,res.data?.DidBindingProof?.proof?.did)
+        this.getCache(BindingCacheKey).set(accountId, res.data?.DidBindingProof?.proof?.did);
         return res.data?.DidBindingProof?.proof?.did || null;
       } else {
         throw new Error("failed to query binding for accountid: " + accountId);
@@ -95,7 +94,7 @@ export class CosmosDidStore implements DidStore {
       throw new Error(`unbind account ${accountId} failed.`);
     } else {
       console.log(`unbind account succeed. tx=${txResult.transactionHash}`);
-      this.getCache(BindingCacheKey).delete(accountId)
+      this.getCache(BindingCacheKey).delete(accountId);
       return;
     }
   }
@@ -257,11 +256,11 @@ export class CosmosDidStore implements DidStore {
     }
   }
 
-  getCache(key: string): LRUCache<string,any>{
-    if (this.cache[key]){
+  getCache(key: string): LRUCache<string, any> {
+    if (this.cache[key]) {
       return this.cache[key];
     }
-    this.cache[key] = new LRUCache<string, any>(DefaultLruOptions)
+    this.cache[key] = new LRUCache<string, any>(DefaultLruOptions);
     return this.cache[key];
   }
 }
