@@ -68,13 +68,13 @@ export class ChainApiClient {
   }
 
   async GetLatestBlockHeight(): Promise<number> {
-    const res = this.saoClient.queryLatesthight();
-    return Number(res.latest_block_height);
+    const res = await this.saoClient.queryLatesthight();
+    return Number(res.data.latest_block_height);
   }
 
   async GetLatestBlockTime(): Promise<string> {
-    const res = this.saoClient.queryLatesthight();
-    return res.latest_block_time;
+    const res = await this.saoClient.queryLatesthight();
+    return res.data.latest_block_time;
   }
 
   async GetNodePeerInfo(address: string): Promise<string> {
