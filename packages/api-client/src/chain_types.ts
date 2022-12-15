@@ -1,6 +1,13 @@
 import { JWE } from "did-jwt";
 import { OfflineSigner } from "@cosmjs/proto-signing";
 import { JWSSignature } from "@sao-js-sdk/common";
+import {
+  Proposal,
+  QueryProposal,
+  RenewProposal,
+  PermissionProposal,
+  TerminateProposal,
+} from "sao-chain-client/dist/saonetwork.sao.sao";
 
 export type ChainApiClientConfig = {
   apiURL: string;
@@ -23,54 +30,6 @@ export type Result = {
 export type TxResult = {
   code: number;
   transactionHash: string;
-};
-
-export type QueryProposal = {
-  owner: string;
-  keyword: string;
-  groupId?: string;
-  keywordType?: number | undefined;
-  lastValidHeight: number;
-  gateway: string;
-  commitId?: string | undefined;
-  version?: string | undefined;
-};
-
-export type Proposal = {
-  owner: string;
-  provider: string;
-  groupId: string;
-  duration: number;
-  replica: number;
-  timeout: number;
-  alias: string;
-  dataId: string;
-  commitId: string;
-  tags: string[] | undefined;
-  cid: string;
-  rule: string | undefined;
-  extendInfo: string | undefined;
-  size: number;
-  operation: number;
-};
-
-export type PermissionProposal = {
-  owner: string;
-  dataId: string;
-  readonlyDids?: string[] | undefined;
-  readwriteDids?: string[] | undefined;
-};
-
-export type RenewProposal = {
-  owner: string;
-  duration: number;
-  timeout: number;
-  data: string[];
-};
-
-export type TerminateProposal = {
-  owner: string;
-  dataId: string;
 };
 
 export type QueryMetadataProposal = {
@@ -97,3 +56,11 @@ export type OrderTerminateProposal = {
   Proposal: TerminateProposal;
   JwsSignature: JWSSignature;
 };
+
+export {
+  Proposal,
+  QueryProposal,
+  RenewProposal,
+  PermissionProposal,
+  TerminateProposal,
+} from "sao-chain-client/dist/saonetwork.sao.sao";

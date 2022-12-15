@@ -12,6 +12,7 @@ import { Api } from "sao-chain-client/dist/saonetwork.sao.did/rest";
 import { Client } from "sao-chain-client";
 import { queryClient as didQueryClient } from "sao-chain-client/dist/saonetwork.sao.did";
 import { queryClient as nodeQueryClient } from "sao-chain-client/dist/saonetwork.sao.node";
+import { queryClient as saoQueryClient } from "sao-chain-client/dist/saonetwork.sao.sao";
 import * as u8a from "uint8arrays";
 import stringify from "fast-json-stable-stringify";
 import { MsgStoreResponse } from "sao-chain-client/dist/saonetwork.sao.sao/types/sao/sao/tx";
@@ -24,6 +25,7 @@ export class ChainApiClient {
   private client: InstanceType<typeof Client>;
   private didClient: Api<unknown>;
   private nodeClient: Api<unknown>;
+  private saoClient: Api<unknown>;
 
   constructor(config: ChainApiClientConfig) {
     const api = config.apiURL || process.env.COSMOS_API_URL || "http://localhost:1317";
@@ -47,6 +49,7 @@ export class ChainApiClient {
     this.signer = config.signer;
     this.didClient = didQueryClient({ addr: api });
     this.nodeClient = nodeQueryClient({ addr: api });
+    this.saoClient = saoQueryClient({ addr: api });
   }
 
   // common
@@ -65,8 +68,13 @@ export class ChainApiClient {
   }
 
   async GetLatestBlockHeight(): Promise<number> {
-    const res = await this.client.CosmosBaseTendermintV1Beta1.query.serviceGetLatestBlock();
-    return Number(res.data.block.header.height);
+    const res = this.saoClient.queryLatesthight();
+    return Number(res.latest_block_height);
+  }
+
+  async GetLatestBlockTime(): Promise<string> {
+    const res = this.saoClient.queryLatesthight();
+    return res.latest_block_time;
   }
 
   async GetNodePeerInfo(address: string): Promise<string> {
