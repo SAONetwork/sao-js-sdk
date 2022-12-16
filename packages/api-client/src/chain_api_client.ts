@@ -8,17 +8,19 @@ import {
 } from "./chain_types";
 import { BindingProof, BindingProofV1 } from "@sao-js-sdk/common";
 import { OfflineSigner } from "@cosmjs/proto-signing";
-import { Api } from "sao-chain-client/dist/saonetwork.sao.did/rest";
-import { Client } from "sao-chain-client";
-import { queryClient as didQueryClient } from "sao-chain-client/dist/saonetwork.sao.did";
-import { queryClient as nodeQueryClient } from "sao-chain-client/dist/saonetwork.sao.node";
-import { queryClient as saoQueryClient } from "sao-chain-client/dist/saonetwork.sao.sao";
+import {
+  Api,
+  Client,
+  MsgStoreResponse,
+  MsgUpdateSidDocumentResponse,
+  didQueryClient,
+  nodeQueryClient,
+  saoQueryClient,
+  TxMsgData
+} from "sao-chain-client";
 import * as u8a from "uint8arrays";
 import stringify from "fast-json-stable-stringify";
-import { MsgStoreResponse } from "sao-chain-client/dist/saonetwork.sao.sao/types/sao/sao/tx";
-import { MsgUpdateSidDocumentResponse } from "sao-chain-client/dist/saonetwork.sao.did/types/sao/did/tx";
-import { TxMsgData } from "sao-chain-client/dist/cosmos.tx.v1beta1/types/cosmos/base/abci/v1beta1/abci";
-import { JWE } from "did-jwt";
+import {JWE} from "did-jwt";
 
 export class ChainApiClient {
   private signer: OfflineSigner;
