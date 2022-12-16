@@ -7,7 +7,7 @@ import {
   RenewProposal,
   PermissionProposal,
   TerminateProposal,
-} from "sao-chain-client/dist/saonetwork.sao.sao";
+} from "sao-chain-client";
 
 export type ChainApiClientConfig = {
   apiURL: string;
@@ -63,4 +63,4 @@ export {
   RenewProposal,
   PermissionProposal,
   TerminateProposal,
-} from "sao-chain-client/dist/saonetwork.sao.sao";
+} from "sao-chain-client";
