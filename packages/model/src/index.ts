@@ -8,7 +8,7 @@ import {
   SaoNodeAPISchema,
   ClientOrderProposal,
   QueryMetadataProposal,
-  Proposal,
+  SaoTypes,
   UpdatePermissionProposal,
   OrderRenewProposal,
   OrderTerminateProposal,
@@ -103,7 +103,7 @@ export class ModelProvider {
     return this.nodeAddress;
   }
 
-  validate(proposal: Proposal): boolean {
+  validate(proposal: SaoTypes.Proposal): boolean {
     return proposal.groupId === this.groupId && proposal.owner === this.ownerSid;
   }
 

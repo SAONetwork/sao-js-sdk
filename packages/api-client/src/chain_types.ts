@@ -1,13 +1,7 @@
 import { JWE } from "did-jwt";
 import { OfflineSigner } from "@cosmjs/proto-signing";
 import { JWSSignature } from "@sao-js-sdk/common";
-import {
-  Proposal,
-  QueryProposal,
-  RenewProposal,
-  PermissionProposal,
-  TerminateProposal,
-} from "sao-chain-client";
+import { SaoTypes } from "sao-chain-client";
 
 export type ChainApiClientConfig = {
   apiURL: string;
@@ -33,34 +27,28 @@ export type TxResult = {
 };
 
 export type QueryMetadataProposal = {
-  Proposal: QueryProposal;
+  Proposal: SaoTypes.QueryProposal;
   JwsSignature: JWSSignature;
 };
 
 export type ClientOrderProposal = {
-  Proposal: Proposal;
+  Proposal: SaoTypes.Proposal;
   JwsSignature: JWSSignature;
 };
 
 export type UpdatePermissionProposal = {
-  Proposal: PermissionProposal;
+  Proposal: SaoTypes.PermissionProposal;
   JwsSignature: JWSSignature;
 };
 
 export type OrderRenewProposal = {
-  Proposal: RenewProposal;
+  Proposal: SaoTypes.RenewProposal;
   JwsSignature: JWSSignature;
 };
 
 export type OrderTerminateProposal = {
-  Proposal: TerminateProposal;
+  Proposal: SaoTypes.TerminateProposal;
   JwsSignature: JWSSignature;
 };
 
-export {
-  Proposal,
-  QueryProposal,
-  RenewProposal,
-  PermissionProposal,
-  TerminateProposal,
-} from "sao-chain-client";
+export { SaoTypes } from "sao-chain-client";

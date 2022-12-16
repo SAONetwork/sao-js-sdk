@@ -11,11 +11,11 @@ import { OfflineSigner } from "@cosmjs/proto-signing";
 import {
   Api,
   Client,
-  MsgStoreResponse,
-  MsgUpdateSidDocumentResponse,
-  didQueryClient,
-  nodeQueryClient,
-  saoQueryClient,
+  SaoTxTypes,
+  DidTxTypes,
+  DidTypes,
+  NodeTypes,
+  SaoTypes,
   TxMsgData
 } from "sao-chain-client";
 import * as u8a from "uint8arrays";
@@ -49,9 +49,9 @@ export class ChainApiClient {
     );
 
     this.signer = config.signer;
-    this.didClient = didQueryClient({ addr: api });
-    this.nodeClient = nodeQueryClient({ addr: api });
-    this.saoClient = saoQueryClient({ addr: api });
+    this.didClient = DidTypes.queryClient({ addr: api });
+    this.nodeClient = NodeTypes.queryClient({ addr: api });
+    this.saoClient = SaoTypes.queryClient({ addr: api });
   }
 
   // common
@@ -61,12 +61,12 @@ export class ChainApiClient {
 
   async DecodeOrderId(data: string): Promise<any> {
     const decoded = u8a.fromString(data.toLowerCase(), "base16");
-    return MsgStoreResponse.decode(TxMsgData.decode(decoded).msgResponses[0].value);
+    return SaoTxTypes.MsgStoreResponse.decode(TxMsgData.decode(decoded).msgResponses[0].value);
   }
 
   async DecodeSidDocument(data: string): Promise<any> {
     const decoded = u8a.fromString(data.toLowerCase(), "base16");
-    return MsgUpdateSidDocumentResponse.decode(TxMsgData.decode(decoded).msgResponses[0].value);
+    return DidTxTypes.MsgUpdateSidDocumentResponse.decode(TxMsgData.decode(decoded).msgResponses[0].value);
   }
 
   async GetLatestBlockHeight(): Promise<number> {
