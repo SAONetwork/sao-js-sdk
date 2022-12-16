@@ -5,11 +5,7 @@ import {
   GetNodeApiClient,
   ChainApiClient,
   QueryMetadataProposal,
-  Proposal,
-  QueryProposal,
-  RenewProposal,
-  PermissionProposal,
-  TerminateProposal,
+  SaoTypes,
   UpdatePermissionProposal,
   OrderRenewProposal,
   OrderTerminateProposal,
@@ -80,7 +76,7 @@ export class ModelManager {
     this.modelProviders[config.ownerDid] = provider;
   }
 
-  async buildQueryRequest(provider: ModelProvider, proposal: QueryProposal) {
+  async buildQueryRequest(provider: ModelProvider, proposal: SaoTypes.QueryProposal) {
     const lastHeight: number = await provider.getLatestHeight();
     const lastValidHeight: number = 200 + lastHeight;
     const peerInfo: string = await provider.getPeerInfo();
@@ -94,13 +90,13 @@ export class ModelManager {
     }
 
     const clientProposal = await sidProvider.createJWS({
-      payload: u8a.toString(QueryProposal.encode(QueryProposal.fromPartial(proposal)).finish(), "base64url"),
+      payload: u8a.toString(SaoTypes.QueryProposal.encode(proposal).finish(), "base64url"),
     });
 
     console.log("sig:", clientProposal.signatures[0]);
     console.log(
       "payload:",
-      u8a.toString(QueryProposal.encode(QueryProposal.fromPartial(proposal)).finish(), "base64url")
+      u8a.toString(SaoTypes.QueryProposal.encode(proposal).finish(), "base64url")
     );
 
     const queryMetadataProposal: QueryMetadataProposal = {
@@ -125,7 +121,7 @@ export class ModelManager {
 
     const dataId = GenerateDataId();
     const cid = await CalculateCid(dataBytes);
-    const proposal: Proposal = {
+    const proposal: SaoTypes.Proposal = {
       owner: ownerDid || provider.getOwnerSid(),
       provider: provider.getNodeAddress(),
       groupId: provider.getGroupId(),
@@ -149,7 +145,7 @@ export class ModelManager {
     }
 
     const clientProposal = await sidProvider.createJWS({
-      payload: u8a.toString(Proposal.encode(Proposal.fromPartial(proposal)).finish(), "base64url"),
+      payload: u8a.toString(SaoTypes.Proposal.encode(proposal).finish(), "base64url"),
     });
 
     console.log("sig:", clientProposal.signatures[0]);
@@ -221,7 +217,7 @@ export class ModelManager {
     const targetDataBytes = stringToUint8Array(stringify(target));
     const cid = await CalculateCid(targetDataBytes);
 
-    const proposal: Proposal = {
+    const proposal: SaoTypes.Proposal = {
       owner: ownerDid || provider.getOwnerSid(),
       provider: provider.getNodeAddress(),
       groupId: provider.getGroupId(),
@@ -244,7 +240,7 @@ export class ModelManager {
       throw new Error("failed to get sid provider");
     }
     const clientProposal = await sidProvider.createJWS({
-      payload: u8a.toString(Proposal.encode(Proposal.fromPartial(proposal)).finish(), "base64url"),
+      payload: u8a.toString(SaoTypes.Proposal.encode(proposal).finish(), "base64url"),
     });
 
     if (!provider.validate(proposal)) {
@@ -349,7 +345,7 @@ export class ModelManager {
       provider = this.getModelProvider(ownerDid);
     }
 
-    const proposal: PermissionProposal = {
+    const proposal: SaoTypes.PermissionProposal = {
       owner: ownerDid || provider.getOwnerSid(),
       dataId,
       readonlyDids,
@@ -362,7 +358,7 @@ export class ModelManager {
     }
 
     const permissionProposal = await sidProvider.createJWS({
-      payload: u8a.toString(PermissionProposal.encode(PermissionProposal.fromPartial(proposal)).finish(), "base64url"),
+      payload: u8a.toString(SaoTypes.PermissionProposal.encode(proposal).finish(), "base64url"),
     });
 
     console.log("sig:", permissionProposal.signatures[0]);
@@ -388,7 +384,7 @@ export class ModelManager {
       provider = this.getModelProvider(ownerDid);
     }
 
-    const proposal: RenewProposal = {
+    const proposal: SaoTypes.RenewProposal = {
       owner: ownerDid || provider.getOwnerSid(),
       duration: modelConfig.duration,
       timeout: modelConfig.timeout,
@@ -401,7 +397,7 @@ export class ModelManager {
     }
 
     const renewProposal = await sidProvider.createJWS({
-      payload: u8a.toString(RenewProposal.encode(RenewProposal.fromPartial(proposal).finish()), "base64url"),
+      payload: u8a.toString(SaoTypes.RenewProposal.encode(proposal).finish(), "base64url"),
     });
 
     console.log("sig:", renewProposal.signatures[0]);
@@ -423,7 +419,7 @@ export class ModelManager {
       provider = this.getModelProvider(ownerDid);
     }
 
-    const proposal: TerminateProposal = {
+    const proposal: SaoTypes.TerminateProposal = {
       owner: ownerDid || provider.getOwnerSid(),
       dataId,
     };
@@ -434,7 +430,7 @@ export class ModelManager {
     }
 
     const terminateProposal = await sidProvider.createJWS({
-      payload: u8a.toString(TerminateProposal.encode(TerminateProposal.fromPartial(proposal)).finish(), "base64url"),
+      payload: u8a.toString(SaoTypes.TerminateProposal.encode(proposal).finish(), "base64url"),
     });
 
     console.log("sig:", terminateProposal.signatures[0]);
