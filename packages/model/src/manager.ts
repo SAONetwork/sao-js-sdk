@@ -101,12 +101,6 @@ export class ModelManager {
       payload: u8a.toString(SaoQueryProposal.encode(SaoQueryProposal.fromPartial(proposal)).finish(), "base64url"),
     });
 
-    console.log("sig:", clientProposal.signatures[0]);
-    console.log(
-      "payload:",
-      u8a.toString(SaoQueryProposal.encode(SaoQueryProposal.fromPartial(proposal)).finish(), "base64url")
-    );
-
     const queryMetadataProposal: QueryMetadataProposal = {
       Proposal: proposal,
       JwsSignature: clientProposal.signatures[0],
@@ -123,8 +117,6 @@ export class ModelManager {
     if (ownerDid !== undefined) {
       provider = this.getModelProvider(ownerDid);
     }
-    console.log("NodeAddress: ", provider.getNodeAddress());
-
     const dataBytes = stringToUint8Array(stringify(def.data));
 
     const dataId = GenerateDataId();
@@ -155,9 +147,6 @@ export class ModelManager {
     const clientProposal = await sidProvider.createJWS({
       payload: u8a.toString(SaoProposal.encode(SaoProposal.fromPartial(proposal)).finish(), "base64url"),
     });
-
-    console.log("sig:", clientProposal.signatures[0]);
-    console.log("payload:", stringify(proposal));
 
     if (!provider.validate(proposal)) {
       throw new Error("invalid provider");
@@ -214,8 +203,6 @@ export class ModelManager {
     const origin = originModel.cast();
 
     const patch = jsonpatch.compare(origin, def.data);
-    console.log("Patch: ", stringify(patch));
-
     const target = jsonpatch.applyPatch(origin, patch).newDocument;
     const dataBytes = stringToUint8Array(stringify(patch));
     const targetDataBytes = stringToUint8Array(stringify(target));
@@ -235,7 +222,7 @@ export class ModelManager {
       cid,
       rule: originModel.rule,
       extendInfo: originModel.extendInfo,
-      size: dataBytes.length,
+      size: targetDataBytes.length,
       operation: modelConfig.operation,
     };
 
@@ -277,9 +264,6 @@ export class ModelManager {
     });
 
     const model = await provider.load(query);
-
-    console.log(String(model.content));
-
     return model.cast();
   }
 
@@ -353,9 +337,6 @@ export class ModelManager {
       ),
     });
 
-    console.log("sig:", permissionProposal.signatures[0]);
-    console.log("payload:", stringify(proposal));
-
     const request: UpdatePermissionProposal = {
       Proposal: proposal,
       JwsSignature: permissionProposal.signatures[0],
@@ -391,9 +372,6 @@ export class ModelManager {
     const renewProposal = await sidProvider.createJWS({
       payload: u8a.toString(SaoRenewProposal.encode(SaoRenewProposal.fromPartial(proposal).finish()), "base64url"),
     });
-
-    console.log("sig:", renewProposal.signatures[0]);
-    console.log("payload:", stringify(proposal));
 
     const request: OrderRenewProposal = {
       Proposal: proposal,
