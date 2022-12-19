@@ -90,13 +90,13 @@ export class ModelManager {
     }
 
     const clientProposal = await sidProvider.createJWS({
-      payload: u8a.toString(SaoTypes.QueryProposal.encode(proposal).finish(), "base64url"),
+      payload: u8a.toString(SaoTypes.QueryProposal.encode(SaoTypes.QueryProposal.fromPartial(proposal)).finish(), "base64url"),
     });
 
     console.log("sig:", clientProposal.signatures[0]);
     console.log(
       "payload:",
-      u8a.toString(SaoTypes.QueryProposal.encode(proposal).finish(), "base64url")
+      u8a.toString(SaoTypes.QueryProposal.encode(SaoTypes.QueryProposal.fromPartial(proposal)).finish(), "base64url")
     );
 
     const queryMetadataProposal: QueryMetadataProposal = {
@@ -145,7 +145,7 @@ export class ModelManager {
     }
 
     const clientProposal = await sidProvider.createJWS({
-      payload: u8a.toString(SaoTypes.Proposal.encode(proposal).finish(), "base64url"),
+      payload: u8a.toString(SaoTypes.Proposal.encode(SaoTypes.Proposal.fromPartial(proposal)).finish(), "base64url"),
     });
 
     console.log("sig:", clientProposal.signatures[0]);
@@ -240,7 +240,7 @@ export class ModelManager {
       throw new Error("failed to get sid provider");
     }
     const clientProposal = await sidProvider.createJWS({
-      payload: u8a.toString(SaoTypes.Proposal.encode(proposal).finish(), "base64url"),
+      payload: u8a.toString(SaoTypes.Proposal.encode(SaoTypes.Proposal.fromPartial(proposal)).finish(), "base64url"),
     });
 
     if (!provider.validate(proposal)) {
@@ -358,7 +358,7 @@ export class ModelManager {
     }
 
     const permissionProposal = await sidProvider.createJWS({
-      payload: u8a.toString(SaoTypes.PermissionProposal.encode(proposal).finish(), "base64url"),
+      payload: u8a.toString(SaoTypes.PermissionProposal.encode(SaoTypes.PermissionProposal.fromPartial(proposal)).finish(), "base64url"),
     });
 
     console.log("sig:", permissionProposal.signatures[0]);
@@ -397,7 +397,7 @@ export class ModelManager {
     }
 
     const renewProposal = await sidProvider.createJWS({
-      payload: u8a.toString(SaoTypes.RenewProposal.encode(proposal).finish(), "base64url"),
+      payload: u8a.toString(SaoTypes.RenewProposal.encode(SaoTypes.RenewProposal.fromPartial(proposal)).finish(), "base64url"),
     });
 
     console.log("sig:", renewProposal.signatures[0]);
@@ -430,7 +430,7 @@ export class ModelManager {
     }
 
     const terminateProposal = await sidProvider.createJWS({
-      payload: u8a.toString(SaoTypes.TerminateProposal.encode(proposal).finish(), "base64url"),
+      payload: u8a.toString(SaoTypes.TerminateProposal.encode(SaoTypes.TerminateProposal.fromPartial(proposal)).finish(), "base64url"),
     });
 
     console.log("sig:", terminateProposal.signatures[0]);
