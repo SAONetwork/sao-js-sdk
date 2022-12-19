@@ -1,7 +1,9 @@
 import { AccountId } from "caip";
 import { AccountProvider } from "./account_provider";
-import { BindingProof, getBindMessage } from "@sao-js-sdk/common";
+import { DidTxTypes } from "sao-chain-client";
 import { Keplr } from "@keplr-wallet/types";
+
+import { getBindMessage } from "./utils";
 
 const CHAIN_ID = "sao";
 
@@ -58,7 +60,7 @@ export class SaoKeplrAccountProvider implements AccountProvider {
     return resp.signature;
   }
 
-  async generateBindingProof(did: string, timestamp: number): Promise<BindingProof> {
+  async generateBindingProof(did: string, timestamp: number): Promise<DidTxTypes.BindingProof> {
     const msg = getBindMessage(did, timestamp);
     const signed = await this.sign(msg);
     const accountId = await this.accountId();

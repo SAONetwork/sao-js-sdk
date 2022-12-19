@@ -1,5 +1,5 @@
 import { DidStore, Binding, AccountAuth  } from "../src/did_store";
-import { Account, BindingProof } from "@sao-js-sdk/sid";
+import { DidTxTypes } from "sao-chain-client";
 
 function guid() {
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
@@ -14,7 +14,7 @@ export class MockDidStore implements DidStore {
     authMap: Record<string, Record<string, AccountAuth>> = {}
     docMap: Record<string, Record<string, any>> = {}
 
-    async addBinding(accountId: string, did: string, proof: BindingProof): Promise<void> {
+    async addBinding(accountId: string, did: string, proof: DidTxTypes.BindingProof): Promise<void> {
         return new Promise(r => {
             this.bindingMap[accountId] = { did, proof };
             r();

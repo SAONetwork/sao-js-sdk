@@ -1,12 +1,12 @@
 import {
   AccountAuth,
+  BindingProofV1,
   ChainApiClientConfig,
   ClientOrderProposal,
   OrderRenewProposal,
   OrderTerminateProposal,
   UpdatePermissionProposal,
 } from "./chain_types";
-import { BindingProof, BindingProofV1 } from "@sao-js-sdk/common";
 import { OfflineSigner } from "@cosmjs/proto-signing";
 import {
   Api,
@@ -113,7 +113,7 @@ export class ChainApiClient {
   async Binding(
     rootDocId: string,
     keys: Record<string, string>,
-    proof: BindingProof,
+    proof: DidTxTypes.BindingProof,
     accountAuth: AccountAuth
   ): Promise<any> {
     const account = await this.signer.getAccounts();
@@ -155,7 +155,7 @@ export class ChainApiClient {
     return txResult;
   }
 
-  async AddBinding(proof: BindingProof): Promise<any> {
+  async AddBinding(proof: DidTxTypes.BindingProof): Promise<any> {
     const account = await this.signer.getAccounts();
     const txResult = await this.client.SaonetworkSaoDid.tx.sendMsgAddBinding({
       value: {

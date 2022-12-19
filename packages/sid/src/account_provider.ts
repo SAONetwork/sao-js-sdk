@@ -1,5 +1,5 @@
 import { AccountId } from "caip";
-import { BindingProof } from "@sao-js-sdk/common";
+import { DidTxTypes } from "sao-chain-client";
 
 /**
  * accounts that binds to sid should implement this interface.
@@ -21,5 +21,5 @@ export interface AccountProvider {
    * @param did
    * @param timestamp
    */
-  generateBindingProof(did: string, timestamp: number): Promise<BindingProof>;
+  generateBindingProof(did: string, timestamp: number): Promise<DidTxTypes.BindingProof>;
 }

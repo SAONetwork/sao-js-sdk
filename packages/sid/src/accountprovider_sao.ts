@@ -1,8 +1,9 @@
 import { AccountId } from "caip";
 import { AccountProvider } from "./account_provider";
-import { BindingProof, getBindMessage } from "@sao-js-sdk/common";
+import { DidTxTypes } from "sao-chain-client";
 import { makeSignDoc, OfflineDirectSigner } from "@cosmjs/proto-signing";
 import * as u8a from "uint8arrays";
+import { getBindMessage } from "./utils";
 
 export class SaoAccountProvider implements AccountProvider {
   private address: string;
@@ -52,7 +53,7 @@ export class SaoAccountProvider implements AccountProvider {
     }
   }
 
-  async generateBindingProof(did: string, timestamp: number): Promise<BindingProof> {
+  async generateBindingProof(did: string, timestamp: number): Promise<DidTxTypes.BindingProof> {
     const message = getBindMessage(did, timestamp);
     const signed = await this.sign(message);
     const accountId = await this.accountId();

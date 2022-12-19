@@ -6,7 +6,7 @@ import { DID } from "dids";
 import { Ed25519Provider } from "key-did-provider-ed25519";
 import { getResolver as getKeyResolver } from "key-did-resolver";
 import stringify from "fast-json-stable-stringify";
-import { JWS } from "@sao-js-sdk/common";
+import { JWS } from "./types";
 import { JWE } from "did-jwt";
 import { Hash } from "@sao-js-sdk/common";
 
@@ -90,3 +90,7 @@ export function isSid(did: string): boolean {
 export function getSidIdentifier(did: string): string {
   return did.slice(8);
 }
+
+export const getBindMessage = (did: string, timestamp: number): string => {
+  return `Link this account to your did: ${did}\nTimestamp: ${timestamp.toString(10)}`;
+};

@@ -1,4 +1,4 @@
-import { BindingProof } from "@sao-js-sdk/common";
+import { DidTxTypes } from "sao-chain-client";
 import { JWE } from "did-jwt";
 
 export interface AccountAuth {
@@ -18,12 +18,12 @@ export interface DidStore {
    *
    * @param proof
    */
-  addBinding(proof: BindingProof): Promise<void>;
+  addBinding(proof: DidTxTypes.BindingProof): Promise<void>;
 
   binding(
     rootDocId: string,
     keys: Record<string, string>,
-    proof: BindingProof,
+    proof: DidTxTypes.BindingProof,
     accountAuth: AccountAuth
   ): Promise<void>;
 
