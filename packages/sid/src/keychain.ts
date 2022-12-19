@@ -5,7 +5,7 @@ import { randomBytes } from "@stablelib/random";
 import { JWE, ES256KSigner, Signer, createJWE, x25519Encrypter, x25519Decrypter, decryptJWE, Decrypter } from "did-jwt";
 import { accountSecretToDid, encodeKey, parseJWEKids } from "./utils";
 import { DidStore } from "./did_store";
-import { AccountAuth } from "./did_store";
+import { AccountAuth } from "@sao-js-sdk/api-client";
 import { DID } from "dids";
 import { getResolver } from "key-did-resolver";
 import stringify from "fast-json-stable-stringify";
