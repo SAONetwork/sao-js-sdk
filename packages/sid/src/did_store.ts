@@ -1,11 +1,6 @@
 import { DidTxTypes } from "sao-chain-client";
 import { JWE } from "did-jwt";
-
-export interface AccountAuth {
-  accountDid: string;
-  accountEncryptedSeed: JWE;
-  sidEncryptedAccount: JWE;
-}
+import { AccountAuth } from "@sao-js-sdk/api-client";
 
 // 1. get did by account id
 // 2. set account id -> did
