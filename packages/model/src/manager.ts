@@ -231,7 +231,7 @@ export class ModelManager {
       cid,
       rule: originModel.rule,
       extendInfo: originModel.extendInfo,
-      size: dataBytes.length,
+      size: targetDataBytes.length,
       operation: modelConfig.operation,
     };
 
