@@ -3,7 +3,7 @@ import { OfflineSigner } from "@cosmjs/proto-signing";
 import { JWE } from "did-jwt";
 import LRUCache from "lru-cache";
 import { AccountAuth, ChainApiClient } from "@sao-js-sdk/api-client";
-import { BindingProof } from "@sao-js-sdk/common";
+import { DidTxTypes } from "sao-chain-client";
 
 const DefaultLruOptions = {
   max: 20,
@@ -28,7 +28,7 @@ export class CosmosDidStore implements DidStore {
   async binding(
     rootDocId: string,
     keys: Record<string, string>,
-    proof: BindingProof,
+    proof: DidTxTypes.BindingProof,
     accountAuth: AccountAuth
   ): Promise<void> {
     const txResult = await this.chainApiClient.Binding(rootDocId, keys, proof, accountAuth);
@@ -42,7 +42,7 @@ export class CosmosDidStore implements DidStore {
     }
   }
 
-  async addBinding(proof: BindingProof): Promise<void> {
+  async addBinding(proof: DidTxTypes.BindingProof): Promise<void> {
     const txResult = await this.chainApiClient.AddBinding(proof);
     if (txResult.code != 0) {
       console.log(`bind account failed. tx=${txResult.transactionHash} code=${txResult.code}`);

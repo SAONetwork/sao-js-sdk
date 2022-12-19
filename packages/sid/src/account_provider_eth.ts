@@ -1,7 +1,8 @@
 import { AccountId } from "caip";
 import { AccountProvider } from "./account_provider";
-import { BindingProof, getBindMessage } from "@sao-js-sdk/common";
-import { utf8ToHex } from "./utils";
+import { DidTxTypes } from "sao-chain-client";
+
+import { getBindMessage, utf8ToHex } from "./utils";
 
 export class EthAccountProvider implements AccountProvider {
   private provider: any;
@@ -46,7 +47,7 @@ export class EthAccountProvider implements AccountProvider {
     });
   }
 
-  async generateBindingProof(did: string, timestamp: number): Promise<BindingProof> {
+  async generateBindingProof(did: string, timestamp: number): Promise<DidTxTypes.BindingProof> {
     const message = getBindMessage(did, timestamp);
     const signature = await this.provider.request({
       method: "personal_sign",

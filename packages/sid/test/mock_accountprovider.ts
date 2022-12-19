@@ -1,4 +1,4 @@
-import { BindingProof, Account } from "../src";
+import { DidTxTypes } from "sao-chain-client";
 
 export class MockAccountProvider {
     chain: string
@@ -18,7 +18,7 @@ export class MockAccountProvider {
         return `${this.chain}|${this.address}|${message}`;
     }
 
-    async generateBindingProof(did: string): Promise<BindingProof> {
+    async generateBindingProof(did: string): Promise<DidTxTypes.BindingProof> {
         return {
             chainId: this.chain,
             address: this.address,

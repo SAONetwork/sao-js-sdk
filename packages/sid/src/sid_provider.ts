@@ -2,7 +2,7 @@ import { Keychain } from "./keychain";
 import { AccountProvider } from "./account_provider";
 import { accountSecretToDid, generateAccountSecret, getSidIdentifier, toJWS, toStableObject } from "./utils";
 import { createJWS } from "did-jwt";
-import { AuthenticateParam, CreateJWSParam, JWS } from "@sao-js-sdk/common";
+import { AuthenticateParam, CreateJWSParam, JWS } from "./types";
 import { DidStore } from "./did_store";
 
 /**
