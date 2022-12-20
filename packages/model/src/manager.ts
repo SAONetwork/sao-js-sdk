@@ -334,7 +334,7 @@ export class ModelManager {
     dataId: string,
     readonlyDids?: string[],
     readwriteDids?: string[],
-    isPublish?: false,
+    isPublish?: true,
     ownerDid?: string
   ): Promise<string> {
     let provider = this.defaultModelProvider;
@@ -374,7 +374,7 @@ export class ModelManager {
   async renewModel(
     dataIds: string[],
     modelConfig: ModelConfig = defaultModelConfig,
-    isPublish?: false,
+    isPublish?: true,
     ownerDid?: string
   ): Promise<string> {
     let provider = this.defaultModelProvider;
