@@ -27,4 +27,5 @@ export type ModelConfig = {
   replica?: number | 3;
   timeout?: number | 300;
   operation?: number | 1;
+  isPublish?: boolean | false;
 };
