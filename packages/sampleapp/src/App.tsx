@@ -38,7 +38,6 @@ export default function App() {
   };
   const bind = async () => {
     const accountProvider = await SaoKeplrAccountProvider.new(window.keplr!);
-    console.log(did);
     if (did === "") {
       await manager.setAccountProvider(accountProvider);
     } else {
@@ -48,7 +47,6 @@ export default function App() {
     addLog(`${(await accountProvider.accountId()).toString()} is binded to ${provider?.sid}`);
   };
   const addLog = (newlog: string) => {
-    console.log(newlog);
     // setLog(prev => {
     //   var l = new Array<string>()
     //   l = l.concat(prev);
@@ -62,7 +60,6 @@ export default function App() {
     addLog(`sign "anything" signature: ${jws?.signatures[0].signature}`);
   };
   const listDids = async () => {
-    console.log(manager);
       const dids = await manager.listDids();
       addLog(dids.toString());
   };

@@ -90,7 +90,6 @@ export class Keychain {
     const keys = Keychain.generatePubKeys(fullKeySeries);
 
     // rootDocId
-    console.log("account created at ", timestamp.toString(10));
     const rootDocId = u8a.toString(await Hash(u8a.fromString(stringify(keys) + timestamp.toString(10))), "base16");
 
     // keychain

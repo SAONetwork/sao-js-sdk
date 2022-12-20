@@ -70,8 +70,6 @@ export class SidProvider {
    */
   private async recoverKeychain() {
     if (this.keychain == null) {
-      console.log("keychain is not initialized. init lazily");
-
       const accountSecret = await generateAccountSecret(this.accountProvider);
       const accountDid = await accountSecretToDid(accountSecret);
       const accountAuth = await this.didStore.getAccountAuth(this.sid, accountDid.id);
@@ -80,8 +78,6 @@ export class SidProvider {
       }
       const seed = await accountDid.decryptJWE(accountAuth.accountEncryptedSeed);
       this.keychain = await Keychain.load(this.didStore, seed, this.sid);
-    } else {
-      console.log("keychain is ready.");
     }
   }
 

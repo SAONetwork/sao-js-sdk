@@ -157,17 +157,13 @@ export class ModelProvider {
   async store(request: ClientOrderProposal): Promise<number> {
     const txResult = await this.chainApiClient.Store(request);
     if (txResult.code != 0) {
-      console.log(`store failed. tx=${txResult.transactionHash} code=${txResult.code}`);
       throw new Error(`store failed, DataId: ${request.Proposal.dataId}`);
     } else {
-      console.log(`store succeed, DataId: ${request.Proposal.dataId}`);
 
       const res = await this.chainApiClient.GetTx(txResult.transactionHash);
-      console.log(res);
 
       if (res.status === 200) {
         const resp = await this.chainApiClient.DecodeOrderId(res.data.tx_response.data);
-        console.log(resp);
 
         return resp.orderId;
       } else {
@@ -197,10 +193,8 @@ export class ModelProvider {
   async updatePermission(request: UpdatePermissionProposal): Promise<void> {
     const txResult = await this.chainApiClient.UpdatePermission(request);
     if (txResult.code != 0) {
-      console.log(`update permission failed. tx=${txResult.transactionHash} code=${txResult.code}`);
       throw new Error(`update permission failed failed, DataId: ${request.Proposal.dataId}`);
     } else {
-      console.log(`update permission succeed, DataId: ${request.Proposal.dataId}`);
       return;
     }
   }
@@ -208,10 +202,8 @@ export class ModelProvider {
   async renew(request: OrderRenewProposal): Promise<void> {
     const txResult = await this.chainApiClient.Renew(request);
     if (txResult.code != 0) {
-      console.log(`renew failed. tx=${txResult.transactionHash} code=${txResult.code}`);
       throw new Error(`renew failed, DataIds: ${request.Proposal.data}`);
     } else {
-      console.log(`renew succeed, DataIds: ${request.Proposal.data}`);
       return;
     }
   }
@@ -219,10 +211,8 @@ export class ModelProvider {
   async terminate(request: OrderTerminateProposal): Promise<void> {
     const txResult = await this.chainApiClient.Terminate(request);
     if (txResult.code != 0) {
-      console.log(`terminate failed. tx=${txResult.transactionHash} code=${txResult.code}`);
       throw new Error(`terminate failed, DataIds: ${request.Proposal.dataId}`);
     } else {
-      console.log(`terminate succeed, DataIds: ${request.Proposal.dataId}`);
       return;
     }
   }

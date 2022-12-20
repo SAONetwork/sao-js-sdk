@@ -16,7 +16,6 @@ describe('Keychain', () => {
     it('create', async () => {
         const keychain = await Keychain.create(didStore);
         const did = keychain.did;
-        console.log("did: ", did);
         expect(did.startsWith("did:sid")).toBeTruthy();
         const accountSecret = generateAccountSecret();
         const accountId = "a1";
