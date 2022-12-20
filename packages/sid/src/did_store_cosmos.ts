@@ -33,10 +33,8 @@ export class CosmosDidStore implements DidStore {
   ): Promise<void> {
     const txResult = await this.chainApiClient.Binding(rootDocId, keys, proof, accountAuth);
     if (txResult.code != 0) {
-      console.log(`bind account failed. tx=${txResult.transactionHash} code=${txResult.code}`);
       throw new Error(`bind account ${proof.accountId} -> did ${proof.did} failed.`);
     } else {
-      console.log(`bind account ${proof.accountId} -> did ${proof.did} succeed. tx=${txResult.transactionHash}`);
       this.getCache(BindingCacheKey).set(proof.accountId, proof.did);
       return;
     }
@@ -45,10 +43,8 @@ export class CosmosDidStore implements DidStore {
   async addBinding(proof: DidTxTypes.BindingProof): Promise<void> {
     const txResult = await this.chainApiClient.AddBinding(proof);
     if (txResult.code != 0) {
-      console.log(`bind account failed. tx=${txResult.transactionHash} code=${txResult.code}`);
       throw new Error(`bind account ${proof.accountId} -> did ${proof.did} failed.`);
     } else {
-      console.log(`bind account ${proof.accountId} -> did ${proof.did} succeed. tx=${txResult.transactionHash}`);
       this.getCache(BindingCacheKey).set(proof.accountId, proof.did);
       return;
     }
@@ -63,10 +59,8 @@ export class CosmosDidStore implements DidStore {
     const did = this.getCache(BindingCacheKey).get(accountId);
 
     if (did) {
-      console.log("get binding from cache: ", accountId, " : ", did);
       return did;
     }
-    console.log("get binding from remote");
 
     try {
       const res = await this.chainApiClient.GetBinding(accountId);
@@ -77,9 +71,7 @@ export class CosmosDidStore implements DidStore {
         throw new Error("failed to query binding for accountid: " + accountId);
       }
     } catch (err) {
-      console.log(err);
       if (err.response.status === 404) {
-        console.log();
         return null;
       } else {
         throw new Error("failed to query binding for accountid: " + accountId + ", !!!" + err.response.status);
@@ -90,10 +82,8 @@ export class CosmosDidStore implements DidStore {
   async removeBinding(accountId: string): Promise<void> {
     const txResult = await this.chainApiClient.RemoveBinding(accountId);
     if (txResult.code != 0) {
-      console.log(`unbind account failed. tx=${txResult.transactionHash} code=${txResult.code}`);
       throw new Error(`unbind account ${accountId} failed.`);
     } else {
-      console.log(`unbind account succeed. tx=${txResult.transactionHash}`);
       this.getCache(BindingCacheKey).delete(accountId);
       return;
     }
@@ -102,10 +92,8 @@ export class CosmosDidStore implements DidStore {
   async addAccountAuth(did: string, accountAuth: AccountAuth): Promise<void> {
     const result = await this.chainApiClient.AddAccountAuth(did, accountAuth);
     if (result.code != 0) {
-      console.log(`add account auth failed. tx=${result.transactionHash} code=${result.code}`);
       throw new Error(`add account auth did ${did} -> accountdid ${accountAuth.accountDid} failed.`);
     } else {
-      console.log(`add account auth succeed. tx=${result.transactionHash}`);
       return;
     }
   }
@@ -123,7 +111,6 @@ export class CosmosDidStore implements DidStore {
         throw new Error("failed to account auth for accountdid " + accountDid);
       }
     } catch (err) {
-      console.log(err);
       // const ae = err as AxiosError
       if (err.response.status === 404) {
         return null;
@@ -144,10 +131,8 @@ export class CosmosDidStore implements DidStore {
 
     const txResult = await this.chainApiClient.UpdateAccountAuths(did, update, remove);
     if (txResult.code != 0) {
-      console.log(`update account auths failed. tx=${txResult.transactionHash} code=${txResult.code}`);
       throw new Error(`update account auth did ${did} failed.`);
     } else {
-      console.log(`update account auth succeed. tx=${txResult.transactionHash}`);
       return;
     }
   }
@@ -179,14 +164,10 @@ export class CosmosDidStore implements DidStore {
 
   async updateSidDocument(keys: Record<string, string>, rootDocId?: string): Promise<string> {
     const txResult = await this.chainApiClient.UpdateSidDocument(keys, rootDocId);
-    console.log(txResult);
 
     if (txResult.code != 0) {
-      console.log(`update sid document failed. tx=${txResult.transactionHash} code=${txResult.code}`);
       throw new Error(`update sid document failed.`);
     } else {
-      console.log(`update sid document succeed. tx=${txResult.transactionHash}`);
-
       const res = await this.chainApiClient.GetTx(txResult.transactionHash);
 
       if (res.status === 200) {
@@ -239,20 +220,14 @@ export class CosmosDidStore implements DidStore {
   async addOldSeed(did: string, seed: JWE): Promise<void> {
     const txResult = await this.chainApiClient.addPastSeed(did, seed);
     if (txResult.code != 0) {
-      console.log(`add old seed for did ${did} failed. hash=${txResult.hash} code=${txResult.code}`);
       throw new Error(`add old seed for did ${did} failed. hash=${txResult.hash} code=${txResult.code}`);
-    } else {
-      console.log(`add old seed for did ${did}suceed.`);
     }
   }
 
   async updatePaymentAddress(accountId: string, did: string): Promise<void> {
     const txResult = await this.chainApiClient.updatePaymentAddress(accountId, did);
     if (txResult.code != 0) {
-      console.log(`update payment address failed. hash=${txResult.hash} code=${txResult.code}`);
       throw new Error(`update payment address failed. hash=${txResult.hash} code=${txResult.code}`);
-    } else {
-      console.log(`update payment address for ${accountId} succeed.`);
     }
   }
 

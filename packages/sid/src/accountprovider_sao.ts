@@ -42,13 +42,10 @@ export class SaoAccountProvider implements AccountProvider {
   async sign(message: string): Promise<string> {
     // not a tx sign. default authinfo and account number.
     const signDoc = makeSignDoc(u8a.fromString(message), u8a.fromString(""), "sao", 0);
-    console.log(`sign from address: ${this.address}`);
     try {
       const resp = await this.signer.signDirect(this.address, signDoc);
-      console.log(resp);
       return resp.signature.signature;
     } catch (e) {
-      console.log(e);
       throw e;
     }
   }

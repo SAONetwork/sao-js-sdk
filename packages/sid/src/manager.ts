@@ -32,7 +32,6 @@ export class SidManager {
   private async prepareSidProvider(did?: string, lazy = true): Promise<void> {
     const account = await this.accountProvider.accountId();
     const bindingDid = await this.didStore.getBinding(account.toString());
-    console.log(`binding did for ${account.toString()}: ${bindingDid}`);
 
     if (bindingDid) {
       if (this.sidProviders[bindingDid]) {
@@ -50,7 +49,6 @@ export class SidManager {
       if (did) {
         await this.bind(account.toString(), did);
       } else {
-        console.log("new did provider.");
         const sidProvider = await SidProvider.newFromAccount(this.didStore, this.accountProvider);
         this.sidProviders[sidProvider.sid] = sidProvider;
       }
@@ -83,8 +81,6 @@ export class SidManager {
       await this.didStore.removeBinding(account.toString());
       await this.sidProviders[bindingDid].keychain.remove(account.toString());
       delete this.sidProviders[bindingDid];
-    } else {
-      console.log("binding doesn't exist");
     }
   }
 

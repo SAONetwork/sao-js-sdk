@@ -47,7 +47,6 @@ export const Hash = async (content: Uint8Array) => {
   const hasher = new Sha256();
   hasher.update(content);
   const hash = await hasher.digest();
-  console.log("Hash:", hash);
 
   // const buffer = await crypto.subtle.digest({ name: "SHA-256" }, content);
   return new Uint8Array(hash);
@@ -59,8 +58,6 @@ export const MultiHash = async (content: Uint8Array) => {
   const length = varint.encode(0x20);
   const hash = concat([code, length, digest], code.length + length.length + digest.length);
 
-  console.log("MultiHash:", hash);
-
   return hash;
 };
 
@@ -68,7 +65,6 @@ export const CalculateCid = async (content: Uint8Array) => {
   const hash = await MultiHash(content);
 
   const cid = new CID(1, "raw", hash);
-  console.log("CID:", cid);
-
+  
   return cid.toString();
 };

@@ -22,7 +22,6 @@ describe('cosmos client', () => {
     //     await didStore.addBinding(bindingProof);
 
     //     const accountId = await accountProvider.accountId();
-    //     console.log("accountId", accountId.toString());
     //     let binding = await didStore.getBinding(accountId.toString());
     //     expect(binding).toBeDefined();
     //     expect(binding).toBe(did);
