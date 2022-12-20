@@ -4,6 +4,9 @@ import {
   BuildLoadReqParams,
   BuildNodeAddressReqParams,
   BuildUpdateReqParams,
+  BuildModelDeleteReqParams,
+  BuildModelRenewOrderReqParams,
+  BuildModelUpdatePermissionReqParams,
   CreateRequestClient,
   SaoNodeAPISchema,
   ClientOrderProposal,
@@ -159,7 +162,6 @@ export class ModelProvider {
     if (txResult.code != 0) {
       throw new Error(`store failed, DataId: ${request.Proposal.dataId}`);
     } else {
-
       const res = await this.chainApiClient.GetTx(txResult.transactionHash);
 
       if (res.status === 200) {
@@ -190,30 +192,63 @@ export class ModelProvider {
     }
   }
 
-  async updatePermission(request: UpdatePermissionProposal): Promise<void> {
-    const txResult = await this.chainApiClient.UpdatePermission(request);
-    if (txResult.code != 0) {
-      throw new Error(`update permission failed failed, DataId: ${request.Proposal.dataId}`);
+  async updatePermission(request: UpdatePermissionProposal, isPublish: boolean): Promise<void> {
+    if (isPublish) {
+      const txResult = await this.chainApiClient.UpdatePermission(request);
+      if (txResult.code != 0) {
+        throw new Error(`update permission failed failed, DataId: ${request.Proposal.dataId}`);
+      } else {
+        return;
+      }
     } else {
-      return;
+      const res = await this.nodeApiClient.jsonRpcApi(BuildModelUpdatePermissionReqParams(request));
+      if (res.data.result) {
+        return;
+      } else if (res.data.error) {
+        throw new Error(res.data.error.message);
+      } else {
+        throw new Error("unknown error");
+      }
     }
   }
 
-  async renew(request: OrderRenewProposal): Promise<void> {
-    const txResult = await this.chainApiClient.Renew(request);
-    if (txResult.code != 0) {
-      throw new Error(`renew failed, DataIds: ${request.Proposal.data}`);
+  async renew(request: OrderRenewProposal, isPublish: boolean): Promise<void> {
+    if (isPublish) {
+      const txResult = await this.chainApiClient.Renew(request);
+      if (txResult.code != 0) {
+        throw new Error(`renew failed, DataIds: ${request.Proposal.data}`);
+      } else {
+        return;
+      }
     } else {
-      return;
+      const res = await this.nodeApiClient.jsonRpcApi(BuildModelRenewOrderReqParams(request));
+      if (res.data.result) {
+        return;
+      } else if (res.data.error) {
+        throw new Error(res.data.error.message);
+      } else {
+        throw new Error("unknown error");
+      }
     }
   }
 
-  async terminate(request: OrderTerminateProposal): Promise<void> {
-    const txResult = await this.chainApiClient.Terminate(request);
-    if (txResult.code != 0) {
-      throw new Error(`terminate failed, DataIds: ${request.Proposal.dataId}`);
+  async terminate(request: OrderTerminateProposal, isPublish: boolean): Promise<void> {
+    if (isPublish) {
+      const txResult = await this.chainApiClient.Terminate(request);
+      if (txResult.code != 0) {
+        throw new Error(`terminate failed, DataIds: ${request.Proposal.dataId}`);
+      } else {
+        return;
+      }
     } else {
-      return;
+      const res = await this.nodeApiClient.jsonRpcApi(BuildModelDeleteReqParams(request));
+      if (res.data.result) {
+        return;
+      } else if (res.data.error) {
+        throw new Error(res.data.error.message);
+      } else {
+        throw new Error("unknown error");
+      }
     }
   }
 }

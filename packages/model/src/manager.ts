@@ -21,6 +21,7 @@ const defaultModelConfig: ModelConfig = {
   replica: 1,
   timeout: 60 * 60 * 24,
   operation: 1,
+  isPublish: false,
 };
 export class ModelManager {
   private defaultModelProvider: ModelProvider;
@@ -90,7 +91,10 @@ export class ModelManager {
     }
 
     const clientProposal = await sidProvider.createJWS({
-      payload: u8a.toString(SaoTypes.QueryProposal.encode(SaoTypes.QueryProposal.fromPartial(proposal)).finish(), "base64url"),
+      payload: u8a.toString(
+        SaoTypes.QueryProposal.encode(SaoTypes.QueryProposal.fromPartial(proposal)).finish(),
+        "base64url"
+      ),
     });
 
     const queryMetadataProposal: QueryMetadataProposal = {
@@ -157,10 +161,13 @@ export class ModelManager {
       JwsSignature: clientProposal.signatures[0],
     };
 
-    // const orderId = await provider.store(clientOrderProposal);
-    // console.log("orderId:",orderId)
+    var orderId = 0;
+    if (modelConfig.isPublish) {
+      orderId = await provider.store(clientOrderProposal);
+      console.log("orderId:", orderId);
+    }
 
-    const model = await provider.create(query, clientOrderProposal, 0, Array.from(dataBytes));
+    const model = await provider.create(query, clientOrderProposal, orderId, Array.from(dataBytes));
 
     return model.dataId;
   }
@@ -239,9 +246,13 @@ export class ModelManager {
       JwsSignature: clientProposal.signatures[0],
     };
 
-    // const orderId = await provider.store(clientOrderProposal);
+    var orderId = 0;
+    if (modelConfig.isPublish) {
+      orderId = await provider.store(clientOrderProposal);
+    }
 
-    const model = await provider.update(query, clientOrderProposal, 0, Array.from(dataBytes));
+    const model = await provider.update(query, clientOrderProposal, orderId, Array.from(dataBytes));
+
     return model.dataId;
   }
 
@@ -323,6 +334,7 @@ export class ModelManager {
     dataId: string,
     readonlyDids?: string[],
     readwriteDids?: string[],
+    isPublish?: false,
     ownerDid?: string
   ): Promise<string> {
     let provider = this.defaultModelProvider;
@@ -343,7 +355,10 @@ export class ModelManager {
     }
 
     const permissionProposal = await sidProvider.createJWS({
-      payload: u8a.toString(SaoTypes.PermissionProposal.encode(SaoTypes.PermissionProposal.fromPartial(proposal)).finish(), "base64url"),
+      payload: u8a.toString(
+        SaoTypes.PermissionProposal.encode(SaoTypes.PermissionProposal.fromPartial(proposal)).finish(),
+        "base64url"
+      ),
     });
 
     const request: UpdatePermissionProposal = {
@@ -351,7 +366,7 @@ export class ModelManager {
       JwsSignature: permissionProposal.signatures[0],
     };
 
-    await provider.updatePermission(request);
+    await provider.updatePermission(request, isPublish);
 
     return;
   }
@@ -359,6 +374,7 @@ export class ModelManager {
   async renewModel(
     dataIds: string[],
     modelConfig: ModelConfig = defaultModelConfig,
+    isPublish?: false,
     ownerDid?: string
   ): Promise<string> {
     let provider = this.defaultModelProvider;
@@ -379,7 +395,10 @@ export class ModelManager {
     }
 
     const renewProposal = await sidProvider.createJWS({
-      payload: u8a.toString(SaoTypes.RenewProposal.encode(SaoTypes.RenewProposal.fromPartial(proposal)).finish(), "base64url"),
+      payload: u8a.toString(
+        SaoTypes.RenewProposal.encode(SaoTypes.RenewProposal.fromPartial(proposal)).finish(),
+        "base64url"
+      ),
     });
 
     const request: OrderRenewProposal = {
@@ -387,12 +406,12 @@ export class ModelManager {
       JwsSignature: renewProposal.signatures[0],
     };
 
-    await provider.renew(request);
+    await provider.renew(request, isPublish);
 
     return;
   }
 
-  async deleteModel(dataId: string, ownerDid?: string): Promise<string> {
+  async deleteModel(dataId: string, isPublish?: false, ownerDid?: string): Promise<string> {
     let provider = this.defaultModelProvider;
     if (ownerDid !== undefined) {
       provider = this.getModelProvider(ownerDid);
@@ -409,7 +428,10 @@ export class ModelManager {
     }
 
     const terminateProposal = await sidProvider.createJWS({
-      payload: u8a.toString(SaoTypes.TerminateProposal.encode(SaoTypes.TerminateProposal.fromPartial(proposal)).finish(), "base64url"),
+      payload: u8a.toString(
+        SaoTypes.TerminateProposal.encode(SaoTypes.TerminateProposal.fromPartial(proposal)).finish(),
+        "base64url"
+      ),
     });
 
     const request: OrderTerminateProposal = {
@@ -417,7 +439,7 @@ export class ModelManager {
       JwsSignature: terminateProposal.signatures[0],
     };
 
-    await provider.terminate(request);
+    await provider.terminate(request, isPublish);
 
     return;
   }

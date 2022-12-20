@@ -34,7 +34,7 @@ export const BuildNodeAddressReqParams = () => {
   const request: JsonRpcRequest = Object.create(null);
   request.id = 0;
   request.jsonrpc = "2.0";
-  request.method = "Sao.NodeAddress";
+  request.method = "Sao.GetNodeAddress";
 
   return request;
 };
@@ -44,7 +44,7 @@ export const BuildLoadReqParams = (query: any) => {
 
   request.id = 0;
   request.jsonrpc = "2.0";
-  request.method = "Sao.Load";
+  request.method = "Sao.ModelLoad";
   request.params = [];
   request.params.push(query);
 
@@ -56,7 +56,7 @@ export const BuildCreateReqParams = (query: any, proposal: any, orderId: number,
 
   request.id = 0;
   request.jsonrpc = "2.0";
-  request.method = "Sao.Create";
+  request.method = "Sao.ModelCreate";
   request.params = [];
   request.params.push(query);
   request.params.push(proposal);
@@ -71,7 +71,7 @@ export const BuildCreateFileReqParams = (query: any, proposal: any, orderId: num
 
   request.id = 0;
   request.jsonrpc = "2.0";
-  request.method = "Sao.CreateFile";
+  request.method = "Sao.ModelCreateFile";
   request.params = [];
   request.params.push(query);
   request.params.push(proposal);
@@ -85,7 +85,7 @@ export const BuildUpdateReqParams = (query: any, proposal: any, orderId: number,
 
   request.id = 0;
   request.jsonrpc = "2.0";
-  request.method = "Sao.Update";
+  request.method = "Sao.ModelUpdate";
   request.params = [];
   request.params.push(query);
   request.params.push(proposal);
@@ -100,9 +100,48 @@ export const BuildShowCommitsReqParams = (query: any) => {
 
   request.id = 0;
   request.jsonrpc = "2.0";
-  request.method = "Sao.ShowCommits";
+  request.method = "Sao.ModelShowCommits";
   request.params = [];
   request.params.push(query);
+
+  return request;
+};
+
+export const BuildModelDeleteReqParams = (req: any) => {
+  const request: JsonRpcRequest = Object.create(null);
+
+  request.id = 0;
+  request.jsonrpc = "2.0";
+  request.method = "Sao.ModelDelete";
+  request.params = [];
+  request.params.push(req);
+  request.params.push(true);
+
+  return request;
+};
+
+export const BuildModelRenewOrderReqParams = (req: any) => {
+  const request: JsonRpcRequest = Object.create(null);
+
+  request.id = 0;
+  request.jsonrpc = "2.0";
+  request.method = "Sao.ModelRenewOrder";
+  request.params = [];
+  request.params.push(req);
+  request.params.push(true);
+
+  return request;
+};
+
+export const BuildModelUpdatePermissionReqParams = (req: any) => {
+  const request: JsonRpcRequest = Object.create(null);
+
+  request.id = 0;
+  request.jsonrpc = "2.0";
+  request.method = "Sao.ModelUpdatePermission";
+  request.params = [];
+  request.params.push(req);
+  request.params.push(true);
 
   return request;
 };
