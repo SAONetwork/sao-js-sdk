@@ -30,7 +30,7 @@ export const GetNodeApiClient = (config: CreateRequestConfig<SaoNodeAPISchema>) 
   return createRequestClient<SaoNodeAPISchema>(config);
 };
 
-export const BuildNodeAddressReqParams = () => {
+export const BuildGetNodeAddressReqParams = () => {
   const request: JsonRpcRequest = Object.create(null);
   request.id = 0;
   request.jsonrpc = "2.0";
@@ -39,7 +39,7 @@ export const BuildNodeAddressReqParams = () => {
   return request;
 };
 
-export const BuildLoadReqParams = (query: any) => {
+export const BuildModelLoadReqParams = (query: any) => {
   const request: JsonRpcRequest = Object.create(null);
 
   request.id = 0;
@@ -51,7 +51,7 @@ export const BuildLoadReqParams = (query: any) => {
   return request;
 };
 
-export const BuildCreateReqParams = (query: any, proposal: any, orderId: number, content: number[]) => {
+export const BuildModelCreateReqParams = (query: any, proposal: any, orderId: number, content: number[]) => {
   const request: JsonRpcRequest = Object.create(null);
 
   request.id = 0;
@@ -66,7 +66,7 @@ export const BuildCreateReqParams = (query: any, proposal: any, orderId: number,
   return request;
 };
 
-export const BuildCreateFileReqParams = (query: any, proposal: any, orderId: number) => {
+export const BuildModelCreateFileReqParams = (query: any, proposal: any, orderId: number) => {
   const request: JsonRpcRequest = Object.create(null);
 
   request.id = 0;
@@ -80,7 +80,7 @@ export const BuildCreateFileReqParams = (query: any, proposal: any, orderId: num
   return request;
 };
 
-export const BuildUpdateReqParams = (query: any, proposal: any, orderId: number, patch: number[]) => {
+export const BuildModelUpdateReqParams = (query: any, proposal: any, orderId: number, patch: number[]) => {
   const request: JsonRpcRequest = Object.create(null);
 
   request.id = 0;
@@ -95,7 +95,7 @@ export const BuildUpdateReqParams = (query: any, proposal: any, orderId: number,
   return request;
 };
 
-export const BuildShowCommitsReqParams = (query: any) => {
+export const BuildModelShowCommitsReqParams = (query: any) => {
   const request: JsonRpcRequest = Object.create(null);
 
   request.id = 0;
