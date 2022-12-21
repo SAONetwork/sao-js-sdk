@@ -1,4 +1,3 @@
-import { ChainApiClient } from "@sao-js-sdk/api-client";
 import {
   BuildModelCreateReqParams,
   BuildModelLoadReqParams,
@@ -7,6 +6,7 @@ import {
   BuildModelDeleteReqParams,
   BuildModelRenewOrderReqParams,
   BuildModelUpdatePermissionReqParams,
+  ChainApiClient,
   CreateRequestClient,
   SaoNodeAPISchema,
   ClientOrderProposal,
