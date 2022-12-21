@@ -50,14 +50,29 @@ export class ModelManager {
     this.sidManager = sidManager;
   }
 
+  /**
+   * get the model provider by DID stringt.
+   *
+   * @param ownerDid DID string.
+   * @returns the model provider.
+   */
   private getModelProvider(ownerDid: string): ModelProvider {
     return this.modelProviders[ownerDid];
   }
 
+  /**
+   * initialize the data model manager.
+   *
+   */
   async init() {
     await this.defaultModelProvider.init();
   }
 
+  /**
+   * add a model provider.
+   *
+   * @param config model provider configuration.
+   */
   addModelProvider(config: ModelProviderConfig) {
     const nodeApiClient = GetNodeApiClient({
       baseURL: config.nodeApiUrl,
@@ -77,6 +92,12 @@ export class ModelManager {
     this.modelProviders[config.ownerDid] = provider;
   }
 
+  /**
+   * build query requst proposal.
+   *
+   * @param provider data model provider.
+   * @param proposal query proposal.
+   */
   async buildQueryRequest(provider: ModelProvider, proposal: SaoTypes.QueryProposal) {
     const lastHeight: number = await provider.getLatestHeight();
     const lastValidHeight: number = 200 + lastHeight;
@@ -104,6 +125,14 @@ export class ModelManager {
     return queryMetadataProposal;
   }
 
+  /**
+   * create a data model.
+   *
+   * @param def data model defination.
+   * @param modelConfig data model configuration.
+   * @param ownerDid DID string, optional.
+   * @returns the created data model.
+   */
   async createModel<T>(
     def: ModelDef<T>,
     modelConfig: ModelConfig = defaultModelConfig,
@@ -172,6 +201,14 @@ export class ModelManager {
     return model.dataId;
   }
 
+  /**
+   * update a data model.
+   *
+   * @param def data model defination.
+   * @param modelConfig data model configuration.
+   * @param ownerDid DID string, optional.
+   * @returns the updated data model.
+   */
   async updateModel<T>(
     def: ModelDef<T>,
     modelConfig: ModelConfig = defaultModelConfig,
@@ -256,6 +293,15 @@ export class ModelManager {
     return model.dataId;
   }
 
+  /**
+   * load a data model.
+   *
+   * @param keyword keyword to search the data model.
+   * @param keywordType keyword type: 0, 1 - data-id; 2 - alias.
+   * @param ownerDid DID string, optional.
+   * @param groupId group id string, optional.
+   * @returns the data model.
+   */
   async loadModel<T>(keyword: string, keywordType?: number, ownerDid?: string, groupId?: string): Promise<T> {
     let provider = this.defaultModelProvider;
     if (ownerDid !== undefined) {
@@ -276,6 +322,16 @@ export class ModelManager {
     return model.cast();
   }
 
+  /**
+   * load a data model.
+   *
+   * @param keyword keyword to search the data model.
+   * @param commitId commit id.
+   * @param keywordType keyword type: 0, 1 - data-id; 2 - alias.
+   * @param ownerDid DID string, optional.
+   * @param groupId group id string, optional.
+   * @returns the data model.
+   */
   async loadModelByCommitId<T>(
     keyword: string,
     commitId: string,
@@ -303,6 +359,16 @@ export class ModelManager {
     return model.cast();
   }
 
+  /**
+   * load a data model.
+   *
+   * @param keyword keyword to search the data model.
+   * @param version version id.
+   * @param keywordType keyword type: 0, 1 - data-id; 2 - alias.
+   * @param ownerDid DID string, optional.
+   * @param groupId group id string, optional.
+   * @returns the data model.
+   */
   async loadModelByVersion<T>(
     keyword: string,
     version: string,
@@ -330,6 +396,15 @@ export class ModelManager {
     return model.cast();
   }
 
+  /**
+   * update a data model's permissions.
+   *
+   * @param dataId data id of the data model.
+   * @param readonlyDids readonly DID string list.
+   * @param readwriteDids read/write DID string list.
+   * @param isPublish whether to pubish the message or not.
+   * @param ownerDid DID string, optional.
+   */
   async updateModelPermission(
     dataId: string,
     readonlyDids?: string[],
@@ -371,6 +446,14 @@ export class ModelManager {
     return;
   }
 
+  /**
+   * renew a data model.
+   *
+   * @param dataId data id of the data model.
+   * @param modelConfig data model configuration.
+   * @param isPublish whether to pubish the message or not.
+   * @param ownerDid DID string, optional.
+   */
   async renewModel(
     dataIds: string[],
     modelConfig: ModelConfig = defaultModelConfig,
@@ -411,6 +494,13 @@ export class ModelManager {
     return;
   }
 
+  /**
+   * delete a data model's order.
+   *
+   * @param dataId data id of the data model.
+   * @param isPublish whether to pubish the message or not.
+   * @param ownerDid DID string, optional.
+   */
   async deleteModel(dataId: string, isPublish?: false, ownerDid?: string): Promise<string> {
     let provider = this.defaultModelProvider;
     if (ownerDid !== undefined) {
