@@ -89,35 +89,72 @@ export class ModelProvider {
     this.chainApiClient = chainApiClient;
   }
 
+  /**
+   * initialize the data model provider.
+   *
+   */
   async init() {
     const res = await this.nodeApiClient.jsonRpcApi(BuildGetNodeAddressReqParams());
     this.nodeAddress = res.data.result;
   }
 
+  /**
+   * get the owner SID
+   *
+   */
   getOwnerSid(): string {
     return this.ownerSid;
   }
 
+  /**
+   * get the group id.
+   *
+   */
   getGroupId(): string {
     return this.groupId;
   }
 
+  /**
+   * get the gateway address
+   *
+   */
   getNodeAddress(): string {
     return this.nodeAddress;
   }
 
+  /**
+   * validate the proposal.
+   *
+   */
   validate(proposal: SaoTypes.Proposal): boolean {
     return proposal.groupId === this.groupId && proposal.owner === this.ownerSid;
   }
 
+  /**
+   * get the latest blocke height.
+   *
+   */
   async getLatestHeight(): Promise<number> {
     return await this.chainApiClient.GetLatestBlockHeight();
   }
 
+  /**
+   * get the libp2p peer information.
+   *
+   */
   async getPeerInfo(): Promise<string> {
     return await this.chainApiClient.GetNodePeerInfo(this.nodeAddress);
   }
 
+  /**
+   * create a data model.
+   *
+   * @param query query proposal for data model validation.
+   * @param clientProposal requst proposal to create a data model.
+   * @param orderId store message order id.
+   * @param content data model content.
+   * @returns the created data model.
+   */
   async create(
     query: QueryMetadataProposal,
     clientProposal: ClientOrderProposal,
@@ -138,6 +175,15 @@ export class ModelProvider {
     }
   }
 
+  /**
+   * update a data model.
+   *
+   * @param query query proposal for data model validation.
+   * @param clientProposal requst proposal to update a data model.
+   * @param orderId store message order id.
+   * @param patch json diff patch for the update operation.
+   * @returns the update data model.
+   */
   async update(
     query: QueryMetadataProposal,
     clientProposal: ClientOrderProposal,
@@ -157,6 +203,12 @@ export class ModelProvider {
     }
   }
 
+  /**
+   * send a store message.
+   *
+   * @param request the data model store request proposal.
+   * @returns the order id.
+   */
   async store(request: ClientOrderProposal): Promise<number> {
     const txResult = await this.chainApiClient.Store(request);
     if (txResult.code != 0) {
@@ -174,6 +226,12 @@ export class ModelProvider {
     }
   }
 
+  /**
+   * load a data model.
+   *
+   * @param query the data model query proposal.
+   * @returns the update data model.
+   */
   async load(query: QueryMetadataProposal): Promise<Model> {
     const res = await this.nodeApiClient.jsonRpcApi(BuildModelLoadReqParams(query));
 
@@ -192,6 +250,13 @@ export class ModelProvider {
     }
   }
 
+  /**
+   * update a data model permission.
+   *
+   * @param request the update data model permission request proposal.
+   * @param isPublish whether to pubish the message or not.
+   * @returns void.
+   */
   async updatePermission(request: UpdatePermissionProposal, isPublish: boolean): Promise<void> {
     if (isPublish) {
       const txResult = await this.chainApiClient.UpdatePermission(request);
@@ -212,6 +277,13 @@ export class ModelProvider {
     }
   }
 
+  /**
+   * renew a data model order.
+   *
+   * @param request the renew data model order request proposal.
+   * @param isPublish whether to pubish the message or not.
+   * @returns void.
+   */
   async renew(request: OrderRenewProposal, isPublish: boolean): Promise<void> {
     if (isPublish) {
       const txResult = await this.chainApiClient.Renew(request);
@@ -232,6 +304,13 @@ export class ModelProvider {
     }
   }
 
+  /**
+   * terminate a data model order.
+   *
+   * @param request the terminate data model order request proposal.
+   * @param isPublish whether to pubish the message or not.
+   * @returns void.
+   */
   async terminate(request: OrderTerminateProposal, isPublish: boolean): Promise<void> {
     if (isPublish) {
       const txResult = await this.chainApiClient.Terminate(request);
