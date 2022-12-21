@@ -1,9 +1,9 @@
 import { ChainApiClient } from "@sao-js-sdk/api-client";
 import {
-  BuildCreateReqParams,
-  BuildLoadReqParams,
-  BuildNodeAddressReqParams,
-  BuildUpdateReqParams,
+  BuildModelCreateReqParams,
+  BuildModelLoadReqParams,
+  BuildGetNodeAddressReqParams,
+  BuildModelUpdateReqParams,
   BuildModelDeleteReqParams,
   BuildModelRenewOrderReqParams,
   BuildModelUpdatePermissionReqParams,
@@ -90,7 +90,7 @@ export class ModelProvider {
   }
 
   async init() {
-    const res = await this.nodeApiClient.jsonRpcApi(BuildNodeAddressReqParams());
+    const res = await this.nodeApiClient.jsonRpcApi(BuildGetNodeAddressReqParams());
     this.nodeAddress = res.data.result;
   }
 
@@ -124,7 +124,7 @@ export class ModelProvider {
     orderId: number,
     content: number[]
   ): Promise<Model> {
-    const res = await this.nodeApiClient.jsonRpcApi(BuildCreateReqParams(query, clientProposal, orderId, content));
+    const res = await this.nodeApiClient.jsonRpcApi(BuildModelCreateReqParams(query, clientProposal, orderId, content));
 
     if (res.data.result) {
       const model = new Model(res.data.result.DataId, res.data.result.Alias);
@@ -144,7 +144,7 @@ export class ModelProvider {
     orderId: number,
     patch: number[]
   ): Promise<Model> {
-    const res = await this.nodeApiClient.jsonRpcApi(BuildUpdateReqParams(query, clientProposal, orderId, patch));
+    const res = await this.nodeApiClient.jsonRpcApi(BuildModelUpdateReqParams(query, clientProposal, orderId, patch));
     if (res.data.result) {
       const model = new Model(res.data.result.DataId, res.data.result.Alias);
       model.setCid(res.data.result.Cid);
@@ -175,7 +175,7 @@ export class ModelProvider {
   }
 
   async load(query: QueryMetadataProposal): Promise<Model> {
-    const res = await this.nodeApiClient.jsonRpcApi(BuildLoadReqParams(query));
+    const res = await this.nodeApiClient.jsonRpcApi(BuildModelLoadReqParams(query));
 
     if (res.data.result) {
       const model = new Model(res.data.result.DataId, res.data.result.Alias);
