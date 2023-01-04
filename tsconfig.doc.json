@@ -1,0 +1,32 @@
+{
+  "extends": "./tsconfig.build.json",
+  "include": [
+    "./packages/api-client/src",
+    "./packages/common/src",
+    "./packages/model/src",
+    "./packages/sid/src",
+  ],
+  "compilerOptions": {
+    "jsx": "preserve",
+    "lib": ["DOM", "ES2020"],
+    "skipLibCheck": true
+  },
+  "typedocOptions": {
+    "name": "Sao Typescript SDK",
+    "readme": "none",
+    "entryDocument": "overview.md",
+    "entryPoints": [
+      "./packages/common/src/index.ts",
+      "./packages/model/src/index.ts",
+      "./packages/api-client/src/index.ts",
+      "./packages/sid/src/index.ts"
+    ],
+    "disableSources": true,
+    "excludeExternals": true,
+    "excludeInternal": true,
+    "excludePrivate": true,
+    "githubPages": false,
+    "hideBreadcrumbs": true,
+    "hideInPageTOC": true
+  }
+}
