@@ -2,7 +2,7 @@ import { Sha256 } from "@aws-crypto/sha256-browser";
 import varint from "varint";
 import { concat } from "uint8arrays/concat";
 import CID from "cids";
-import { v4 as uuid } from "uuid";
+import { v1 as uuidv1, v5 as uuidv5 } from "uuid";
 
 export const Uint8ArrayToString = (dataArray: Uint8Array) => {
   let dataString = "";
@@ -22,8 +22,10 @@ export const stringToUint8Array = (dataString: string) => {
   return new Uint8Array(dataArray);
 };
 
-export const GenerateDataId = () => {
-  return uuid();
+export const GenerateDataId = (seed: string) => {
+  const idv1 = uuidv1();
+  const idv5 = uuidv5(seed, uuidv5.URL);
+  return idv1.substr(0, 18) + idv5(18);
 };
 
 export const IsUUID = (id: string): boolean => {
@@ -65,6 +67,6 @@ export const CalculateCid = async (content: Uint8Array) => {
   const hash = await MultiHash(content);
 
   const cid = new CID(1, "raw", hash);
-  
+
   return cid.toString();
 };
