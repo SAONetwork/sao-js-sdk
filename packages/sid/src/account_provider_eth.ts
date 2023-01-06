@@ -4,9 +4,19 @@ import { DidTxTypes } from "sao-chain-client";
 
 import { getBindMessage, utf8ToHex } from "./utils";
 
+/**
+ * Account provider for eip55 wallets.
+ */
 export class EthAccountProvider implements AccountProvider {
+  /**
+   * ethereum provider, for example a metamask window.
+   */
   private provider: any;
+  /**
+   * account address.
+   */
   private address: string;
+
   static async new(provider: any): Promise<EthAccountProvider> {
     const accounts = await provider.request({ method: "eth_requestAccounts" });
     if (accounts.length === 0) {

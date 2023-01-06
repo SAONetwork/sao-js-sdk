@@ -64,7 +64,7 @@ export const MultiHash = async (content: Uint8Array) => {
 export const CalculateCid = async (content: Uint8Array) => {
   const hash = await MultiHash(content);
 
-  const cid = new CID(1, "raw", hash);
-  
+  const cid = new CID(0, "raw", hash);
+
   return cid.toString();
 };
