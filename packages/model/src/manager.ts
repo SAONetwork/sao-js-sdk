@@ -117,6 +117,12 @@ export class ModelManager {
         "base64url"
       ),
     });
+    console.log(
+      `query proposal signature: ${u8a.toString(
+        SaoTypes.QueryProposal.encode(SaoTypes.QueryProposal.fromPartial(proposal)).finish(),
+        "base64url"
+      )}`
+    );
 
     const queryMetadataProposal: QueryMetadataProposal = {
       Proposal: proposal,
@@ -172,6 +178,12 @@ export class ModelManager {
     const clientProposal = await sidProvider.createJWS({
       payload: u8a.toString(SaoTypes.Proposal.encode(SaoTypes.Proposal.fromPartial(proposal)).finish(), "base64url"),
     });
+    console.log(
+      `createJWS: ${u8a.toString(
+        SaoTypes.Proposal.encode(SaoTypes.Proposal.fromPartial(proposal)).finish(),
+        "base64url"
+      )}`
+    );
 
     if (!provider.validate(proposal)) {
       throw new Error("invalid provider");
