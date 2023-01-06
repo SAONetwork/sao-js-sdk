@@ -23,7 +23,7 @@ export interface FullKeySeries {
   seed: Uint8Array;
 }
 
-const ROOT_PATH = "10000";
+const ROOT_PATH = "m/736964'";
 const keyNameLen = 10;
 
 type SidDocId = string;
