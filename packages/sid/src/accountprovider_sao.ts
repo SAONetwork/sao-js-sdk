@@ -42,12 +42,8 @@ export class SaoAccountProvider implements AccountProvider {
   async sign(message: string): Promise<string> {
     // not a tx sign. default authinfo and account number.
     const signDoc = makeSignDoc(u8a.fromString(message), u8a.fromString(""), "sao", 0);
-    try {
-      const resp = await this.signer.signDirect(this.address, signDoc);
-      return resp.signature.signature;
-    } catch (e) {
-      throw e;
-    }
+    const resp = await this.signer.signDirect(this.address, signDoc);
+    return resp.signature.signature;
   }
 
   async generateBindingProof(did: string, timestamp: number): Promise<DidTxTypes.BindingProof> {

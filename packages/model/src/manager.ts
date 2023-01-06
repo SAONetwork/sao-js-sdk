@@ -190,7 +190,7 @@ export class ModelManager {
       JwsSignature: clientProposal.signatures[0],
     };
 
-    var orderId = 0;
+    let orderId = 0;
     if (modelConfig.isPublish) {
       orderId = await provider.store(clientOrderProposal);
       console.log("orderId:", orderId);
@@ -283,7 +283,7 @@ export class ModelManager {
       JwsSignature: clientProposal.signatures[0],
     };
 
-    var orderId = 0;
+    let orderId = 0;
     if (modelConfig.isPublish) {
       orderId = await provider.store(clientOrderProposal);
     }
