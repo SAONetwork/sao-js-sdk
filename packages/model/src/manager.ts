@@ -144,7 +144,7 @@ export class ModelManager {
     }
     const dataBytes = stringToUint8Array(stringify(def.data));
 
-    const dataId = GenerateDataId();
+    const dataId = GenerateDataId(provider.getOwnerSid() + provider.getGroupId());
     const cid = await CalculateCid(dataBytes);
     const proposal: SaoTypes.Proposal = {
       owner: ownerDid || provider.getOwnerSid(),
@@ -257,7 +257,7 @@ export class ModelManager {
       timeout: modelConfig.timeout,
       alias: originModel.alias,
       dataId: originModel.dataId,
-      commitId: GenerateDataId(),
+      commitId: GenerateDataId(provider.getOwnerSid() + provider.getGroupId()),
       tags: originModel.tags,
       cid,
       rule: originModel.rule,
