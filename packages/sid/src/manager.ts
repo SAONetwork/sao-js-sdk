@@ -4,6 +4,9 @@ import { SidProvider } from "./sid_provider";
 import { DidStore } from "./did_store";
 import { generateAccountSecret, isSid, getSidIdentifier } from "./utils";
 
+/**
+ * Sid manager which can manage a list of accounts and sid
+ */
 export class SidManager {
   private didStore: DidStore;
   // current account provider
@@ -17,13 +20,26 @@ export class SidManager {
     this.sidProviders = {};
   }
 
+  /**
+   * create a sid manager instance.
+   *
+   * @param accountProvider account provider
+   * @param didStore  did store
+   * @param did did string
+   * @returns sid manager
+   */
   static async createManager(accountProvider: AccountProvider, didStore: DidStore, did?: string): Promise<SidManager> {
     const manager = new SidManager(accountProvider, didStore);
     await manager.prepareSidProvider(did);
     return manager;
   }
 
-  // change to a new account provider.
+  /**
+   * set current account provider
+   *
+   * @param accountProvider account provider to set
+   * @param did
+   */
   async setAccountProvider(accountProvider: AccountProvider, did?: string) {
     this.accountProvider = accountProvider;
     await this.prepareSidProvider(did);
@@ -55,6 +71,12 @@ export class SidManager {
     }
   }
 
+  /**
+   * Bind account id to did.
+   *
+   * @param accountId account id
+   * @param did did
+   */
   private async bind(accountId: string, did: string): Promise<void> {
     if (!isSid(did)) {
       throw new Error(`${did} is not a sid.`);
@@ -71,6 +93,9 @@ export class SidManager {
     await this.didStore.binding(rootDocId, {}, proof, accountAuth);
   }
 
+  /**
+   * Unbind current account from its sid.
+   */
   async unbind(): Promise<void> {
     const account = await this.accountProvider.accountId();
     const bindingDid = await this.didStore.getBinding(account.toString());
@@ -84,10 +109,20 @@ export class SidManager {
     }
   }
 
+  /**
+   * list all dids that are in managed.
+   * @returns all dids
+   */
   listDids(): Array<string> {
     return Object.keys(this.sidProviders);
   }
 
+  /**
+   * Get sid provider that are in managed for the given did.
+   *
+   * @param did sid
+   * @returns
+   */
   async getSidProvider(did?: string): Promise<SidProvider | null> {
     if (did) {
       return this.sidProviders[did];
@@ -102,6 +137,11 @@ export class SidManager {
     }
   }
 
+  /**
+   * Update did's payment address
+   *
+   * @param did did string
+   */
   async updatePaymentAddress(did?: string): Promise<void> {
     const accountId = await this.accountProvider.accountId();
     if (!accountId.toString().startsWith("cosmos:sao")) {
