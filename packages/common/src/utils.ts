@@ -25,7 +25,7 @@ export const stringToUint8Array = (dataString: string) => {
 export const GenerateDataId = (seed: string) => {
   const idv1 = uuidv1();
   const idv5 = uuidv5(seed, uuidv5.URL);
-  return idv1.substr(0, 18) + idv5(18);
+  return idv1.substr(0, 18) + idv5.substr(18);
 };
 
 export const IsUUID = (id: string): boolean => {
@@ -66,7 +66,7 @@ export const MultiHash = async (content: Uint8Array) => {
 export const CalculateCid = async (content: Uint8Array) => {
   const hash = await MultiHash(content);
 
-  const cid = new CID(0, "raw", hash);
+  const cid = new CID(0, "dag-pb", hash);
 
   return cid.toString();
 };
