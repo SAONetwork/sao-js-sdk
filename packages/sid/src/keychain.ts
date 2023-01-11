@@ -13,13 +13,28 @@ import { Hash } from "@sao-js-sdk/common";
 import { getSidIdentifier } from "./utils";
 
 export interface KeySeries {
+  /**
+   * key for signing.
+   */
   signing: Uint8Array;
+  /**
+   * key for encrypting
+   */
   encrypt: Uint8Array;
 }
 
 export interface FullKeySeries {
+  /**
+   * public keys
+   */
   pub: KeySeries;
+  /**
+   * private keys
+   */
   priv: KeySeries;
+  /**
+   * seed to generate keys
+   */
   seed: Uint8Array;
 }
 

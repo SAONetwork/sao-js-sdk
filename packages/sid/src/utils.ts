@@ -58,6 +58,12 @@ export function toJWS(jws: string): JWS {
   };
 }
 
+/**
+ *
+ *
+ * @param jwe
+ * @returns
+ */
 export function parseJWEKids(jwe: JWE): Array<string> {
   return (
     jwe.recipients?.reduce((kids: Array<string>, recipient): Array<string> => {
@@ -67,6 +73,13 @@ export function parseJWEKids(jwe: JWE): Array<string> {
   );
 }
 
+/**
+ * Prepare jsonrpc body.
+ *
+ * @param method jsonrpc method
+ * @param params jsonrpc params
+ * @returns jsonrpc body
+ */
 export function encodeRpcMessage(method: string, params?: any): any {
   return {
     jsonrpc: "2.0",
@@ -76,20 +89,48 @@ export function encodeRpcMessage(method: string, params?: any): any {
   };
 }
 
+/**
+ * Convert a utf8 string to hex representation.
+ *
+ * @param message utf8 string.
+ * @returns hex representation
+ */
 export function utf8ToHex(message: string): string {
   const bytes = u8a.fromString(message);
   const hex = u8a.toString(bytes, "base16");
   return "0x" + hex;
 }
 
+/**
+ * Check if the given did is a sid.
+ *
+ * @param did did string
+ * @returns if the given did is a sid.
+ */
 export function isSid(did: string): boolean {
   return did.startsWith("did:sid");
 }
 
+/**
+ * Get identifier part of a did.
+ *
+ * @param did sid string
+ * @returns
+ */
 export function getSidIdentifier(did: string): string {
-  return did.slice(8);
+  if (isSid(did)) {
+    return did.slice(8);
+  }
+  return "";
 }
 
+/**
+ * Get binding message
+ *
+ * @param did did string
+ * @param timestamp timestamp
+ * @returns binding message content
+ */
 export const getBindMessage = (did: string, timestamp: number): string => {
   return `Link this account to your did: ${did}\nTimestamp: ${timestamp.toString(10)}`;
 };
