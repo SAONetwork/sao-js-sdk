@@ -2,16 +2,12 @@ import { DidTxTypes } from "sao-chain-client";
 import { JWE } from "did-jwt";
 import { AccountAuth } from "@sao-js-sdk/api-client";
 
-// 1. get did by account id
-// 2. set account id -> did
-// 2.1 if accountid's chainid is cosmos:sao, it can be set payment account.
-// 3. get a did's payment account
-// 4. get a did's all accounts
-// 5. remove account id -> did
+// interface for did information storage.
 export interface DidStore {
   /**
+   * add a binding from an account id to a did.
    *
-   * @param proof
+   * @param proof binding proof information.
    */
   addBinding(proof: DidTxTypes.BindingProof): Promise<void>;
 

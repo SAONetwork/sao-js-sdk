@@ -6,7 +6,7 @@ import { AuthenticateParam, CreateJWSParam, JWS } from "./types";
 import { DidStore } from "./did_store";
 
 /**
- * sid provider
+ * sid did provider
  */
 export class SidProvider {
   keychain: Keychain | null;
@@ -22,11 +22,11 @@ export class SidProvider {
   }
 
   /**
-   * generate new sid for the given account.
+   * generate a new sid and bind to the given account.
    *
-   * @param didStore
-   * @param accountProvider
-   * @returns
+   * @param didStore did store
+   * @param accountProvider account provider
+   * @returns sid provider
    */
   static async newFromAccount(didStore: DidStore, accountProvider: AccountProvider): Promise<SidProvider> {
     // const account = await accountProvider.accountId()
@@ -51,6 +51,14 @@ export class SidProvider {
     return new SidProvider(keychain, did, didStore, accountProvider);
   }
 
+  /**
+   * Recover a sid provider by the given account and did.
+   *
+   * @param didStore did store.
+   * @param accountProvider account provider
+   * @param did did string
+   * @returns sid provider
+   */
   static async recoverFromAccount(
     didStore: DidStore,
     accountProvider: AccountProvider,
@@ -61,12 +69,21 @@ export class SidProvider {
     return sidProvider;
   }
 
+  /**
+   * Get a sid provider without initializing keychain.
+   *
+   * @param didStore did store
+   * @param accountProvider account provider
+   * @param did did
+   * @returns sid provider.
+   */
   static lazyInit(didStore: DidStore, accountProvider: AccountProvider, did: string): SidProvider {
     return new SidProvider(null, did, didStore, accountProvider);
   }
 
   /**
    * if keychain is not initialized, recover keychain from current account provider.
+   * if keychain is already initialized, do nothing.
    */
   private async recoverKeychain() {
     if (this.keychain == null) {
@@ -81,6 +98,14 @@ export class SidProvider {
     }
   }
 
+  /**
+   * Sign the given payload
+   *
+   * @param payload payload to sign
+   * @param didWithFragment did fragment to use for sign
+   * @param protectedHeader signature header
+   * @returns signature
+   */
   private async sign(
     payload: Record<string, any> | string,
     didWithFragment: string,
@@ -104,6 +129,11 @@ export class SidProvider {
     return toJWS(jws);
   }
 
+  /**
+   *
+   * @param param authentication parameter
+   * @returns signature
+   */
   async authenticate(param: AuthenticateParam): Promise<JWS> {
     const jws = await this.sign(
       {
@@ -117,6 +147,12 @@ export class SidProvider {
     return jws;
   }
 
+  /**
+   * create json web signature.
+   *
+   * @param param create jws parameters
+   * @returns
+   */
   async createJWS(param: CreateJWSParam): Promise<JWS> {
     const jws = await this.sign(param.payload, this.sid);
     return jws;
