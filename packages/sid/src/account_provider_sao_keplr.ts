@@ -55,9 +55,10 @@ export class SaoKeplrAccountProvider implements AccountProvider {
     // const signDoc = this.getADR36SignDoc(this.address, Buffer.from(message).toString("base64"));
     // const resp = await this.signer.signAmino(this.address, signDoc);
     // return resp.signature.signature;
+    const res = await this.signer.signArbitrary(this.reference(), this.address, message);
 
-    const resp = await this.signer.signArbitrary(this.reference(), this.address, message);
-    return resp.signature;
+    return `${res.pub_key.type}.${res.pub_key.value}.${res.signature}`
+    // return resp;
   }
 
   async generateBindingProof(did: string, timestamp: number): Promise<DidTxTypes.BindingProof> {
