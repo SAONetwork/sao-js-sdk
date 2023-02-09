@@ -68,17 +68,6 @@ export class ChainApiClient {
   }
 
   /**
-   * Decode sid document from input data string.
-   *
-   * @param data encoded data string.
-   * @returns the decoded sid document.
-   */
-  async DecodeSidDocument(data: string): Promise<any> {
-    const decoded = u8a.fromString(data.toLowerCase(), "base16");
-    return DidTxTypes.MsgUpdateSidDocumentResponse.decode(TxMsgData.decode(decoded).msgResponses[0].value);
-  }
-
-  /**
    * Get the lastes block height.
    *
    * @param N/a.
@@ -112,34 +101,6 @@ export class ChainApiClient {
   }
 
   // account
-  /**
-   * Create a new Account Auth for the DID.
-   *
-   * @param did DID string.
-   * @param accountAuth Account Auth to create.
-   * @returns the transaction result.
-   */
-  async AddAccountAuth(did: string, accountAuth: AccountAuth): Promise<any> {
-    const account = await this.signer.getAccounts();
-
-    const accountDid = accountAuth.accountDid;
-    const accountEncryptedSeed = stringify(accountAuth.accountEncryptedSeed);
-    const sidEncryptedAccount = stringify(accountAuth.sidEncryptedAccount);
-
-    const txResult = await this.client.SaonetworkSaoDid.tx.sendMsgAddAccountAuth({
-      value: {
-        creator: account[0].address,
-        did: did,
-        accountAuth: {
-          accountDid,
-          accountEncryptedSeed,
-          sidEncryptedAccount,
-        },
-      },
-    });
-    return txResult;
-  }
-
   /**
    * Get the Account Auth by accountDid.
    *
@@ -205,76 +166,69 @@ export class ChainApiClient {
   }
 
   /**
-   * Bind another Account proof to the Account Auth.
-   *
-   * @param proof account proof.
-   * @returns the transaction result.
-   */
-  async AddBinding(proof: DidTxTypes.BindingProof): Promise<any> {
-    const account = await this.signer.getAccounts();
-    const txResult = await this.client.SaonetworkSaoDid.tx.sendMsgAddBinding({
-      value: {
-        creator: account[0].address,
-        accountId: proof.accountId,
-        proof: {
-          message: proof.message,
-          signature: proof.signature,
-          account: proof.accountId,
-          did: proof.did,
-          timestamp: proof.timestamp,
-          // TODO:
-          version: BindingProofV1,
-        },
-      },
-    });
-
-    return txResult;
-  }
-
-  /**
-   * Get binded account proof of the Account Auth.
+   * Get bound did by account id.
    *
    * @param accountId account id string.
-   * @returns the binded account proof.
+   * @returns the bound did.
    */
-  async GetBinding(accountId: string): Promise<any> {
-    return this.didClient.queryDidBindingProof(accountId + ":");
+  async GetDid(accountId: string): Promise<any> {
+    return this.didClient.queryDid(accountId + ":");
   }
 
-  /**
-   * Remove the binded account proof from the Account Auth.
-   *
-   * @param accountId account id string.
-   * @returns the transaction result.
-   */
-  async RemoveBinding(accountId: string): Promise<any> {
-    const account = await this.signer.getAccounts();
-    const txResult = await this.client.SaonetworkSaoDid.tx.sendMsgUnbinding({
-      value: {
-        creator: account[0].address,
-        accountId,
-      },
-    });
-    return txResult;
-  }
 
   /**
-   * Update the Account Auth.
+   * Unbind Account , Update Sid Document and other Account Auth.
    *
    * @param did DID string.
+   * @param newDocId new sid document id.
+   * @param keys new keys for new sid document.
+   * @param timestamp timestamp when generate new keys.
    * @param updates Account Auths to update.
-   * @param removes Account Auths to remove.
+   * @param removes Account Dids to remove.
+   * @param pastSeed previous sid document seed.
    * @returns the transaction result.
    */
-  async UpdateAccountAuths(did: string, updates: AccountAuth[], removes: string[]): Promise<any> {
+  async Update(
+    did: string,
+    newDocId: string,
+    keys: Record<string, string>,
+    timestamp: number,
+    updates: AccountAuth[],
+    removes: string[],
+    pastSeed: JWE
+  ): Promise<any> {
     const account = await this.signer.getAccounts();
-    const txResult = await this.client.SaonetworkSaoDid.tx.sendMsgUpdateAccountAuths({
+    const pubkeys = [];
+    Object.keys(keys).forEach((k) => {
+      pubkeys.push({
+        name: k,
+        value: keys[k],
+      });
+    });
+    const updateAccountAuth = [];
+    updates.forEach((accAuth) => {
+      updateAccountAuth.push({
+        accountDid: accAuth.accountDid,
+        accountEncryptedSeed: stringify(accAuth.accountEncryptedSeed),
+        sidEncryptedAccount: stringify(accAuth.sidEncryptedAccount),
+      });
+    });
+    const txResult = await this.client.SaonetworkSaoDid.tx.sendMsgUpdate({
       value: {
         creator: account[0].address,
         did: did,
-        update: updates,
-        removes,
+        newDocId: newDocId,
+        keys: pubkeys,
+        timestamp: timestamp,
+        updateAccountAuth,
+        removeAccountDid: removes,
+        pastSeed: stringify(pastSeed)
       },
+      // TODO: estimate gas
+      fee:{
+        amount: [],
+        gas: "400000"
+      }
     });
     return txResult;
   }
@@ -287,32 +241,6 @@ export class ChainApiClient {
    */
   async GetAllAccountAuth(did: string): Promise<any> {
     return await this.didClient.queryGetAllAccountAuths(did + ":");
-  }
-
-  /**
-   * Update SID document.
-   *
-   * @param keys keys records.
-   * @param rootDocId root documnet id, optinal.
-   * @returns the transaction result.
-   */
-  async UpdateSidDocument(keys: Record<string, string>, rootDocId?: string): Promise<any> {
-    const account = await this.signer.getAccounts();
-    const pubkeys = [];
-    Object.keys(keys).forEach((k) => {
-      pubkeys.push({
-        name: k,
-        value: keys[k],
-      });
-    });
-    const txResult = await this.client.SaonetworkSaoDid.tx.sendMsgUpdateSidDocument({
-      value: {
-        creator: account[0].address,
-        keys: pubkeys,
-        rootDocId: rootDocId,
-      },
-    });
-    return txResult;
   }
 
   /**
@@ -333,25 +261,6 @@ export class ChainApiClient {
    */
   async getPastSeeds(did: string): Promise<any> {
     return this.didClient.queryPastSeeds(did);
-  }
-
-  /**
-   * Add a past seeds.
-   *
-   * @param did DID string.
-   * @param seed JWE seed.
-   * @returns the transaction result.
-   */
-  async addPastSeed(did: string, seed: JWE): Promise<any> {
-    const accounts = await this.signer.getAccounts();
-    const txResult = this.client.SaonetworkSaoDid.tx.sendMsgAddPastSeed({
-      value: {
-        creator: accounts[0].address,
-        did,
-        pastSeed: stringify(seed),
-      },
-    });
-    return txResult;
   }
 
   /**

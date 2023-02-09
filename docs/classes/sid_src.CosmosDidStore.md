@@ -149,9 +149,9 @@ DidStore.getAllAccountAuth
 
 ___
 
-### getBinding
+### getDid
 
-▸ **getBinding**(`accountId`): `Promise`<`string`\>
+▸ **getDid**(`accountId`): `Promise`<`string`\>
 
 #### Parameters
 
@@ -165,7 +165,7 @@ ___
 
 #### Implementation of
 
-DidStore.getBinding
+DidStore.getDid
 
 ___
 

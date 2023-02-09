@@ -1,4 +1,5 @@
-import { SaoTypes } from "sao-chain-client";
+import { SaoTypes, DidTxTypes } from "sao-chain-client";
+import { AccountAuth } from "@sao-js-sdk/api-client";
 
 /**
  * JSON web signature type.
@@ -24,3 +25,12 @@ export type CreateJWSParam = {
   payload: string | Record<string, any>;
   protected?: Record<string, any>;
 };
+
+/**
+ * Binding tx parameters
+ */
+export type BindingParam = {
+  rootDocId: string,
+  proof: DidTxTypes.BindingProof,
+  accountAuth: AccountAuth,
+}
