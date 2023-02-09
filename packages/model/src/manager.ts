@@ -269,7 +269,7 @@ export class ModelManager {
       timeout: modelConfig.timeout,
       alias: originModel.alias,
       dataId: originModel.dataId,
-      commitId: GenerateDataId(provider.getOwnerSid() + provider.getGroupId()),
+      commitId: originModel.commitId + '|' + GenerateDataId(provider.getOwnerSid() + provider.getGroupId()),
       tags: originModel.tags,
       cid,
       rule: originModel.rule,
