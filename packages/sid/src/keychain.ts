@@ -77,9 +77,9 @@ export class Keychain {
     let jwe = tempSeeds.pop();
     while (jwe) {
       const decrypted = await keychain.decryptFromJWE(jwe, [], tempDocId);
-      const decryptedObj = JSON.parse(u8a.toString(decrypted)) as Record<string, Array<number>>;
+      const decryptedObj = JSON.parse(u8a.toString(decrypted)) as Record<string,string>;
       tempDocId = Object.keys(decryptedObj)[0];
-      const prevSeed = new Uint8Array(decryptedObj[tempDocId]);
+      const prevSeed = u8a.fromString(decryptedObj[tempDocId], "base16");
       keychain.keysMap[tempDocId] = Keychain.generateKeys(prevSeed);
       keychain.updateKidToDocId(tempDocId, keychain.keysMap[tempDocId]);
       jwe = tempSeeds.pop();
@@ -167,7 +167,7 @@ export class Keychain {
   }
 
   async remove(accountId: string): Promise<void> {
-    this.rotateKeys(accountId);
+    await this.rotateKeys(accountId);
   }
 
   static generateKeys(seed: Uint8Array): FullKeySeries {
@@ -190,13 +190,12 @@ export class Keychain {
   }
 
   private encodeSeed(docId: string): Uint8Array {
-    const seed = this.keysMap[docId].seed;
+    const seed = u8a.toString(this.keysMap[docId].seed, "base16");
     const seedPayload = { [docId]: seed };
     return u8a.fromString(stringify(seedPayload));
   }
 
   async rotateKeys(removeAuthId: string) {
-    const rootDocId = this.did.split(":")[2];
     const prevDocId = this.latestDocid;
 
     // generate new key
@@ -206,17 +205,14 @@ export class Keychain {
     const keys = Keychain.generatePubKeys(newKeySeries);
 
     // update did document
-    const newDocId = await this.didStore.updateSidDocument(keys, rootDocId);
-
-    this.latestDocid = newDocId;
-    this.keysMap[newDocId] = newKeySeries;
-    Object.keys(keys).forEach((k) => (this.kidToDocid[k] = newDocId));
+    const timestamp = Date.now();
+    const newDocId = u8a.toString(await Hash(u8a.fromString(stringify(keys) + timestamp.toString(10))), "base16");
 
     // update past seeds
     const encodedPrevSeed = this.encodeSeed(prevDocId);
-    const prevSeedJWE = await this.encryptToJWE(encodedPrevSeed);
-    this.oldSeeds.push(prevSeedJWE);
-    await this.didStore.addOldSeed(this.did, prevSeedJWE);
+
+    const encrypter = x25519Encrypter(newKeySeries.pub.encrypt);
+    const prevSeedJWE = await createJWE(encodedPrevSeed, [encrypter]);
 
     const allAccountAuths = await this.didStore.getAllAccountAuth(this.did);
     if (Object.keys(allAccountAuths).length > 0) {
@@ -224,18 +220,23 @@ export class Keychain {
       const updateAccountAuths = [];
       const removeAccountAuths = [];
       for (let i = 0; i < Object.values(allAccountAuths).length; i++) {
-        const aa = await this.updateAccountAuth(accountDid, Object.values(allAccountAuths)[i], removeAuthId);
+        const aa = await
+          this.updateAccountAuth(accountDid, Object.values(allAccountAuths)[i], removeAuthId, newKeySeries);
         if (!aa) {
           removeAccountAuths.push(allAccountAuths[i].accountDid);
         } else {
           updateAccountAuths.push(aa);
         }
       }
-      await this.didStore.updateAccountAuths(this.did, updateAccountAuths, removeAccountAuths);
+      await this.didStore.update(this.did,removeAuthId,newDocId,keys,timestamp,updateAccountAuths,removeAccountAuths,prevSeedJWE);
+      this.latestDocid = newDocId;
+      this.keysMap[newDocId] = newKeySeries;
+      Object.keys(keys).forEach((k) => (this.kidToDocid[k] = newDocId));
+      this.oldSeeds.push(prevSeedJWE);
     }
   }
 
-  async updateAccountAuth(accountDid: DID, auth: AccountAuth, removeAuthId: string): Promise<AccountAuth | null> {
+  async updateAccountAuth(accountDid: DID, auth: AccountAuth, removeAuthId: string, keyset: FullKeySeries): Promise<AccountAuth | null> {
     const kids = parseJWEKids(auth.sidEncryptedAccount);
     const accountId = u8a.toString(await this.decryptFromJWE(auth.sidEncryptedAccount, kids));
     if (accountId === removeAuthId) {
@@ -243,14 +244,14 @@ export class Keychain {
     }
 
     // account encrypt seed
-    const accountEncryptedSeed = await accountDid.createJWE(this.keysMap[this.latestDocid].seed, [accountDid.id]);
+    const accountEncryptedSeed = await accountDid.createJWE(keyset.seed, [auth.accountDid]);
 
     // sid encrypt account
-    const keyFragment = this.getKeyFragment(this.latestDocid, "encrypt");
+    const keyFragment = keyName(encodeKey(keyset.pub.encrypt, "x25519"));
     const kid = `${this.did}#${keyFragment}`;
-    // const encrypter = x25519Encrypter(this.keysMap[this.latestDocid].pub.encrypt, kid);
-    // const sidEncryptedAccount = await createJWE(u8a.fromString(accountId), [encrypter]);
-    const sidEncryptedAccount = await this.encryptToJWE(u8a.fromString(accountId), kid);
+    const encrypter = x25519Encrypter(keyset.pub.encrypt, kid);
+    const sidEncryptedAccount = await createJWE(u8a.fromString(accountId), [encrypter]);
+
     return {
       accountDid: auth.accountDid,
       accountEncryptedSeed,

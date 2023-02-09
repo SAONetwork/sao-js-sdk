@@ -17,7 +17,7 @@ describe('manager', () => {
         expect(dids.length).toBe(1);
 
         const account = await accountProvider.accountId();
-        let binding = await didStore.getBinding(account.toString());
+        let binding = await didStore.getDid(account.toString());
         expect(binding).toBe(dids[0]);
     }, 30000);
 });

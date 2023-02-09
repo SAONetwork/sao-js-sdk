@@ -22,7 +22,7 @@ export class MockDidStore implements DidStore {
     });
   }
 
-  async getBinding(accountId: string): Promise<Binding | null> {
+  async getDid(accountId: string): Promise<Binding | null> {
     return new Promise((r) => {
       r(this.bindingMap[accountId]);
     });

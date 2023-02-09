@@ -40,22 +40,12 @@ export class CosmosDidStore implements DidStore {
     }
   }
 
-  async addBinding(proof: DidTxTypes.BindingProof): Promise<void> {
-    const txResult = await this.chainApiClient.AddBinding(proof);
-    if (txResult.code != 0) {
-      throw new Error(`bind account ${proof.accountId} -> did ${proof.did} failed.`);
-    } else {
-      this.getCache(BindingCacheKey).set(proof.accountId, proof.did);
-      return;
-    }
-  }
-
   /**
    *
    * @param accountId
    * @returns binded did
    */
-  async getBinding(accountId: string): Promise<string | null> {
+  async getDid(accountId: string): Promise<string | null> {
     const did = this.getCache(BindingCacheKey).get(accountId);
 
     if (did) {
@@ -63,37 +53,37 @@ export class CosmosDidStore implements DidStore {
     }
 
     try {
-      const res = await this.chainApiClient.GetBinding(accountId);
+      const res = await this.chainApiClient.GetDid(accountId);
       if (res.status === 200) {
-        this.getCache(BindingCacheKey).set(accountId, res.data?.DidBindingProof?.proof?.did);
-        return res.data?.DidBindingProof?.proof?.did || null;
+        this.getCache(BindingCacheKey).set(accountId, res.data?.did?.did);
+        return res.data?.did?.did || null;
       } else {
-        throw new Error("failed to query binding for accountid: " + accountId);
+        throw new Error("failed to query did for accountid: " + accountId);
       }
     } catch (err) {
       if (err.response.status === 404) {
         return null;
       } else {
-        throw new Error("failed to query binding for accountid: " + accountId + ", !!!" + err.response.status);
+        throw new Error("failed to query did for accountid: " + accountId + ", !!!" + err.response.status);
       }
     }
   }
 
-  async removeBinding(accountId: string): Promise<void> {
-    const txResult = await this.chainApiClient.RemoveBinding(accountId);
+  async update(
+    did: string,
+    accountId: string,
+    newDocId: string,
+    keys: Record<string, string>,
+    timestamp: number,
+    updates: AccountAuth[],
+    removes: string[],
+    pastSeed: JWE
+  ): Promise<void> {
+    const txResult = await this.chainApiClient.Update(did, newDocId, keys, timestamp, updates, removes, pastSeed);
     if (txResult.code != 0) {
-      throw new Error(`unbind account ${accountId} failed.`);
+      throw new Error(`update ${did} accounts failed.`);
     } else {
-      this.getCache(BindingCacheKey).delete(accountId);
-      return;
-    }
-  }
-
-  async addAccountAuth(did: string, accountAuth: AccountAuth): Promise<void> {
-    const result = await this.chainApiClient.AddAccountAuth(did, accountAuth);
-    if (result.code != 0) {
-      throw new Error(`add account auth did ${did} -> accountdid ${accountAuth.accountDid} failed.`);
-    } else {
+      this.getCache(BindingCacheKey).del(accountId);
       return;
     }
   }
@@ -119,24 +109,6 @@ export class CosmosDidStore implements DidStore {
     }
   }
 
-  async updateAccountAuths(did: string, update: AccountAuth[], remove: string[]): Promise<void> {
-    const updates = [];
-    update.forEach((u) => {
-      updates.push({
-        accountDid: u.accountDid,
-        accountEncryptedSeed: u.accountEncryptedSeed,
-        sidEncryptedAccount: u.sidEncryptedAccount,
-      });
-    });
-
-    const txResult = await this.chainApiClient.UpdateAccountAuths(did, update, remove);
-    if (txResult.code != 0) {
-      throw new Error(`update account auth did ${did} failed.`);
-    } else {
-      return;
-    }
-  }
-
   async getAllAccountAuth(did: string): Promise<AccountAuth[]> {
     try {
       const resp = await this.chainApiClient.GetAllAccountAuth(did);
@@ -159,24 +131,6 @@ export class CosmosDidStore implements DidStore {
         return [];
       }
       throw new Error(`failed to get all account auths for did: ${did}, ` + err);
-    }
-  }
-
-  async updateSidDocument(keys: Record<string, string>, rootDocId?: string): Promise<string> {
-    const txResult = await this.chainApiClient.UpdateSidDocument(keys, rootDocId);
-
-    if (txResult.code != 0) {
-      throw new Error(`update sid document failed.`);
-    } else {
-      const res = await this.chainApiClient.GetTx(txResult.transactionHash);
-
-      if (res.status === 200) {
-        const r = await this.chainApiClient.DecodeSidDocument(res.data.tx_response.data);
-
-        return r.docId;
-      } else {
-        throw new Error(`update sid document failed. ${res.statusText}`);
-      }
     }
   }
 
@@ -214,13 +168,6 @@ export class CosmosDidStore implements DidStore {
         return [];
       }
       throw new Error(`get past seeds for did ${did} failed. err=${err}`);
-    }
-  }
-
-  async addOldSeed(did: string, seed: JWE): Promise<void> {
-    const txResult = await this.chainApiClient.addPastSeed(did, seed);
-    if (txResult.code != 0) {
-      throw new Error(`add old seed for did ${did} failed. hash=${txResult.hash} code=${txResult.code}`);
     }
   }
 

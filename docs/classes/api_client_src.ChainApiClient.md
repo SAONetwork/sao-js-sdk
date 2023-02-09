@@ -132,9 +132,9 @@ ___
 
 ___
 
-### GetBinding
+### GetDid
 
-▸ **GetBinding**(`accountId`): `Promise`<`any`\>
+▸ **GetDid**(`accountId`): `Promise`<`any`\>
 
 #### Parameters
 
