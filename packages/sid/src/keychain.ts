@@ -77,7 +77,7 @@ export class Keychain {
     let jwe = tempSeeds.pop();
     while (jwe) {
       const decrypted = await keychain.decryptFromJWE(jwe, [], tempDocId);
-      const decryptedObj = JSON.parse(u8a.toString(decrypted)) as Record<string,string>;
+      const decryptedObj = JSON.parse(u8a.toString(decrypted)) as Record<string, string>;
       tempDocId = Object.keys(decryptedObj)[0];
       const prevSeed = u8a.fromString(decryptedObj[tempDocId], "base16");
       keychain.keysMap[tempDocId] = Keychain.generateKeys(prevSeed);
@@ -220,15 +220,28 @@ export class Keychain {
       const updateAccountAuths = [];
       const removeAccountAuths = [];
       for (let i = 0; i < Object.values(allAccountAuths).length; i++) {
-        const aa = await
-          this.updateAccountAuth(accountDid, Object.values(allAccountAuths)[i], removeAuthId, newKeySeries);
+        const aa = await this.updateAccountAuth(
+          accountDid,
+          Object.values(allAccountAuths)[i],
+          removeAuthId,
+          newKeySeries
+        );
         if (!aa) {
           removeAccountAuths.push(allAccountAuths[i].accountDid);
         } else {
           updateAccountAuths.push(aa);
         }
       }
-      await this.didStore.update(this.did,removeAuthId,newDocId,keys,timestamp,updateAccountAuths,removeAccountAuths,prevSeedJWE);
+      await this.didStore.update(
+        this.did,
+        removeAuthId,
+        newDocId,
+        keys,
+        timestamp,
+        updateAccountAuths,
+        removeAccountAuths,
+        prevSeedJWE
+      );
       this.latestDocid = newDocId;
       this.keysMap[newDocId] = newKeySeries;
       Object.keys(keys).forEach((k) => (this.kidToDocid[k] = newDocId));
@@ -236,7 +249,12 @@ export class Keychain {
     }
   }
 
-  async updateAccountAuth(accountDid: DID, auth: AccountAuth, removeAuthId: string, keyset: FullKeySeries): Promise<AccountAuth | null> {
+  async updateAccountAuth(
+    accountDid: DID,
+    auth: AccountAuth,
+    removeAuthId: string,
+    keyset: FullKeySeries
+  ): Promise<AccountAuth | null> {
     const kids = parseJWEKids(auth.sidEncryptedAccount);
     const accountId = u8a.toString(await this.decryptFromJWE(auth.sidEncryptedAccount, kids));
     if (accountId === removeAuthId) {
