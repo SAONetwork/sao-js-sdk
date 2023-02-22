@@ -57,7 +57,7 @@ export class SaoKeplrAccountProvider implements AccountProvider {
     // return resp.signature.signature;
     const res = await this.signer.signArbitrary(this.reference(), this.address, message);
 
-    return `${res.pub_key.type}.${res.pub_key.value}.${res.signature}`
+    return `${res.pub_key.type}.${res.pub_key.value}.${res.signature}`;
     // return resp;
   }
 

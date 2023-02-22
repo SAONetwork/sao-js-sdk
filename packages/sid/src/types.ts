@@ -30,7 +30,7 @@ export type CreateJWSParam = {
  * Binding tx parameters
  */
 export type BindingParam = {
-  rootDocId: string,
-  proof: DidTxTypes.BindingProof,
-  accountAuth: AccountAuth,
-}
+  rootDocId: string;
+  proof: DidTxTypes.BindingProof;
+  accountAuth: AccountAuth;
+};

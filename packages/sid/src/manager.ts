@@ -3,7 +3,7 @@ import { AccountProvider } from "./account_provider";
 import { SidProvider } from "./sid_provider";
 import { DidStore } from "./did_store";
 import { generateAccountSecret, isSid, getSidIdentifier } from "./utils";
-import { BindingParam } from "./types"
+import { BindingParam } from "./types";
 
 /**
  * Sid manager which can manage a list of accounts and sid
@@ -106,7 +106,6 @@ export class SidManager {
   async bind(param: BindingParam): Promise<void> {
     await this.didStore.binding(param.rootDocId, {}, param.proof, param.accountAuth);
   }
-
 
   /**
    * Unbind current account from its sid.
