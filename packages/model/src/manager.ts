@@ -39,7 +39,7 @@ export class ModelManager {
     const chainApiClient = new ChainApiClient({
       apiURL: config.chainApiUrl,
       rpcURL: config.chainRpcUrl,
-      prefix: config.chainPrefix || "cosmos",
+      prefix: config.chainPrefix || "sao",
       signer: config.signer,
     });
 
@@ -84,7 +84,7 @@ export class ModelManager {
     const chainApiClient = new ChainApiClient({
       apiURL: config.chainApiUrl,
       rpcURL: config.chainRpcUrl,
-      prefix: config.chainPrefix || "cosmos",
+      prefix: config.chainPrefix || "sao",
       signer: config.signer,
     });
 
@@ -269,7 +269,7 @@ export class ModelManager {
       timeout: modelConfig.timeout,
       alias: originModel.alias,
       dataId: originModel.dataId,
-      commitId: originModel.commitId + '|' + GenerateDataId(provider.getOwnerSid() + provider.getGroupId()),
+      commitId: originModel.commitId + "|" + GenerateDataId(provider.getOwnerSid() + provider.getGroupId()),
       tags: originModel.tags,
       cid,
       rule: originModel.rule,

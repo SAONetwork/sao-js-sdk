@@ -23,7 +23,7 @@ export class ChainApiClient {
   constructor(config: ChainApiClientConfig) {
     const api = config.apiURL || process.env.COSMOS_API_URL || "http://localhost:1317";
     const rpc = config.rpcURL || process.env.COSMOS_RPC_URL || "http://localhost:26657";
-    const addressPrefix = config.prefix || "cosmos";
+    const addressPrefix = config.prefix || "sao";
 
     console.log("cosmos did store: ");
     console.log("api url: ", api);
@@ -175,7 +175,6 @@ export class ChainApiClient {
     return this.didClient.queryDid(accountId + ":");
   }
 
-
   /**
    * Unbind Account , Update Sid Document and other Account Auth.
    *
@@ -222,13 +221,13 @@ export class ChainApiClient {
         timestamp: timestamp,
         updateAccountAuth,
         removeAccountDid: removes,
-        pastSeed: stringify(pastSeed)
+        pastSeed: stringify(pastSeed),
       },
       // TODO: estimate gas
-      fee:{
+      fee: {
         amount: [],
-        gas: "400000"
-      }
+        gas: "400000",
+      },
     });
     return txResult;
   }
