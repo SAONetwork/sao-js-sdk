@@ -1,6 +1,6 @@
 {
   "name": "@sao-js-sdk/api-client",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "sao api client",
   "type": "module",
   "main": "dist/index.js",
@@ -22,8 +22,8 @@
     "lint": "eslint --fix --ignore-pattern \"src/**/*.test.[jt]s\" \"src/**/*.[jt]s\""
   },
   "dependencies": {
-    "axios": "1.2.0",
     "another-did-jwt": "7.0.0",
+    "axios": "1.2.0",
     "saochain-ts-client": "^0.0.1",
     "v8-to-istanbul": "^9.0.1"
   },
