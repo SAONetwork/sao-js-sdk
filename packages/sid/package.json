@@ -1,6 +1,6 @@
 {
-  "name": "@sao-js-sdk/sid",
-  "version": "0.0.2",
+  "name": "@saonetwork/sid",
+  "version": "0.0.0",
   "description": "sao did that support binds multiple wallets",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -35,8 +35,8 @@
     "@cosmjs/proto-signing": "^0.29.4",
     "@ethersproject/hdnode": "^5.7.0",
     "@keplr-wallet/types": "^0.11.17",
-    "@sao-js-sdk/api-client": "^0.0.0",
-    "@sao-js-sdk/common": "^0.0.0",
+    "@saonetwork/api-client": "^0.0.0",
+    "@saonetwork/common": "^0.0.0",
     "@stablelib/x25519": "^1.0.3",
     "another-did-jwt": "7.0.0",
     "buffer": "^6.0.3",
@@ -52,7 +52,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git@github.com:SaoNetwork/sao-js-sdk.git",
+    "url": "git@github.com:SaoNetwork/saonetwork.git",
     "directory": "packages/sid"
   },
   "husky": {
@@ -80,5 +80,6 @@
         }
       ]
     }
-  }
+  },
+  "gitHead": "fb06c7e9a0e1eb5bf4cb3fb017cf070b5dcca01e"
 }

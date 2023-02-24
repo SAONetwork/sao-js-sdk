@@ -1,6 +1,6 @@
 {
-  "name": "@sao-js-sdk/model",
-  "version": "0.0.2",
+  "name": "@saonetwork/model",
+  "version": "0.0.0",
   "description": "sao model management",
   "type": "module",
   "main": "dist/index.js",
@@ -22,9 +22,9 @@
     "access": "public"
   },
   "dependencies": {
-    "@sao-js-sdk/api-client": "^0.0.0",
-    "@sao-js-sdk/common": "^0.0.0",
-    "@sao-js-sdk/sid": "^0.0.0",
+    "@saonetwork/api-client": "^0.0.0",
+    "@saonetwork/common": "^0.0.0",
+    "@saonetwork/sid": "^0.0.0",
     "fast-json-patch": "3.1.1"
   },
   "jest": {
@@ -46,5 +46,6 @@
         }
       ]
     }
-  }
+  },
+  "gitHead": "fb06c7e9a0e1eb5bf4cb3fb017cf070b5dcca01e"
 }

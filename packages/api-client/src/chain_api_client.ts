@@ -8,7 +8,16 @@ import {
   UpdatePermissionProposal,
 } from "./chain_types";
 import { OfflineSigner } from "@cosmjs/proto-signing";
-import { Api, Client, SaoTxTypes, DidTxTypes, DidTypes, NodeTypes, SaoTypes, TxMsgData } from "saochain-ts-client";
+import {
+  Api,
+  Client,
+  SaoTxTypes,
+  DidTxTypes,
+  DidTypes,
+  NodeTypes,
+  SaoTypes,
+  TxMsgData,
+} from "@saonetwork/saochain-ts-client";
 import * as u8a from "uint8arrays";
 import stringify from "fast-json-stable-stringify";
 import { JWE } from "did-jwt";

@@ -15,7 +15,7 @@ import {
   UpdatePermissionProposal,
   OrderRenewProposal,
   OrderTerminateProposal,
-} from "@sao-js-sdk/api-client";
+} from "@saonetwork/api-client";
 
 export class Model {
   dataId: string;

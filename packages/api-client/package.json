@@ -1,6 +1,6 @@
 {
-  "name": "@sao-js-sdk/api-client",
-  "version": "0.0.2",
+  "name": "@saonetwork/api-client",
+  "version": "0.0.0",
   "description": "sao api client",
   "type": "module",
   "main": "dist/index.js",
@@ -24,7 +24,7 @@
   "dependencies": {
     "another-did-jwt": "7.0.0",
     "axios": "1.2.0",
-    "saochain-ts-client": "^0.0.1",
+    "@saonetwork/saochain-ts-client": "^0.0.1",
     "v8-to-istanbul": "^9.0.1"
   },
   "jest": {
@@ -46,5 +46,6 @@
         }
       ]
     }
-  }
+  },
+  "gitHead": "fb06c7e9a0e1eb5bf4cb3fb017cf070b5dcca01e"
 }

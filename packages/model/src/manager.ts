@@ -10,10 +10,10 @@ import {
   OrderRenewProposal,
   OrderTerminateProposal,
   ClientOrderProposal,
-} from "@sao-js-sdk/api-client";
-import { SidManager } from "@sao-js-sdk/sid";
+} from "@saonetwork/api-client";
+import { SidManager } from "@saonetwork/sid";
 import { ModelConfig, ModelDef, ModelProviderConfig } from "./types";
-import { CalculateCid, GenerateDataId, stringToUint8Array } from "@sao-js-sdk/common";
+import { CalculateCid, GenerateDataId, stringToUint8Array } from "@saonetwork/common";
 import { ModelProvider } from ".";
 
 const defaultModelConfig: ModelConfig = {
