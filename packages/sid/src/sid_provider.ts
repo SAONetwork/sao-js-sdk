@@ -1,7 +1,7 @@
 import { Keychain } from "./keychain";
 import { AccountProvider } from "./account_provider";
 import { accountSecretToDid, generateAccountSecret, getSidIdentifier, toJWS, toStableObject } from "./utils";
-import { createJWS } from "did-jwt";
+import { createJWS } from "another-did-jwt";
 import { AuthenticateParam, CreateJWSParam, JWS } from "./types";
 import { DidStore } from "./did_store";
 

@@ -20,7 +20,7 @@ import {
 } from "@saonetwork/saochain-ts-client";
 import * as u8a from "uint8arrays";
 import stringify from "fast-json-stable-stringify";
-import { JWE } from "did-jwt";
+import { JWE } from "another-did-jwt";
 
 export class ChainApiClient {
   private signer: OfflineSigner;

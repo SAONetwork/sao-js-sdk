@@ -1,6 +1,6 @@
 import { DidStore } from "./did_store";
 import { OfflineSigner } from "@cosmjs/proto-signing";
-import { JWE } from "did-jwt";
+import { JWE } from "another-did-jwt";
 import LRUCache from "lru-cache";
 import { AccountAuth, ChainApiClient } from "@saonetwork/api-client";
 import { DidTxTypes } from "@saonetwork/saochain-ts-client";
