@@ -1,6 +1,6 @@
 import { JWE } from "did-jwt";
 import { OfflineSigner } from "@cosmjs/proto-signing";
-import { SaoTypes } from "sao-chain-client";
+import { SaoTypes } from "saochain-ts-client";
 
 export const BindingProofV1 = 1;
 
@@ -52,4 +52,4 @@ export type OrderTerminateProposal = {
   JwsSignature: SaoTypes.JwsSignature;
 };
 
-export { SaoTypes } from "sao-chain-client";
+export { SaoTypes } from "saochain-ts-client";

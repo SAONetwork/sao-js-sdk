@@ -1,9 +1,7 @@
 {
   "name": "@sao-js-sdk/sid",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "sao did that support binds multiple wallets",
-  "author": "LeoR <leo@sao.network>",
-  "homepage": "",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "type": "module",
@@ -29,6 +27,10 @@
       "git add"
     ]
   },
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/",
+    "access": "public"
+  },
   "dependencies": {
     "@cosmjs/proto-signing": "^0.29.4",
     "@ethersproject/hdnode": "^5.7.0",
@@ -38,7 +40,7 @@
     "@stablelib/x25519": "^1.0.3",
     "buffer": "^6.0.3",
     "caip": "^1.1.0",
-    "did-jwt": "7.0.0",
+    "another-did-jwt": "7.0.0",
     "did-resolver": "^3.2.2",
     "dids": "^3.4.0",
     "ethers": "^5.7.2",

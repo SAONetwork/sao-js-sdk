@@ -1,6 +1,6 @@
 import { AccountId } from "caip";
 import { AccountProvider } from "./account_provider";
-import { DidTxTypes } from "sao-chain-client";
+import { DidTxTypes } from "saochain-ts-client";
 
 import { getBindMessage, utf8ToHex } from "./utils";
 
