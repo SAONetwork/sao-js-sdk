@@ -1,6 +1,6 @@
 {
   "name": "@saonetwork/sid",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "sao did that support binds multiple wallets",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -35,8 +35,8 @@
     "@cosmjs/proto-signing": "^0.29.4",
     "@ethersproject/hdnode": "^5.7.0",
     "@keplr-wallet/types": "^0.11.17",
-    "@saonetwork/api-client": "^0.0.0",
-    "@saonetwork/common": "^0.0.0",
+    "@saonetwork/api-client": "^0.0.1",
+    "@saonetwork/common": "^0.0.1",
     "@stablelib/x25519": "^1.0.3",
     "another-did-jwt": "7.0.0",
     "buffer": "^6.0.3",
