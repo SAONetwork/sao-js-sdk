@@ -1,5 +1,5 @@
 import { AccountId } from "caip";
-import { DidTxTypes } from "sao-chain-client";
+import { DidTxTypes } from "saochain-ts-client";
 
 /**
  * accounts that binds to sid should implement this interface.

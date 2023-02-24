@@ -1,4 +1,4 @@
-import { DidTxTypes } from "sao-chain-client";
+import { DidTxTypes } from "saochain-ts-client";
 import { JWE } from "did-jwt";
 import { AccountAuth } from "@sao-js-sdk/api-client";
 

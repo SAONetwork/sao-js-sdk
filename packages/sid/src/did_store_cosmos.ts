@@ -3,7 +3,7 @@ import { OfflineSigner } from "@cosmjs/proto-signing";
 import { JWE } from "did-jwt";
 import LRUCache from "lru-cache";
 import { AccountAuth, ChainApiClient } from "@sao-js-sdk/api-client";
-import { DidTxTypes } from "sao-chain-client";
+import { DidTxTypes } from "saochain-ts-client";
 
 const DefaultLruOptions = {
   max: 20,

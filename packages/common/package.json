@@ -1,19 +1,19 @@
 {
   "name": "@sao-js-sdk/common",
-  "version": "0.0.0",
-  "description": "> TODO: description",
+  "version": "0.0.1",
   "keywords": [
     "did"
   ],
-  "author": "LeoR <leo@sao.network>",
-  "homepage": "",
-  "license": "ISC",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [
     "dist"
   ],
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/",
+    "access": "public"
+  },
   "scripts": {
     "build:clean": "del dist",
     "build:js": "swc src -d ./dist --config-file ../../.swcrc",
