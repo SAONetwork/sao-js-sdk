@@ -1,5 +1,5 @@
 import { DidTxTypes } from "@saonetwork/saochain-ts-client";
-import { JWE } from "did-jwt";
+import { JWE } from "another-did-jwt";
 import { AccountAuth } from "@saonetwork/api-client";
 
 // interface for did information storage.

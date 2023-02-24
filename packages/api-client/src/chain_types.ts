@@ -1,4 +1,4 @@
-import { JWE } from "did-jwt";
+import { JWE } from "another-did-jwt";
 import { OfflineSigner } from "@cosmjs/proto-signing";
 import { SaoTypes } from "@saonetwork/saochain-ts-client";
 
