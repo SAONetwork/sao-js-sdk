@@ -5,11 +5,11 @@ import { randomBytes } from "@stablelib/random";
 import { JWE, ES256KSigner, Signer, createJWE, x25519Encrypter, x25519Decrypter, decryptJWE, Decrypter } from "did-jwt";
 import { accountSecretToDid, encodeKey, parseJWEKids } from "./utils";
 import { DidStore } from "./did_store";
-import { AccountAuth } from "@sao-js-sdk/api-client";
+import { AccountAuth } from "@saonetwork/api-client";
 import { DID } from "dids";
 import { getResolver } from "key-did-resolver";
 import stringify from "fast-json-stable-stringify";
-import { Hash } from "@sao-js-sdk/common";
+import { Hash } from "@saonetwork/common";
 import { getSidIdentifier } from "./utils";
 
 export interface KeySeries {

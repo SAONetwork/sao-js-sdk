@@ -2,8 +2,8 @@ import { DidStore } from "./did_store";
 import { OfflineSigner } from "@cosmjs/proto-signing";
 import { JWE } from "did-jwt";
 import LRUCache from "lru-cache";
-import { AccountAuth, ChainApiClient } from "@sao-js-sdk/api-client";
-import { DidTxTypes } from "saochain-ts-client";
+import { AccountAuth, ChainApiClient } from "@saonetwork/api-client";
+import { DidTxTypes } from "@saonetwork/saochain-ts-client";
 
 const DefaultLruOptions = {
   max: 20,

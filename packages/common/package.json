@@ -1,6 +1,6 @@
 {
-  "name": "@sao-js-sdk/common",
-  "version": "0.0.2",
+  "name": "@saonetwork/common",
+  "version": "0.0.0",
   "keywords": [
     "did"
   ],
@@ -30,5 +30,6 @@
     "caip": "^1.1.0",
     "cids": "^1.1.9",
     "jest": "^29.3.1"
-  }
+  },
+  "gitHead": "fb06c7e9a0e1eb5bf4cb3fb017cf070b5dcca01e"
 }

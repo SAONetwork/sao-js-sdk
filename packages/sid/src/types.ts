@@ -1,5 +1,5 @@
-import { SaoTypes, DidTxTypes } from "saochain-ts-client";
-import { AccountAuth } from "@sao-js-sdk/api-client";
+import { SaoTypes, DidTxTypes } from "@saonetwork/saochain-ts-client";
+import { AccountAuth } from "@saonetwork/api-client";
 
 /**
  * JSON web signature type.

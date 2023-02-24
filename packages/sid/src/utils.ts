@@ -8,7 +8,7 @@ import { getResolver as getKeyResolver } from "key-did-resolver";
 import stringify from "fast-json-stable-stringify";
 import { JWS } from "./types";
 import { JWE } from "did-jwt";
-import { Hash } from "@sao-js-sdk/common";
+import { Hash } from "@saonetwork/common";
 
 const multicodecPubkeyTable: Record<string, number> = {
   secp256k1: 0xe7,

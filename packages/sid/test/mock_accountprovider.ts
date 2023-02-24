@@ -1,4 +1,4 @@
-import { DidTxTypes } from "saochain-ts-client";
+import { DidTxTypes } from "@saonetwork/saochain-ts-client";
 
 export class MockAccountProvider {
   chain: string;
