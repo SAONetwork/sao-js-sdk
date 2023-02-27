@@ -6,18 +6,20 @@ import * as u8a from "uint8arrays";
 import { getBindMessage } from "./utils";
 
 export class SaoAccountProvider implements AccountProvider {
+  private cosmosChainId: string;
   private address: string;
   private signer: OfflineDirectSigner;
 
-  static async newSaoAccountProvider(signer: OfflineDirectSigner): Promise<SaoAccountProvider> {
+  static async newSaoAccountProvider(signer: OfflineDirectSigner, chainId: string): Promise<SaoAccountProvider> {
     const account = await signer.getAccounts();
     const address = account[0].address;
-    return new SaoAccountProvider(signer, address);
+    return new SaoAccountProvider(signer, address, chainId);
   }
 
-  private constructor(signer: OfflineDirectSigner, address: string) {
+  private constructor(signer: OfflineDirectSigner, address: string, chainId: string) {
     this.signer = signer;
     this.address = address;
+    this.cosmosChainId = chainId;
   }
 
   private namespace(): string {
@@ -25,7 +27,7 @@ export class SaoAccountProvider implements AccountProvider {
   }
 
   private reference(): string {
-    return "sao";
+    return this.cosmosChainId;
   }
 
   chainId(): string {

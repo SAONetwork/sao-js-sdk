@@ -5,8 +5,6 @@ import { Keplr } from "@keplr-wallet/types";
 
 import { getBindMessage } from "./utils";
 
-const CHAIN_ID = "sao";
-
 /**
  * account provider implementation for keplr wallet.
  *
@@ -17,18 +15,20 @@ const CHAIN_ID = "sao";
  * for amino signer, same payload doesn't work as well. only kepler instance can work now.
  */
 export class SaoKeplrAccountProvider implements AccountProvider {
+  private cosmosChainId: string;
   private address: string;
   // private signer: OfflineAminoSigner
   private signer: Keplr;
 
-  static async new(signer: Keplr): Promise<SaoKeplrAccountProvider> {
-    const currentKey = await signer.getKey(CHAIN_ID);
-    return new SaoKeplrAccountProvider(signer, currentKey.bech32Address);
+  static async new(signer: Keplr, chainId: string): Promise<SaoKeplrAccountProvider> {
+    const currentKey = await signer.getKey(chainId);
+    return new SaoKeplrAccountProvider(signer, currentKey.bech32Address, chainId);
   }
 
-  private constructor(signer: Keplr, address: string) {
+  private constructor(signer: Keplr, address: string, chainId: string) {
     this.signer = signer;
     this.address = address;
+    this.cosmosChainId = chainId;
   }
 
   private namespace(): string {
@@ -36,7 +36,7 @@ export class SaoKeplrAccountProvider implements AccountProvider {
   }
 
   private reference(): string {
-    return CHAIN_ID;
+    return this.cosmosChainId;
   }
 
   chainId(): string {
