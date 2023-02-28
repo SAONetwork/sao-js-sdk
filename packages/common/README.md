@@ -1,11 +1,9 @@
 # `common`
 
-> TODO: description
+common library for sao.
 
-## Usage
+## Installation
 
 ```
-const common = require('common');
-
-// TODO: DEMONSTRATE API
+npm install @saonetwork/common
 ```
