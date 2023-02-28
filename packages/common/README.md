@@ -1,11 +1,7 @@
 # `common`
 
-> TODO: description
+## Installation
 
-## Usage
-
-```
-const common = require('common');
-
-// TODO: DEMONSTRATE API
+``` sh
+npm install @saonetwork/common
 ```
