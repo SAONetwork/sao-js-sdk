@@ -1,11 +1,9 @@
-# `sid`
+# apiclient
 
-> TODO: description
+Encapsulate sao nodes' api and sao chain api.
 
-## Usage
+## Installation
 
 ```
-const sid = require('model');
-
-// TODO: DEMONSTRATE API
+npm install @saonetwork/apiclient
 ```
