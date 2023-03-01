@@ -3,7 +3,11 @@ import { AccountProvider } from "./account_provider";
 import { SidProvider } from "./sid_provider";
 import { DidStore } from "./did_store";
 import { generateAccountSecret, isSid, getSidIdentifier } from "./utils";
+import { BindingParam } from "./types";
 
+/**
+ * Sid manager which can manage a list of accounts and sid
+ */
 export class SidManager {
   private didStore: DidStore;
   // current account provider
@@ -17,22 +21,34 @@ export class SidManager {
     this.sidProviders = {};
   }
 
+  /**
+   * create a sid manager instance.
+   *
+   * @param accountProvider account provider
+   * @param didStore  did store
+   * @param did did string
+   * @returns sid manager
+   */
   static async createManager(accountProvider: AccountProvider, didStore: DidStore, did?: string): Promise<SidManager> {
     const manager = new SidManager(accountProvider, didStore);
     await manager.prepareSidProvider(did);
     return manager;
   }
 
-  // change to a new account provider.
-  async setAccountProvider(accountProvider: AccountProvider, did?: string) {
+  /**
+   * set current account provider
+   *
+   * @param accountProvider account provider to set
+   * @param did
+   */
+  async setAccountProvider(accountProvider: AccountProvider, did?: string): Promise<BindingParam | null> {
     this.accountProvider = accountProvider;
-    await this.prepareSidProvider(did);
+    return await this.prepareSidProvider(did);
   }
 
-  private async prepareSidProvider(did?: string, lazy = true): Promise<void> {
+  private async prepareSidProvider(did?: string, lazy = true): Promise<BindingParam | null> {
     const account = await this.accountProvider.accountId();
-    const bindingDid = await this.didStore.getBinding(account.toString());
-    console.log(`binding did for ${account.toString()}: ${bindingDid}`);
+    const bindingDid = await this.didStore.getDid(account.toString());
 
     if (bindingDid) {
       if (this.sidProviders[bindingDid]) {
@@ -48,16 +64,21 @@ export class SidManager {
       }
     } else {
       if (did) {
-        await this.bind(account.toString(), did);
+        return await this.generateBindingParam(account.toString(), did);
       } else {
-        console.log("new did provider.");
         const sidProvider = await SidProvider.newFromAccount(this.didStore, this.accountProvider);
         this.sidProviders[sidProvider.sid] = sidProvider;
       }
     }
   }
 
-  private async bind(accountId: string, did: string): Promise<void> {
+  /**
+   * generate Binding parameter.
+   *
+   * @param accountId account id
+   * @param did did
+   */
+  private async generateBindingParam(accountId: string, did: string): Promise<BindingParam> {
     if (!isSid(did)) {
       throw new Error(`${did} is not a sid.`);
     }
@@ -67,37 +88,62 @@ export class SidManager {
 
     const rootDocId = getSidIdentifier(did);
     const timestamp = Date.now();
-    const proof = await this.accountProvider.generateBindingProof(did, timestamp);
     const accountSecret = await generateAccountSecret(this.accountProvider);
     const accountAuth = await this.sidProviders[did].keychain.add(accountId, accountSecret);
-    await this.didStore.binding(rootDocId, {}, proof, accountAuth);
+    const proof = await this.accountProvider.generateBindingProof(did, timestamp);
+    return {
+      rootDocId,
+      proof,
+      accountAuth,
+    };
   }
 
-  async unbind(): Promise<void> {
-    const account = await this.accountProvider.accountId();
-    const bindingDid = await this.didStore.getBinding(account.toString());
+  /**
+   * Bind account id to did.
+   *
+   * @param param binding parameters, include rootDocId bindingProof and accountAuth
+   */
+  async bind(param: BindingParam): Promise<void> {
+    await this.didStore.binding(param.rootDocId, {}, param.proof, param.accountAuth);
+  }
+
+  /**
+   * Unbind current account from its sid.
+   */
+  async unbind(accountId?: string): Promise<void> {
+    if (!accountId) {
+      accountId = (await this.accountProvider.accountId()).toString();
+    }
+    const bindingDid = await this.didStore.getDid(accountId);
     if (bindingDid) {
       if (!this.sidProviders[bindingDid]) {
-        await this.prepareSidProvider();
+        await this.prepareSidProvider(null, false);
       }
-      await this.didStore.removeBinding(account.toString());
-      await this.sidProviders[bindingDid].keychain.remove(account.toString());
+      await this.sidProviders[bindingDid].keychain.remove(accountId);
       delete this.sidProviders[bindingDid];
-    } else {
-      console.log("binding doesn't exist");
     }
   }
 
+  /**
+   * list all dids that are in managed.
+   * @returns all dids
+   */
   listDids(): Array<string> {
     return Object.keys(this.sidProviders);
   }
 
+  /**
+   * Get sid provider that are in managed for the given did.
+   *
+   * @param did sid
+   * @returns
+   */
   async getSidProvider(did?: string): Promise<SidProvider | null> {
     if (did) {
       return this.sidProviders[did];
     } else {
       const account = await this.accountProvider.accountId();
-      const bindingDid = await this.didStore.getBinding(account.toString());
+      const bindingDid = await this.didStore.getDid(account.toString());
       if (bindingDid) {
         return this.sidProviders[bindingDid];
       } else {
@@ -106,6 +152,11 @@ export class SidManager {
     }
   }
 
+  /**
+   * Update did's payment address
+   *
+   * @param did did string
+   */
   async updatePaymentAddress(did?: string): Promise<void> {
     const accountId = await this.accountProvider.accountId();
     if (!accountId.toString().startsWith("cosmos:sao")) {
@@ -113,7 +164,7 @@ export class SidManager {
     }
 
     if (!did) {
-      did = await this.didStore.getBinding(accountId.toString());
+      did = await this.didStore.getDid(accountId.toString());
       if (!did) {
         throw new Error(`${accountId.toString()} is not binding`);
       }

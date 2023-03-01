@@ -1,15 +1,17 @@
 {
-  "name": "@sao-js-sdk/api-client",
-  "version": "0.0.0",
+  "name": "@saonetwork/api-client",
+  "version": "0.0.2",
   "description": "sao api client",
-  "author": "Not@All <well@sao.network>",
-  "homepage": "",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [
     "dist"
   ],
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/",
+    "access": "public"
+  },
   "scripts": {
     "build:clean": "del dist",
     "build:js": "swc src -d ./dist --config-file ../../.swcrc",
@@ -20,10 +22,10 @@
     "lint": "eslint --fix --ignore-pattern \"src/**/*.test.[jt]s\" \"src/**/*.[jt]s\""
   },
   "dependencies": {
-    "@sao-js-sdk/common": "^0.0.0",
+    "@saonetwork/saochain-ts-client": "^0.0.1",
+    "another-did-jwt": "7.0.0",
     "axios": "1.2.0",
-    "did-jwt": "7.0.0",
-    "sao-chain-client": "^0.0.1"
+    "v8-to-istanbul": "^9.0.1"
   },
   "jest": {
     "moduleDirectories": [
@@ -44,5 +46,6 @@
         }
       ]
     }
-  }
+  },
+  "gitHead": "fb06c7e9a0e1eb5bf4cb3fb017cf070b5dcca01e"
 }

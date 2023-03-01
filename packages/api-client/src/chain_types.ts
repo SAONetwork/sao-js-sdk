@@ -1,6 +1,8 @@
-import { JWE } from "did-jwt";
+import { JWE } from "another-did-jwt";
 import { OfflineSigner } from "@cosmjs/proto-signing";
-import { JWSSignature } from "@sao-js-sdk/common";
+import { SaoTypes } from "@saonetwork/saochain-ts-client";
+
+export const BindingProofV1 = 1;
 
 export type ChainApiClientConfig = {
   apiURL: string;
@@ -25,65 +27,29 @@ export type TxResult = {
   transactionHash: string;
 };
 
-export type QueryProposal = {
-  owner: string;
-  keyword: string;
-  groupId?: string;
-  type_?: number | undefined;
-  lastValidHeight: number;
-  gateway: string;
-  commitId?: string | undefined;
-  version?: string | undefined;
-};
-
-export type Proposal = {
-  owner: string;
-  provider: string;
-  groupId: string;
-  duration: number;
-  replica: number;
-  timeout: number;
-  alias: string;
-  dataId: string;
-  commitId: string;
-  tags: string[] | undefined;
-  cid: string;
-  rule: string | undefined;
-  extendInfo: string | undefined;
-  size: number;
-  operation: number;
-};
-
-export type PermissionProposal = {
-  owner: string;
-  dataId: string;
-  readonlyDids?: string[] | undefined;
-  readwriteDids?: string[] | undefined;
-};
-
-export type RenewProposal = {
-  owner: string;
-  duration: number;
-  timeout: number;
-  data: string[];
-};
-
 export type QueryMetadataProposal = {
-  Proposal: QueryProposal;
-  JwsSignature: JWSSignature;
+  Proposal: SaoTypes.QueryProposal;
+  JwsSignature: SaoTypes.JwsSignature;
 };
 
 export type ClientOrderProposal = {
-  Proposal: Proposal;
-  JwsSignature: JWSSignature;
+  Proposal: SaoTypes.Proposal;
+  JwsSignature: SaoTypes.JwsSignature;
 };
 
 export type UpdatePermissionProposal = {
-  Proposal: PermissionProposal;
-  JwsSignature: JWSSignature;
+  Proposal: SaoTypes.PermissionProposal;
+  JwsSignature: SaoTypes.JwsSignature;
 };
 
 export type OrderRenewProposal = {
-  Proposal: RenewProposal;
-  JwsSignature: JWSSignature;
+  Proposal: SaoTypes.RenewProposal;
+  JwsSignature: SaoTypes.JwsSignature;
 };
+
+export type OrderTerminateProposal = {
+  Proposal: SaoTypes.TerminateProposal;
+  JwsSignature: SaoTypes.JwsSignature;
+};
+
+export { SaoTypes } from "@saonetwork/saochain-ts-client";

@@ -5,23 +5,15 @@ import {
   GetNodeApiClient,
   ChainApiClient,
   QueryMetadataProposal,
-  Proposal,
-  QueryProposal,
-  RenewProposal,
+  SaoTypes,
   UpdatePermissionProposal,
   OrderRenewProposal,
-  PermissionProposal,
+  OrderTerminateProposal,
   ClientOrderProposal,
-} from "@sao-js-sdk/api-client";
-import { SidManager } from "@sao-js-sdk/sid";
+} from "@saonetwork/api-client";
+import { SidManager } from "@saonetwork/sid";
 import { ModelConfig, ModelDef, ModelProviderConfig } from "./types";
-import {
-  Proposal as SaoProposal,
-  QueryProposal as SaoQueryProposal,
-  RenewProposal as SaoRenewProposal,
-  PermissionProposal as SaoPermissionProposal,
-} from "sao-chain-client/dist/saonetwork.sao.sao";
-import { CalculateCid, GenerateDataId, stringToUint8Array } from "@sao-js-sdk/common";
+import { CalculateCid, GenerateDataId, stringToUint8Array } from "@saonetwork/common";
 import { ModelProvider } from ".";
 
 const defaultModelConfig: ModelConfig = {
@@ -29,12 +21,12 @@ const defaultModelConfig: ModelConfig = {
   replica: 1,
   timeout: 60 * 60 * 24,
   operation: 1,
+  isPublish: false,
 };
 export class ModelManager {
   private defaultModelProvider: ModelProvider;
   private modelProviders: Record<string, ModelProvider>;
   private sidManager: SidManager;
-  private chainApiClient: ChainApiClient;
 
   constructor(config: ModelProviderConfig, sidManager: SidManager) {
     const nodeApiClient = GetNodeApiClient({
@@ -47,7 +39,7 @@ export class ModelManager {
     const chainApiClient = new ChainApiClient({
       apiURL: config.chainApiUrl,
       rpcURL: config.chainRpcUrl,
-      prefix: config.chainPrefix || "cosmos",
+      prefix: config.chainPrefix || "sao",
       signer: config.signer,
     });
 
@@ -58,14 +50,29 @@ export class ModelManager {
     this.sidManager = sidManager;
   }
 
+  /**
+   * get the model provider by DID stringt.
+   *
+   * @param ownerDid DID string.
+   * @returns the model provider.
+   */
   private getModelProvider(ownerDid: string): ModelProvider {
     return this.modelProviders[ownerDid];
   }
 
+  /**
+   * initialize the data model manager.
+   *
+   */
   async init() {
     await this.defaultModelProvider.init();
   }
 
+  /**
+   * add a model provider.
+   *
+   * @param config model provider configuration.
+   */
   addModelProvider(config: ModelProviderConfig) {
     const nodeApiClient = GetNodeApiClient({
       baseURL: config.nodeApiUrl,
@@ -77,7 +84,7 @@ export class ModelManager {
     const chainApiClient = new ChainApiClient({
       apiURL: config.chainApiUrl,
       rpcURL: config.chainRpcUrl,
-      prefix: config.chainPrefix || "cosmos",
+      prefix: config.chainPrefix || "sao",
       signer: config.signer,
     });
 
@@ -85,9 +92,16 @@ export class ModelManager {
     this.modelProviders[config.ownerDid] = provider;
   }
 
-  async buildQueryRequest(proposal: QueryProposal) {
-    const lastValidHeight = 100;
-    const peerInfo = "";
+  /**
+   * build query requst proposal.
+   *
+   * @param provider data model provider.
+   * @param proposal query proposal.
+   */
+  async buildQueryRequest(provider: ModelProvider, proposal: SaoTypes.QueryProposal) {
+    const lastHeight: number = await provider.getLatestHeight();
+    const lastValidHeight: number = 200 + lastHeight;
+    const peerInfo: string = await provider.getPeerInfo();
 
     proposal.lastValidHeight = lastValidHeight;
     proposal.gateway = peerInfo;
@@ -98,8 +112,17 @@ export class ModelManager {
     }
 
     const clientProposal = await sidProvider.createJWS({
-      payload: u8a.toString(SaoQueryProposal.encode(SaoQueryProposal.fromPartial(proposal)).finish(), "base64url"),
+      payload: u8a.toString(
+        SaoTypes.QueryProposal.encode(SaoTypes.QueryProposal.fromPartial(proposal)).finish(),
+        "base64url"
+      ),
     });
+    console.log(
+      `query proposal signature: ${u8a.toString(
+        SaoTypes.QueryProposal.encode(SaoTypes.QueryProposal.fromPartial(proposal)).finish(),
+        "base64url"
+      )}`
+    );
 
     const queryMetadataProposal: QueryMetadataProposal = {
       Proposal: proposal,
@@ -108,6 +131,14 @@ export class ModelManager {
     return queryMetadataProposal;
   }
 
+  /**
+   * create a data model.
+   *
+   * @param def data model defination.
+   * @param modelConfig data model configuration.
+   * @param ownerDid DID string, optional.
+   * @returns the created data model.
+   */
   async createModel<T>(
     def: ModelDef<T>,
     modelConfig: ModelConfig = defaultModelConfig,
@@ -119,9 +150,9 @@ export class ModelManager {
     }
     const dataBytes = stringToUint8Array(stringify(def.data));
 
-    const dataId = GenerateDataId();
+    const dataId = GenerateDataId(provider.getOwnerSid() + provider.getGroupId());
     const cid = await CalculateCid(dataBytes);
-    const proposal: Proposal = {
+    const proposal: SaoTypes.Proposal = {
       owner: ownerDid || provider.getOwnerSid(),
       provider: provider.getNodeAddress(),
       groupId: provider.getGroupId(),
@@ -145,14 +176,20 @@ export class ModelManager {
     }
 
     const clientProposal = await sidProvider.createJWS({
-      payload: u8a.toString(SaoProposal.encode(SaoProposal.fromPartial(proposal)).finish(), "base64url"),
+      payload: u8a.toString(SaoTypes.Proposal.encode(SaoTypes.Proposal.fromPartial(proposal)).finish(), "base64url"),
     });
+    console.log(
+      `createJWS: ${u8a.toString(
+        SaoTypes.Proposal.encode(SaoTypes.Proposal.fromPartial(proposal)).finish(),
+        "base64url"
+      )}`
+    );
 
     if (!provider.validate(proposal)) {
       throw new Error("invalid provider");
     }
 
-    const query = await this.buildQueryRequest({
+    const query = await this.buildQueryRequest(provider, {
       owner: proposal.owner,
       keyword: proposal.dataId,
       groupId: def.groupId || provider.getGroupId(),
@@ -165,13 +202,25 @@ export class ModelManager {
       JwsSignature: clientProposal.signatures[0],
     };
 
-    const orderId = await provider.store(clientOrderProposal);
+    let orderId = 0;
+    if (modelConfig.isPublish) {
+      orderId = await provider.store(clientOrderProposal);
+      console.log("orderId:", orderId);
+    }
 
     const model = await provider.create(query, clientOrderProposal, orderId, Array.from(dataBytes));
 
     return model.dataId;
   }
 
+  /**
+   * update a data model.
+   *
+   * @param def data model defination.
+   * @param modelConfig data model configuration.
+   * @param ownerDid DID string, optional.
+   * @returns the updated data model.
+   */
   async updateModel<T>(
     def: ModelDef<T>,
     modelConfig: ModelConfig = defaultModelConfig,
@@ -183,16 +232,19 @@ export class ModelManager {
     }
 
     let keyword = def.dataId;
+    let keywordType = 1;
     if (keyword === undefined) {
       keyword = def.alias;
+      keywordType = 2;
       if (keyword === undefined) {
         throw new Error("Neither dataId nor alias is specified.");
       }
     }
 
-    const query = await this.buildQueryRequest({
+    const query = await this.buildQueryRequest(provider, {
       owner: ownerDid || provider.getOwnerSid(),
       keyword,
+      keywordType,
       groupId: def.groupId || provider.getGroupId(),
       lastValidHeight: 0,
       gateway: "",
@@ -208,7 +260,7 @@ export class ModelManager {
     const targetDataBytes = stringToUint8Array(stringify(target));
     const cid = await CalculateCid(targetDataBytes);
 
-    const proposal: Proposal = {
+    const proposal: SaoTypes.Proposal = {
       owner: ownerDid || provider.getOwnerSid(),
       provider: provider.getNodeAddress(),
       groupId: provider.getGroupId(),
@@ -217,7 +269,7 @@ export class ModelManager {
       timeout: modelConfig.timeout,
       alias: originModel.alias,
       dataId: originModel.dataId,
-      commitId: GenerateDataId(),
+      commitId: originModel.commitId + "|" + GenerateDataId(provider.getOwnerSid() + provider.getGroupId()),
       tags: originModel.tags,
       cid,
       rule: originModel.rule,
@@ -231,7 +283,7 @@ export class ModelManager {
       throw new Error("failed to get sid provider");
     }
     const clientProposal = await sidProvider.createJWS({
-      payload: u8a.toString(SaoProposal.encode(SaoProposal.fromPartial(proposal)).finish(), "base64url"),
+      payload: u8a.toString(SaoTypes.Proposal.encode(SaoTypes.Proposal.fromPartial(proposal)).finish(), "base64url"),
     });
 
     if (!provider.validate(proposal)) {
@@ -243,21 +295,35 @@ export class ModelManager {
       JwsSignature: clientProposal.signatures[0],
     };
 
-    const orderId = await provider.store(clientOrderProposal);
+    let orderId = 0;
+    if (modelConfig.isPublish) {
+      orderId = await provider.store(clientOrderProposal);
+    }
 
     const model = await provider.update(query, clientOrderProposal, orderId, Array.from(dataBytes));
+
     return model.dataId;
   }
 
-  async loadModel<T>(keyword: string, ownerDid?: string, groupId?: string): Promise<T> {
+  /**
+   * load a data model.
+   *
+   * @param keyword keyword to search the data model.
+   * @param keywordType keyword type: 0, 1 - data-id; 2 - alias.
+   * @param ownerDid DID string, optional.
+   * @param groupId group id string, optional.
+   * @returns the data model.
+   */
+  async loadModel<T>(keyword: string, keywordType?: number, ownerDid?: string, groupId?: string): Promise<T> {
     let provider = this.defaultModelProvider;
     if (ownerDid !== undefined) {
       provider = this.getModelProvider(ownerDid);
     }
 
-    const query = await this.buildQueryRequest({
+    const query = await this.buildQueryRequest(provider, {
       owner: ownerDid || provider.getOwnerSid(),
       keyword,
+      keywordType: keywordType || 1,
       groupId: groupId || provider.getGroupId(),
       lastValidHeight: 0,
       gateway: "",
@@ -267,15 +333,32 @@ export class ModelManager {
     return model.cast();
   }
 
-  async loadModelByCommitId<T>(keyword: string, commitId: string, ownerDid?: string, groupId?: string): Promise<T> {
+  /**
+   * load a data model.
+   *
+   * @param keyword keyword to search the data model.
+   * @param commitId commit id.
+   * @param keywordType keyword type: 0, 1 - data-id; 2 - alias.
+   * @param ownerDid DID string, optional.
+   * @param groupId group id string, optional.
+   * @returns the data model.
+   */
+  async loadModelByCommitId<T>(
+    keyword: string,
+    commitId: string,
+    keywordType?: number,
+    ownerDid?: string,
+    groupId?: string
+  ): Promise<T> {
     let provider = this.defaultModelProvider;
     if (ownerDid !== undefined) {
       provider = this.getModelProvider(ownerDid);
     }
 
-    const query = await this.buildQueryRequest({
+    const query = await this.buildQueryRequest(provider, {
       owner: ownerDid || provider.getOwnerSid(),
       keyword,
+      keywordType: keywordType || 1,
       groupId: groupId || provider.getGroupId(),
       commitId,
       lastValidHeight: 0,
@@ -287,15 +370,32 @@ export class ModelManager {
     return model.cast();
   }
 
-  async loadModelByVersion<T>(keyword: string, version: string, ownerDid?: string, groupId?: string): Promise<T> {
+  /**
+   * load a data model.
+   *
+   * @param keyword keyword to search the data model.
+   * @param version version id.
+   * @param keywordType keyword type: 0, 1 - data-id; 2 - alias.
+   * @param ownerDid DID string, optional.
+   * @param groupId group id string, optional.
+   * @returns the data model.
+   */
+  async loadModelByVersion<T>(
+    keyword: string,
+    version: string,
+    keywordType?: number,
+    ownerDid?: string,
+    groupId?: string
+  ): Promise<T> {
     let provider = this.defaultModelProvider;
     if (ownerDid !== undefined) {
       provider = this.getModelProvider(ownerDid);
     }
 
-    const query = await this.buildQueryRequest({
+    const query = await this.buildQueryRequest(provider, {
       owner: ownerDid || provider.getOwnerSid(),
       keyword,
+      keywordType: keywordType || 1,
       groupId: groupId || provider.getGroupId(),
       version,
       lastValidHeight: 0,
@@ -307,10 +407,20 @@ export class ModelManager {
     return model.cast();
   }
 
+  /**
+   * update a data model's permissions.
+   *
+   * @param dataId data id of the data model.
+   * @param readonlyDids readonly DID string list.
+   * @param readwriteDids read/write DID string list.
+   * @param isPublish whether to pubish the message or not.
+   * @param ownerDid DID string, optional.
+   */
   async updateModelPermission(
     dataId: string,
     readonlyDids?: string[],
     readwriteDids?: string[],
+    isPublish?: true,
     ownerDid?: string
   ): Promise<string> {
     let provider = this.defaultModelProvider;
@@ -318,7 +428,7 @@ export class ModelManager {
       provider = this.getModelProvider(ownerDid);
     }
 
-    const proposal: PermissionProposal = {
+    const proposal: SaoTypes.PermissionProposal = {
       owner: ownerDid || provider.getOwnerSid(),
       dataId,
       readonlyDids,
@@ -332,7 +442,7 @@ export class ModelManager {
 
     const permissionProposal = await sidProvider.createJWS({
       payload: u8a.toString(
-        SaoPermissionProposal.encode(SaoPermissionProposal.fromPartial(proposal)).finish(),
+        SaoTypes.PermissionProposal.encode(SaoTypes.PermissionProposal.fromPartial(proposal)).finish(),
         "base64url"
       ),
     });
@@ -342,14 +452,23 @@ export class ModelManager {
       JwsSignature: permissionProposal.signatures[0],
     };
 
-    await provider.updatePermission(request);
+    await provider.updatePermission(request, isPublish);
 
     return;
   }
 
+  /**
+   * renew a data model.
+   *
+   * @param dataId data id of the data model.
+   * @param modelConfig data model configuration.
+   * @param isPublish whether to pubish the message or not.
+   * @param ownerDid DID string, optional.
+   */
   async renewModel(
     dataIds: string[],
     modelConfig: ModelConfig = defaultModelConfig,
+    isPublish?: true,
     ownerDid?: string
   ): Promise<string> {
     let provider = this.defaultModelProvider;
@@ -357,7 +476,7 @@ export class ModelManager {
       provider = this.getModelProvider(ownerDid);
     }
 
-    const proposal: RenewProposal = {
+    const proposal: SaoTypes.RenewProposal = {
       owner: ownerDid || provider.getOwnerSid(),
       duration: modelConfig.duration,
       timeout: modelConfig.timeout,
@@ -370,7 +489,10 @@ export class ModelManager {
     }
 
     const renewProposal = await sidProvider.createJWS({
-      payload: u8a.toString(SaoRenewProposal.encode(SaoRenewProposal.fromPartial(proposal).finish()), "base64url"),
+      payload: u8a.toString(
+        SaoTypes.RenewProposal.encode(SaoTypes.RenewProposal.fromPartial(proposal)).finish(),
+        "base64url"
+      ),
     });
 
     const request: OrderRenewProposal = {
@@ -378,7 +500,47 @@ export class ModelManager {
       JwsSignature: renewProposal.signatures[0],
     };
 
-    await provider.renew(request);
+    await provider.renew(request, isPublish);
+
+    return;
+  }
+
+  /**
+   * delete a data model's order.
+   *
+   * @param dataId data id of the data model.
+   * @param isPublish whether to pubish the message or not.
+   * @param ownerDid DID string, optional.
+   */
+  async deleteModel(dataId: string, isPublish?: false, ownerDid?: string): Promise<string> {
+    let provider = this.defaultModelProvider;
+    if (ownerDid !== undefined) {
+      provider = this.getModelProvider(ownerDid);
+    }
+
+    const proposal: SaoTypes.TerminateProposal = {
+      owner: ownerDid || provider.getOwnerSid(),
+      dataId,
+    };
+
+    const sidProvider = await this.sidManager.getSidProvider();
+    if (sidProvider === null) {
+      throw new Error("failed to get sid provider");
+    }
+
+    const terminateProposal = await sidProvider.createJWS({
+      payload: u8a.toString(
+        SaoTypes.TerminateProposal.encode(SaoTypes.TerminateProposal.fromPartial(proposal)).finish(),
+        "base64url"
+      ),
+    });
+
+    const request: OrderTerminateProposal = {
+      Proposal: proposal,
+      JwsSignature: terminateProposal.signatures[0],
+    };
+
+    await provider.terminate(request, isPublish);
 
     return;
   }

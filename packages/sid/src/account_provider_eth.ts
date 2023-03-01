@@ -1,11 +1,22 @@
 import { AccountId } from "caip";
 import { AccountProvider } from "./account_provider";
-import { BindingProof, getBindMessage } from "@sao-js-sdk/common";
-import { utf8ToHex } from "./utils";
+import { DidTxTypes } from "@saonetwork/saochain-ts-client";
 
+import { getBindMessage, utf8ToHex } from "./utils";
+
+/**
+ * Account provider for eip55 wallets.
+ */
 export class EthAccountProvider implements AccountProvider {
+  /**
+   * ethereum provider, for example a metamask window.
+   */
   private provider: any;
+  /**
+   * account address.
+   */
   private address: string;
+
   static async new(provider: any): Promise<EthAccountProvider> {
     const accounts = await provider.request({ method: "eth_requestAccounts" });
     if (accounts.length === 0) {
@@ -46,7 +57,7 @@ export class EthAccountProvider implements AccountProvider {
     });
   }
 
-  async generateBindingProof(did: string, timestamp: number): Promise<BindingProof> {
+  async generateBindingProof(did: string, timestamp: number): Promise<DidTxTypes.BindingProof> {
     const message = getBindMessage(did, timestamp);
     const signature = await this.provider.request({
       method: "personal_sign",

@@ -1,29 +1,13 @@
-import { BindingProof } from "@sao-js-sdk/common";
-import { JWE } from "did-jwt";
+import { DidTxTypes } from "@saonetwork/saochain-ts-client";
+import { JWE } from "another-did-jwt";
+import { AccountAuth } from "@saonetwork/api-client";
 
-export interface AccountAuth {
-  accountDid: string;
-  accountEncryptedSeed: JWE;
-  sidEncryptedAccount: JWE;
-}
-
-// 1. get did by account id
-// 2. set account id -> did
-// 2.1 if accountid's chainid is cosmos:sao, it can be set payment account.
-// 3. get a did's payment account
-// 4. get a did's all accounts
-// 5. remove account id -> did
+// interface for did information storage.
 export interface DidStore {
-  /**
-   *
-   * @param proof
-   */
-  addBinding(proof: BindingProof): Promise<void>;
-
   binding(
     rootDocId: string,
     keys: Record<string, string>,
-    proof: BindingProof,
+    proof: DidTxTypes.BindingProof,
     accountAuth: AccountAuth
   ): Promise<void>;
 
@@ -32,32 +16,26 @@ export interface DidStore {
    * @param accountId
    * @return did
    */
-  getBinding(accountId: string): Promise<string | null>;
-
-  /**
-   *
-   * @param accountId
-   */
-  removeBinding(accountId: string): Promise<void>;
-
-  // @param accountEncryptedSeed - account encrypted sid's seed.
-  // @param sidEncryptedAccount - sid encrypted account id.
-  addAccountAuth(did: string, accountAuth: AccountAuth): Promise<void>;
+  getDid(accountId: string): Promise<string | null>;
 
   getAccountAuth(did: string, accountDid: string): Promise<AccountAuth | null>;
 
-  updateAccountAuths(did: string, update: Array<AccountAuth>, remove: Array<string>): Promise<void>;
+  update(
+    did: string,
+    accountId: string,
+    newDocId: string,
+    keys: Record<string, string>,
+    timestamp: number,
+    updates: AccountAuth[],
+    removes: string[],
+    pastSeed: JWE
+  ): Promise<void>;
 
   getAllAccountAuth(did: string): Promise<AccountAuth[]>;
-
-  // @return document id.
-  updateSidDocument(keys: Record<string, string>, rootDocId?: string): Promise<string>;
 
   listSidDocumentVersions(rootDocId: string): Promise<Array<string>>;
 
   getOldSeeds(did: string): Promise<Array<JWE>>;
-
-  addOldSeed(did: string, seed: JWE): Promise<void>;
 
   updatePaymentAddress(accountId: string, did: string): Promise<void>;
 }

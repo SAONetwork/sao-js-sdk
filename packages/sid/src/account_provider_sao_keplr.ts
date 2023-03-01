@@ -1,9 +1,9 @@
 import { AccountId } from "caip";
 import { AccountProvider } from "./account_provider";
-import { BindingProof, getBindMessage } from "@sao-js-sdk/common";
+import { DidTxTypes } from "@saonetwork/saochain-ts-client";
 import { Keplr } from "@keplr-wallet/types";
 
-const CHAIN_ID = "sao";
+import { getBindMessage } from "./utils";
 
 /**
  * account provider implementation for keplr wallet.
@@ -15,18 +15,20 @@ const CHAIN_ID = "sao";
  * for amino signer, same payload doesn't work as well. only kepler instance can work now.
  */
 export class SaoKeplrAccountProvider implements AccountProvider {
+  private cosmosChainId: string;
   private address: string;
   // private signer: OfflineAminoSigner
   private signer: Keplr;
 
-  static async new(signer: Keplr): Promise<SaoKeplrAccountProvider> {
-    const currentKey = await signer.getKey(CHAIN_ID);
-    return new SaoKeplrAccountProvider(signer, currentKey.bech32Address);
+  static async new(signer: Keplr, chainId: string): Promise<SaoKeplrAccountProvider> {
+    const currentKey = await signer.getKey(chainId);
+    return new SaoKeplrAccountProvider(signer, currentKey.bech32Address, chainId);
   }
 
-  private constructor(signer: Keplr, address: string) {
+  private constructor(signer: Keplr, address: string, chainId: string) {
     this.signer = signer;
     this.address = address;
+    this.cosmosChainId = chainId;
   }
 
   private namespace(): string {
@@ -34,7 +36,7 @@ export class SaoKeplrAccountProvider implements AccountProvider {
   }
 
   private reference(): string {
-    return CHAIN_ID;
+    return this.cosmosChainId;
   }
 
   chainId(): string {
@@ -53,12 +55,13 @@ export class SaoKeplrAccountProvider implements AccountProvider {
     // const signDoc = this.getADR36SignDoc(this.address, Buffer.from(message).toString("base64"));
     // const resp = await this.signer.signAmino(this.address, signDoc);
     // return resp.signature.signature;
+    const res = await this.signer.signArbitrary(this.reference(), this.address, message);
 
-    const resp = await this.signer.signArbitrary(this.reference(), this.address, message);
-    return resp.signature;
+    return `${res.pub_key.type}.${res.pub_key.value}.${res.signature}`;
+    // return resp;
   }
 
-  async generateBindingProof(did: string, timestamp: number): Promise<BindingProof> {
+  async generateBindingProof(did: string, timestamp: number): Promise<DidTxTypes.BindingProof> {
     const msg = getBindMessage(did, timestamp);
     const signed = await this.sign(msg);
     const accountId = await this.accountId();

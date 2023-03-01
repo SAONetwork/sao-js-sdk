@@ -1,22 +1,25 @@
 import { AccountId } from "caip";
 import { AccountProvider } from "./account_provider";
-import { BindingProof, getBindMessage } from "@sao-js-sdk/common";
+import { DidTxTypes } from "@saonetwork/saochain-ts-client";
 import { makeSignDoc, OfflineDirectSigner } from "@cosmjs/proto-signing";
 import * as u8a from "uint8arrays";
+import { getBindMessage } from "./utils";
 
 export class SaoAccountProvider implements AccountProvider {
+  private cosmosChainId: string;
   private address: string;
   private signer: OfflineDirectSigner;
 
-  static async newSaoAccountProvider(signer: OfflineDirectSigner): Promise<SaoAccountProvider> {
+  static async newSaoAccountProvider(signer: OfflineDirectSigner, chainId: string): Promise<SaoAccountProvider> {
     const account = await signer.getAccounts();
     const address = account[0].address;
-    return new SaoAccountProvider(signer, address);
+    return new SaoAccountProvider(signer, address, chainId);
   }
 
-  private constructor(signer: OfflineDirectSigner, address: string) {
+  private constructor(signer: OfflineDirectSigner, address: string, chainId: string) {
     this.signer = signer;
     this.address = address;
+    this.cosmosChainId = chainId;
   }
 
   private namespace(): string {
@@ -24,7 +27,7 @@ export class SaoAccountProvider implements AccountProvider {
   }
 
   private reference(): string {
-    return "sao";
+    return this.cosmosChainId;
   }
 
   chainId(): string {
@@ -41,18 +44,11 @@ export class SaoAccountProvider implements AccountProvider {
   async sign(message: string): Promise<string> {
     // not a tx sign. default authinfo and account number.
     const signDoc = makeSignDoc(u8a.fromString(message), u8a.fromString(""), "sao", 0);
-    console.log(`sign from address: ${this.address}`);
-    try {
-      const resp = await this.signer.signDirect(this.address, signDoc);
-      console.log(resp);
-      return resp.signature.signature;
-    } catch (e) {
-      console.log(e);
-      throw e;
-    }
+    const resp = await this.signer.signDirect(this.address, signDoc);
+    return resp.signature.signature;
   }
 
-  async generateBindingProof(did: string, timestamp: number): Promise<BindingProof> {
+  async generateBindingProof(did: string, timestamp: number): Promise<DidTxTypes.BindingProof> {
     const message = getBindMessage(did, timestamp);
     const signed = await this.sign(message);
     const accountId = await this.accountId();

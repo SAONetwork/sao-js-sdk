@@ -1,32 +1,38 @@
 import {
   AccountAuth,
+  BindingProofV1,
   ChainApiClientConfig,
   ClientOrderProposal,
   OrderRenewProposal,
+  OrderTerminateProposal,
   UpdatePermissionProposal,
 } from "./chain_types";
-import { BindingProof, BindingProofV1 } from "@sao-js-sdk/common";
 import { OfflineSigner } from "@cosmjs/proto-signing";
-import { Api } from "sao-chain-client/dist/saonetwork.sao.did/rest";
-import { Client } from "sao-chain-client";
-import { queryClient as didQueryClient } from "sao-chain-client/dist/saonetwork.sao.did";
-import { queryClient as modelQueryClient } from "sao-chain-client/dist/saonetwork.sao.model";
+import {
+  Api,
+  Client,
+  SaoTxTypes,
+  DidTxTypes,
+  DidTypes,
+  NodeTypes,
+  SaoTypes,
+  TxMsgData,
+} from "@saonetwork/saochain-ts-client";
 import * as u8a from "uint8arrays";
 import stringify from "fast-json-stable-stringify";
-import { MsgUpdateSidDocumentResponse } from "sao-chain-client/dist/saonetwork.sao.did/types/sao/did/tx";
-import { TxMsgData } from "sao-chain-client/dist/cosmos.tx.v1beta1/types/cosmos/base/abci/v1beta1/abci";
-import { JWE } from "did-jwt";
+import { JWE } from "another-did-jwt";
 
 export class ChainApiClient {
   private signer: OfflineSigner;
   private client: InstanceType<typeof Client>;
   private didClient: Api<unknown>;
-  private modelClient: Api<unknown>;
+  private nodeClient: Api<unknown>;
+  private saoClient: Api<unknown>;
 
   constructor(config: ChainApiClientConfig) {
     const api = config.apiURL || process.env.COSMOS_API_URL || "http://localhost:1317";
     const rpc = config.rpcURL || process.env.COSMOS_RPC_URL || "http://localhost:26657";
-    const addressPrefix = config.prefix || "cosmos";
+    const addressPrefix = config.prefix || "sao";
 
     console.log("cosmos did store: ");
     console.log("api url: ", api);
@@ -43,54 +49,90 @@ export class ChainApiClient {
     );
 
     this.signer = config.signer;
-    this.didClient = didQueryClient({ addr: api });
-    this.modelClient = modelQueryClient({ addr: api });
+    this.didClient = DidTypes.queryClient({ addr: api });
+    this.nodeClient = NodeTypes.queryClient({ addr: api });
+    this.saoClient = SaoTypes.queryClient({ addr: api });
   }
 
   // common
+  /**
+   * Get the transaction by hash.
+   *
+   * @param transactionHash the hash string of the transaction.
+   * @returns the transaction deatails.
+   */
   async GetTx(transactionHash: string): Promise<any> {
     return this.client.CosmosTxV1Beta1.query.serviceGetTx(transactionHash);
   }
 
-  async Decode(data: string): Promise<any> {
+  /**
+   * Decode order id from input data string.
+   *
+   * @param data encoded data string.
+   * @returns the decoded order id.
+   */
+  async DecodeOrderId(data: string): Promise<any> {
     const decoded = u8a.fromString(data.toLowerCase(), "base16");
-    return MsgUpdateSidDocumentResponse.decode(TxMsgData.decode(decoded).msgResponses[0].value);
+    return SaoTxTypes.MsgStoreResponse.decode(TxMsgData.decode(decoded).msgResponses[0].value);
   }
 
-  async LastValidHeight(): Promise<any> {
-    return this.client.CosmosTxV1Beta1.query.ls;
+  /**
+   * Get the lastes block height.
+   *
+   * @param N/a.
+   * @returns the lastes block height.
+   */
+  async GetLatestBlockHeight(): Promise<number> {
+    const res = await this.saoClient.queryLatesthight();
+    return Number(res.data.latest_block_height);
+  }
+
+  /**
+   * Get the lastes block time.
+   *
+   * @param N/a.
+   * @returns the lastes block time.
+   */
+  async GetLatestBlockTime(): Promise<string> {
+    const res = await this.saoClient.queryLatesthight();
+    return res.data.latest_block_time;
+  }
+
+  /**
+   * Get the SAO storage node libp2p peer information.
+   *
+   * @param address address of the SAO storage node.
+   * @returns the SAO storage node libp2p peer information.
+   */
+  async GetNodePeerInfo(address: string): Promise<string> {
+    const res = await this.nodeClient.queryNode(address);
+    return res.data.node.peer;
   }
 
   // account
-  async AddAccountAuth(did: string, accountAuth: AccountAuth): Promise<any> {
-    const account = await this.signer.getAccounts();
-
-    const accountDid = accountAuth.accountDid;
-    const accountEncryptedSeed = stringify(accountAuth.accountEncryptedSeed);
-    const sidEncryptedAccount = stringify(accountAuth.sidEncryptedAccount);
-
-    const txResult = await this.client.SaonetworkSaoDid.tx.sendMsgAddAccountAuth({
-      value: {
-        creator: account[0].address,
-        did: did,
-        accountAuth: {
-          accountDid,
-          accountEncryptedSeed,
-          sidEncryptedAccount,
-        },
-      },
-    });
-    return txResult;
-  }
-
+  /**
+   * Get the Account Auth by accountDid.
+   *
+   * @param accountAuth accountAuth string.
+   * @returns the Account Auth.
+   */
   async GetAccountAuth(accountDid: string): Promise<any> {
     return this.didClient.queryAccountAuth(accountDid + ":");
   }
 
+  /**
+   * Bind an Account proof to the Account Auth.
+   *
+   * @param rootDocId root document id.
+   * @param keys keys records.
+   * @param proof account proof.
+   * @param accountAuth accountAuth string.
+   * @returns the transaction result.
+   */
   async Binding(
     rootDocId: string,
     keys: Record<string, string>,
-    proof: BindingProof,
+    proof: DidTxTypes.BindingProof,
     accountAuth: AccountAuth
   ): Promise<any> {
     const account = await this.signer.getAccounts();
@@ -132,60 +174,37 @@ export class ChainApiClient {
     return txResult;
   }
 
-  async AddBinding(proof: BindingProof): Promise<any> {
-    const account = await this.signer.getAccounts();
-    const txResult = await this.client.SaonetworkSaoDid.tx.sendMsgAddBinding({
-      value: {
-        creator: account[0].address,
-        accountId: proof.accountId,
-        proof: {
-          message: proof.message,
-          signature: proof.signature,
-          account: proof.accountId,
-          did: proof.did,
-          timestamp: proof.timestamp,
-          // TODO:
-          version: BindingProofV1,
-        },
-      },
-    });
-
-    return txResult;
+  /**
+   * Get bound did by account id.
+   *
+   * @param accountId account id string.
+   * @returns the bound did.
+   */
+  async GetDid(accountId: string): Promise<any> {
+    return this.didClient.queryDid(accountId + ":");
   }
 
-  async GetBinding(accountId: string): Promise<any> {
-    return this.didClient.queryDidBindingProof(accountId + ":");
-  }
-
-  async RemoveBinding(accountId: string): Promise<any> {
-    const account = await this.signer.getAccounts();
-    const txResult = await this.client.SaonetworkSaoDid.tx.sendMsgUnbinding({
-      value: {
-        creator: account[0].address,
-        accountId,
-      },
-    });
-    return txResult;
-  }
-
-  async UpdateAccountAuths(did: string, updates: AccountAuth[], removes: string[]): Promise<any> {
-    const account = await this.signer.getAccounts();
-    const txResult = await this.client.SaonetworkSaoDid.tx.sendMsgUpdateAccountAuths({
-      value: {
-        creator: account[0].address,
-        did: did,
-        update: updates,
-        removes,
-      },
-    });
-    return txResult;
-  }
-
-  async GetAllAccountAuth(did: string): Promise<any> {
-    return await this.didClient.queryGetAllAccountAuths(did + ":");
-  }
-
-  async UpdateSidDocument(keys: Record<string, string>, rootDocId?: string): Promise<any> {
+  /**
+   * Unbind Account , Update Sid Document and other Account Auth.
+   *
+   * @param did DID string.
+   * @param newDocId new sid document id.
+   * @param keys new keys for new sid document.
+   * @param timestamp timestamp when generate new keys.
+   * @param updates Account Auths to update.
+   * @param removes Account Dids to remove.
+   * @param pastSeed previous sid document seed.
+   * @returns the transaction result.
+   */
+  async Update(
+    did: string,
+    newDocId: string,
+    keys: Record<string, string>,
+    timestamp: number,
+    updates: AccountAuth[],
+    removes: string[],
+    pastSeed: JWE
+  ): Promise<any> {
     const account = await this.signer.getAccounts();
     const pubkeys = [];
     Object.keys(keys).forEach((k) => {
@@ -194,36 +213,71 @@ export class ChainApiClient {
         value: keys[k],
       });
     });
-    const txResult = await this.client.SaonetworkSaoDid.tx.sendMsgUpdateSidDocument({
+    const updateAccountAuth = [];
+    updates.forEach((accAuth) => {
+      updateAccountAuth.push({
+        accountDid: accAuth.accountDid,
+        accountEncryptedSeed: stringify(accAuth.accountEncryptedSeed),
+        sidEncryptedAccount: stringify(accAuth.sidEncryptedAccount),
+      });
+    });
+    const txResult = await this.client.SaonetworkSaoDid.tx.sendMsgUpdate({
       value: {
         creator: account[0].address,
+        did: did,
+        newDocId: newDocId,
         keys: pubkeys,
-        rootDocId: rootDocId,
+        timestamp: timestamp,
+        updateAccountAuth,
+        removeAccountDid: removes,
+        pastSeed: stringify(pastSeed),
+      },
+      // TODO: estimate gas
+      fee: {
+        amount: [],
+        gas: "400000",
       },
     });
     return txResult;
   }
 
+  /**
+   * Get all the Account Auth of the account.
+   *
+   * @param did DID string.
+   * @returns the Account Auth list of the account.
+   */
+  async GetAllAccountAuth(did: string): Promise<any> {
+    return await this.didClient.queryGetAllAccountAuths(did + ":");
+  }
+
+  /**
+   * List the SID document versions.
+   *
+   * @param rootDocId root documnet id.
+   * @returns the SID document versions list.
+   */
   async ListSidDocumentVersions(rootDocId: string): Promise<any> {
     return this.didClient.querySidDocumentVersion(rootDocId);
   }
 
+  /**
+   * Get the past seeds.
+   *
+   * @param did DID string.
+   * @returns the past seeds.
+   */
   async getPastSeeds(did: string): Promise<any> {
     return this.didClient.queryPastSeeds(did);
   }
 
-  async addPastSeed(did: string, seed: JWE): Promise<any> {
-    const accounts = await this.signer.getAccounts();
-    const txResult = this.client.SaonetworkSaoDid.tx.sendMsgAddPastSeed({
-      value: {
-        creator: accounts[0].address,
-        did,
-        pastSeed: stringify(seed),
-      },
-    });
-    return txResult;
-  }
-
+  /**
+   * Update the payment address.
+   *
+   * @param accountId account id.
+   * @param did DID string.
+   * @returns the transaction result.
+   */
   async updatePaymentAddress(accountId: string, did: string): Promise<any> {
     const accounts = await this.signer.getAccounts();
     const txResult = this.client.SaonetworkSaoDid.tx.sendMsgUpdatePaymentAddress({
@@ -237,6 +291,12 @@ export class ChainApiClient {
   }
 
   // sao
+  /**
+   * Update the data model permissions.
+   *
+   * @param request requst to update the data model permissions.
+   * @returns the transaction result.
+   */
   async UpdatePermission(request: UpdatePermissionProposal): Promise<any> {
     const account = await this.signer.getAccounts();
     const txResult = await this.client.SaonetworkSaoSao.tx.sendMsgUpdataPermission({
@@ -249,6 +309,12 @@ export class ChainApiClient {
     return txResult;
   }
 
+  /**
+   * Store the data model.
+   *
+   * @param request requst to store the data model.
+   * @returns the transaction result.
+   */
   async Store(request: ClientOrderProposal): Promise<any> {
     const account = await this.signer.getAccounts();
     const txResult = await this.client.SaonetworkSaoSao.tx.sendMsgStore({
@@ -261,9 +327,33 @@ export class ChainApiClient {
     return txResult;
   }
 
+  /**
+   * renew the data models.
+   *
+   * @param request requst to renew the data models.
+   * @returns the transaction result.
+   */
   async Renew(request: OrderRenewProposal): Promise<any> {
     const account = await this.signer.getAccounts();
     const txResult = await this.client.SaonetworkSaoSao.tx.sendMsgRenew({
+      value: {
+        creator: account[0].address,
+        proposal: request.Proposal,
+        jwsSignature: request.JwsSignature,
+      },
+    });
+    return txResult;
+  }
+
+  /**
+   * terminate the data model order.
+   *
+   * @param request requst to terminate the data model order.
+   * @returns the transaction result.
+   */
+  async Terminate(request: OrderTerminateProposal): Promise<any> {
+    const account = await this.signer.getAccounts();
+    const txResult = await this.client.SaonetworkSaoSao.tx.sendMsgTerminate({
       value: {
         creator: account[0].address,
         proposal: request.Proposal,

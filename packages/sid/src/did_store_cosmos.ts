@@ -1,11 +1,19 @@
 import { DidStore } from "./did_store";
 import { OfflineSigner } from "@cosmjs/proto-signing";
-import { JWE } from "did-jwt";
+import { JWE } from "another-did-jwt";
+import LRUCache from "lru-cache";
+import { AccountAuth, ChainApiClient } from "@saonetwork/api-client";
+import { DidTxTypes } from "@saonetwork/saochain-ts-client";
 
-import { AccountAuth, ChainApiClient } from "@sao-js-sdk/api-client";
-import { BindingProof } from "@sao-js-sdk/common";
+const DefaultLruOptions = {
+  max: 20,
+  ttl: 10 * 60 * 1000, //10 minites
+};
+const BindingCacheKey = "binding";
+
 export class CosmosDidStore implements DidStore {
   private chainApiClient: ChainApiClient;
+  private cache: Record<string, LRUCache<string, any>>;
 
   constructor(signer: OfflineSigner, apiURL?: string, rpcURL?: string, prefix?: string) {
     this.chainApiClient = new ChainApiClient({
@@ -14,31 +22,20 @@ export class CosmosDidStore implements DidStore {
       prefix,
       signer: signer,
     });
+    this.cache = {};
   }
 
   async binding(
     rootDocId: string,
     keys: Record<string, string>,
-    proof: BindingProof,
+    proof: DidTxTypes.BindingProof,
     accountAuth: AccountAuth
   ): Promise<void> {
     const txResult = await this.chainApiClient.Binding(rootDocId, keys, proof, accountAuth);
     if (txResult.code != 0) {
-      console.log(`bind account failed. tx=${txResult.transactionHash} code=${txResult.code}`);
       throw new Error(`bind account ${proof.accountId} -> did ${proof.did} failed.`);
     } else {
-      console.log(`bind account ${proof.accountId} -> did ${proof.did} succeed. tx=${txResult.transactionHash}`);
-      return;
-    }
-  }
-
-  async addBinding(proof: BindingProof): Promise<void> {
-    const txResult = await this.chainApiClient.AddBinding(proof);
-    if (txResult.code != 0) {
-      console.log(`bind account failed. tx=${txResult.transactionHash} code=${txResult.code}`);
-      throw new Error(`bind account ${proof.accountId} -> did ${proof.did} failed.`);
-    } else {
-      console.log(`bind account ${proof.accountId} -> did ${proof.did} succeed. tx=${txResult.transactionHash}`);
+      this.getCache(BindingCacheKey).set(proof.accountId, proof.did);
       return;
     }
   }
@@ -48,43 +45,45 @@ export class CosmosDidStore implements DidStore {
    * @param accountId
    * @returns binded did
    */
-  async getBinding(accountId: string): Promise<string | null> {
+  async getDid(accountId: string): Promise<string | null> {
+    const did = this.getCache(BindingCacheKey).get(accountId);
+
+    if (did) {
+      return did;
+    }
+
     try {
-      const res = await this.chainApiClient.GetBinding(accountId);
+      const res = await this.chainApiClient.GetDid(accountId);
       if (res.status === 200) {
-        return res.data?.DidBindingProof?.proof?.did || null;
+        this.getCache(BindingCacheKey).set(accountId, res.data?.did?.did);
+        return res.data?.did?.did || null;
       } else {
-        throw new Error("failed to query binding for accountid: " + accountId);
+        throw new Error("failed to query did for accountid: " + accountId);
       }
     } catch (err) {
-      console.log(err);
       if (err.response.status === 404) {
-        console.log();
         return null;
       } else {
-        throw new Error("failed to query binding for accountid: " + accountId + ", !!!" + err.response.status);
+        throw new Error("failed to query did for accountid: " + accountId + ", !!!" + err.response.status);
       }
     }
   }
 
-  async removeBinding(accountId: string): Promise<void> {
-    const txResult = await this.chainApiClient.RemoveBinding(accountId);
+  async update(
+    did: string,
+    accountId: string,
+    newDocId: string,
+    keys: Record<string, string>,
+    timestamp: number,
+    updates: AccountAuth[],
+    removes: string[],
+    pastSeed: JWE
+  ): Promise<void> {
+    const txResult = await this.chainApiClient.Update(did, newDocId, keys, timestamp, updates, removes, pastSeed);
     if (txResult.code != 0) {
-      console.log(`unbind account failed. tx=${txResult.transactionHash} code=${txResult.code}`);
-      throw new Error(`unbind account ${accountId} failed.`);
+      throw new Error(`update ${did} accounts failed.`);
     } else {
-      console.log(`unbind account succeed. tx=${txResult.transactionHash}`);
-      return;
-    }
-  }
-
-  async addAccountAuth(did: string, accountAuth: AccountAuth): Promise<void> {
-    const result = await this.chainApiClient.AddAccountAuth(did, accountAuth);
-    if (result.code != 0) {
-      console.log(`add account auth failed. tx=${result.transactionHash} code=${result.code}`);
-      throw new Error(`add account auth did ${did} -> accountdid ${accountAuth.accountDid} failed.`);
-    } else {
-      console.log(`add account auth succeed. tx=${result.transactionHash}`);
+      this.getCache(BindingCacheKey).del(accountId);
       return;
     }
   }
@@ -102,32 +101,11 @@ export class CosmosDidStore implements DidStore {
         throw new Error("failed to account auth for accountdid " + accountDid);
       }
     } catch (err) {
-      console.log(err);
       // const ae = err as AxiosError
       if (err.response.status === 404) {
         return null;
       }
       throw new Error(`failed to account auth for accountdid ${accountDid}. error: ${err}`);
-    }
-  }
-
-  async updateAccountAuths(did: string, update: AccountAuth[], remove: string[]): Promise<void> {
-    const updates = [];
-    update.forEach((u) => {
-      updates.push({
-        accountDid: u.accountDid,
-        accountEncryptedSeed: u.accountEncryptedSeed,
-        sidEncryptedAccount: u.sidEncryptedAccount,
-      });
-    });
-
-    const txResult = await this.chainApiClient.UpdateAccountAuths(did, update, remove);
-    if (txResult.code != 0) {
-      console.log(`update account auths failed. tx=${txResult.transactionHash} code=${txResult.code}`);
-      throw new Error(`update account auth did ${did} failed.`);
-    } else {
-      console.log(`update account auth succeed. tx=${txResult.transactionHash}`);
-      return;
     }
   }
 
@@ -153,28 +131,6 @@ export class CosmosDidStore implements DidStore {
         return [];
       }
       throw new Error(`failed to get all account auths for did: ${did}, ` + err);
-    }
-  }
-
-  async updateSidDocument(keys: Record<string, string>, rootDocId?: string): Promise<string> {
-    const txResult = await this.chainApiClient.UpdateSidDocument(keys, rootDocId);
-    console.log(txResult);
-
-    if (txResult.code != 0) {
-      console.log(`update sid document failed. tx=${txResult.transactionHash} code=${txResult.code}`);
-      throw new Error(`update sid document failed.`);
-    } else {
-      console.log(`update sid document succeed. tx=${txResult.transactionHash}`);
-
-      const res = await this.chainApiClient.GetTx(txResult.transactionHash);
-
-      if (res.status === 200) {
-        const r = await this.chainApiClient.Decode(res.data.tx_response.data);
-
-        return r.docId;
-      } else {
-        throw new Error(`update sid document failed. ${res.statusText}`);
-      }
     }
   }
 
@@ -215,23 +171,18 @@ export class CosmosDidStore implements DidStore {
     }
   }
 
-  async addOldSeed(did: string, seed: JWE): Promise<void> {
-    const txResult = await this.chainApiClient.addPastSeed(did, seed);
-    if (txResult.code != 0) {
-      console.log(`add old seed for did ${did} failed. hash=${txResult.hash} code=${txResult.code}`);
-      throw new Error(`add old seed for did ${did} failed. hash=${txResult.hash} code=${txResult.code}`);
-    } else {
-      console.log(`add old seed for did ${did}suceed.`);
-    }
-  }
-
   async updatePaymentAddress(accountId: string, did: string): Promise<void> {
     const txResult = await this.chainApiClient.updatePaymentAddress(accountId, did);
     if (txResult.code != 0) {
-      console.log(`update payment address failed. hash=${txResult.hash} code=${txResult.code}`);
       throw new Error(`update payment address failed. hash=${txResult.hash} code=${txResult.code}`);
-    } else {
-      console.log(`update payment address for ${accountId} succeed.`);
     }
+  }
+
+  getCache(key: string): LRUCache<string, any> {
+    if (this.cache[key]) {
+      return this.cache[key];
+    }
+    this.cache[key] = new LRUCache<string, any>(DefaultLruOptions);
+    return this.cache[key];
   }
 }
