@@ -16,21 +16,22 @@ import { ModelConfig, ModelDef, ModelProviderConfig } from "./types";
 import { CalculateCid, GenerateDataId, stringToUint8Array } from "@saonetwork/common";
 import { ModelProvider } from ".";
 
-const defaultModelConfig: ModelConfig = {
+const DefaultModelConfig: ModelConfig = {
   duration: 365 * 60 * 60 * 24,
-  replica: 1,
+  replica: 3,
   timeout: 60 * 60 * 24,
   operation: 1,
   isPublish: false,
 };
 export class ModelManager {
+  private defaultModelConfig: ModelConfig;
   private defaultModelProvider: ModelProvider;
   private modelProviders: Record<string, ModelProvider>;
   private sidManager: SidManager;
 
-  constructor(config: ModelProviderConfig, sidManager: SidManager) {
+  constructor(config: ModelProviderConfig, sidManager: SidManager, defaultModelConfig: ModelConfig = DefaultModelConfig) {
     const nodeApiClient = GetNodeApiClient({
-      baseURL: config.nodeApiUrl || process.env.SAO_NODE_API_URL || "http://localhost:8888",
+      baseURL: config.nodeApiUrl,
       headers: {
         Authorization: "Bearer " + config.nodeApiToken,
       },
@@ -43,6 +44,7 @@ export class ModelManager {
       signer: config.signer,
     });
 
+    this.defaultModelConfig = defaultModelConfig;
     this.defaultModelProvider = new ModelProvider(config.ownerDid, config.platformId, nodeApiClient, chainApiClient);
     this.modelProviders = {};
     this.modelProviders[config.ownerDid] = this.defaultModelProvider;
@@ -117,12 +119,6 @@ export class ModelManager {
         "base64url"
       ),
     });
-    console.log(
-      `query proposal signature: ${u8a.toString(
-        SaoTypes.QueryProposal.encode(SaoTypes.QueryProposal.fromPartial(proposal)).finish(),
-        "base64url"
-      )}`
-    );
 
     const queryMetadataProposal: QueryMetadataProposal = {
       Proposal: proposal,
@@ -141,7 +137,7 @@ export class ModelManager {
    */
   async createModel<T>(
     def: ModelDef<T>,
-    modelConfig: ModelConfig = defaultModelConfig,
+    modelConfig: ModelConfig = this.defaultModelConfig,
     ownerDid?: string
   ): Promise<string> {
     let provider = this.defaultModelProvider;
@@ -178,12 +174,6 @@ export class ModelManager {
     const clientProposal = await sidProvider.createJWS({
       payload: u8a.toString(SaoTypes.Proposal.encode(SaoTypes.Proposal.fromPartial(proposal)).finish(), "base64url"),
     });
-    console.log(
-      `createJWS: ${u8a.toString(
-        SaoTypes.Proposal.encode(SaoTypes.Proposal.fromPartial(proposal)).finish(),
-        "base64url"
-      )}`
-    );
 
     if (!provider.validate(proposal)) {
       throw new Error("invalid provider");
@@ -205,7 +195,6 @@ export class ModelManager {
     let orderId = 0;
     if (modelConfig.isPublish) {
       orderId = await provider.store(clientOrderProposal);
-      console.log("orderId:", orderId);
     }
 
     const model = await provider.create(query, clientOrderProposal, orderId, Array.from(dataBytes));
@@ -223,7 +212,7 @@ export class ModelManager {
    */
   async updateModel<T>(
     def: ModelDef<T>,
-    modelConfig: ModelConfig = defaultModelConfig,
+    modelConfig: ModelConfig = this.defaultModelConfig,
     ownerDid?: string
   ): Promise<string> {
     let provider = this.defaultModelProvider;
@@ -467,7 +456,7 @@ export class ModelManager {
    */
   async renewModel(
     dataIds: string[],
-    modelConfig: ModelConfig = defaultModelConfig,
+    modelConfig: ModelConfig = this.defaultModelConfig,
     isPublish?: true,
     ownerDid?: string
   ): Promise<string> {
