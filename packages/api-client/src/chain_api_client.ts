@@ -16,6 +16,7 @@ import {
   DidTypes,
   NodeTypes,
   SaoTypes,
+  OrderTypes,
   TxMsgData,
 } from "@saonetwork/saochain-ts-client";
 import * as u8a from "uint8arrays";
@@ -27,6 +28,7 @@ export class ChainApiClient {
   private client: InstanceType<typeof Client>;
   private didClient: Api<unknown>;
   private nodeClient: Api<unknown>;
+  private orderClient: Api<unknown>;
   private saoClient: Api<unknown>;
 
   constructor(config: ChainApiClientConfig) {
@@ -52,6 +54,7 @@ export class ChainApiClient {
     this.didClient = DidTypes.queryClient({ addr: api });
     this.nodeClient = NodeTypes.queryClient({ addr: api });
     this.saoClient = SaoTypes.queryClient({ addr: api });
+    this.orderClient = OrderTypes.queryClient({ addr: api });
   }
 
   // common
@@ -118,6 +121,13 @@ export class ChainApiClient {
    */
   async GetAccountAuth(accountDid: string): Promise<any> {
     return this.didClient.queryAccountAuth(accountDid + ":");
+  }
+
+  async GetOrders(did: string, status: Array<number>): Promise<any> {
+    return this.orderClient.queryOrderAll({
+      did: did,
+      status: status,
+    });
   }
 
   /**
