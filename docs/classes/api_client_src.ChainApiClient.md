@@ -16,39 +16,6 @@
 
 ## Methods
 
-### AddAccountAuth
-
-▸ **AddAccountAuth**(`did`, `accountAuth`): `Promise`<`any`\>
-
-#### Parameters
-
-| Name | Type | Description |
-| :------ | :------ | :------ |
-| `did` | `string` |  |
-| `accountAuth` | [`AccountAuth`](../modules/api_client_src.md#accountauth) |  |
-
-#### Returns
-
-`Promise`<`any`\>
-
-___
-
-### AddBinding
-
-▸ **AddBinding**(`proof`): `Promise`<`any`\>
-
-#### Parameters
-
-| Name | Type | Description |
-| :------ | :------ | :------ |
-| `proof` | `BindingProof` |  |
-
-#### Returns
-
-`Promise`<`any`\>
-
-___
-
 ### Binding
 
 ▸ **Binding**(`rootDocId`, `keys`, `proof`, `accountAuth`): `Promise`<`any`\>
@@ -71,22 +38,6 @@ ___
 ### DecodeOrderId
 
 ▸ **DecodeOrderId**(`data`): `Promise`<`any`\>
-
-#### Parameters
-
-| Name | Type | Description |
-| :------ | :------ | :------ |
-| `data` | `string` |  |
-
-#### Returns
-
-`Promise`<`any`\>
-
-___
-
-### DecodeSidDocument
-
-▸ **DecodeSidDocument**(`data`): `Promise`<`any`\>
 
 #### Parameters
 
@@ -216,22 +167,6 @@ ___
 
 ___
 
-### RemoveBinding
-
-▸ **RemoveBinding**(`accountId`): `Promise`<`any`\>
-
-#### Parameters
-
-| Name | Type | Description |
-| :------ | :------ | :------ |
-| `accountId` | `string` |  |
-
-#### Returns
-
-`Promise`<`any`\>
-
-___
-
 ### Renew
 
 ▸ **Renew**(`request`): `Promise`<`any`\>
@@ -280,17 +215,21 @@ ___
 
 ___
 
-### UpdateAccountAuths
+### Update
 
-▸ **UpdateAccountAuths**(`did`, `updates`, `removes`): `Promise`<`any`\>
+▸ **Update**(`did`, `newDocId`, `keys`, `timestamp`, `updates`, `removes`, `pastSeed`): `Promise`<`any`\>
 
 #### Parameters
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
 | `did` | `string` |  |
+| `newDocId` | `string` |  |
+| `keys` | `Record`<`string`, `string`\> |  |
+| `timestamp` | `number` |  |
 | `updates` | [`AccountAuth`](../modules/api_client_src.md#accountauth)[] |  |
 | `removes` | `string`[] |  |
+| `pastSeed` | `JWE` |  |
 
 #### Returns
 
@@ -307,40 +246,6 @@ ___
 | Name | Type | Description |
 | :------ | :------ | :------ |
 | `request` | [`UpdatePermissionProposal`](../modules/api_client_src.md#updatepermissionproposal) |  |
-
-#### Returns
-
-`Promise`<`any`\>
-
-___
-
-### UpdateSidDocument
-
-▸ **UpdateSidDocument**(`keys`, `rootDocId?`): `Promise`<`any`\>
-
-#### Parameters
-
-| Name | Type | Description |
-| :------ | :------ | :------ |
-| `keys` | `Record`<`string`, `string`\> |  |
-| `rootDocId?` | `string` |  |
-
-#### Returns
-
-`Promise`<`any`\>
-
-___
-
-### addPastSeed
-
-▸ **addPastSeed**(`did`, `seed`): `Promise`<`any`\>
-
-#### Parameters
-
-| Name | Type | Description |
-| :------ | :------ | :------ |
-| `did` | `string` |  |
-| `seed` | `JWE` |  |
 
 #### Returns
 

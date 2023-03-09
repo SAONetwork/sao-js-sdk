@@ -75,13 +75,14 @@ ___
 
 ### new
 
-▸ `Static` **new**(`signer`): `Promise`<[`SaoKeplrAccountProvider`](sid_src.SaoKeplrAccountProvider.md)\>
+▸ `Static` **new**(`signer`, `chainId`): `Promise`<[`SaoKeplrAccountProvider`](sid_src.SaoKeplrAccountProvider.md)\>
 
 #### Parameters
 
 | Name | Type |
 | :------ | :------ |
 | `signer` | `Keplr` |
+| `chainId` | `string` |
 
 #### Returns
 

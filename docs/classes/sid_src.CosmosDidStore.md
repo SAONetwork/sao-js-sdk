@@ -23,68 +23,6 @@
 
 ## Methods
 
-### addAccountAuth
-
-▸ **addAccountAuth**(`did`, `accountAuth`): `Promise`<`void`\>
-
-#### Parameters
-
-| Name | Type |
-| :------ | :------ |
-| `did` | `string` |
-| `accountAuth` | `AccountAuth` |
-
-#### Returns
-
-`Promise`<`void`\>
-
-#### Implementation of
-
-DidStore.addAccountAuth
-
-___
-
-### addBinding
-
-▸ **addBinding**(`proof`): `Promise`<`void`\>
-
-#### Parameters
-
-| Name | Type |
-| :------ | :------ |
-| `proof` | `BindingProof` |
-
-#### Returns
-
-`Promise`<`void`\>
-
-#### Implementation of
-
-DidStore.addBinding
-
-___
-
-### addOldSeed
-
-▸ **addOldSeed**(`did`, `seed`): `Promise`<`void`\>
-
-#### Parameters
-
-| Name | Type |
-| :------ | :------ |
-| `did` | `string` |
-| `seed` | `JWE` |
-
-#### Returns
-
-`Promise`<`void`\>
-
-#### Implementation of
-
-DidStore.addOldSeed
-
-___
-
 ### binding
 
 ▸ **binding**(`rootDocId`, `keys`, `proof`, `accountAuth`): `Promise`<`void`\>
@@ -149,6 +87,22 @@ DidStore.getAllAccountAuth
 
 ___
 
+### getCache
+
+▸ **getCache**(`key`): `LRUCache`<`string`, `any`\>
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `key` | `string` |
+
+#### Returns
+
+`LRUCache`<`string`, `any`\>
+
+___
+
 ### getDid
 
 ▸ **getDid**(`accountId`): `Promise`<`string`\>
@@ -166,22 +120,6 @@ ___
 #### Implementation of
 
 DidStore.getDid
-
-___
-
-### getCache
-
-▸ **getCache**(`key`): `LRUCache`<`string`, `any`\>
-
-#### Parameters
-
-| Name | Type |
-| :------ | :------ |
-| `key` | `string` |
-
-#### Returns
-
-`LRUCache`<`string`, `any`\>
 
 ___
 
@@ -225,37 +163,22 @@ DidStore.listSidDocumentVersions
 
 ___
 
-### removeBinding
+### update
 
-▸ **removeBinding**(`accountId`): `Promise`<`void`\>
-
-#### Parameters
-
-| Name | Type |
-| :------ | :------ |
-| `accountId` | `string` |
-
-#### Returns
-
-`Promise`<`void`\>
-
-#### Implementation of
-
-DidStore.removeBinding
-
-___
-
-### updateAccountAuths
-
-▸ **updateAccountAuths**(`did`, `update`, `remove`): `Promise`<`void`\>
+▸ **update**(`did`, `accountId`, `newDocId`, `keys`, `timestamp`, `updates`, `removes`, `pastSeed`): `Promise`<`void`\>
 
 #### Parameters
 
 | Name | Type |
 | :------ | :------ |
 | `did` | `string` |
-| `update` | `AccountAuth`[] |
-| `remove` | `string`[] |
+| `accountId` | `string` |
+| `newDocId` | `string` |
+| `keys` | `Record`<`string`, `string`\> |
+| `timestamp` | `number` |
+| `updates` | `AccountAuth`[] |
+| `removes` | `string`[] |
+| `pastSeed` | `JWE` |
 
 #### Returns
 
@@ -263,7 +186,7 @@ ___
 
 #### Implementation of
 
-DidStore.updateAccountAuths
+DidStore.update
 
 ___
 
@@ -285,24 +208,3 @@ ___
 #### Implementation of
 
 DidStore.updatePaymentAddress
-
-___
-
-### updateSidDocument
-
-▸ **updateSidDocument**(`keys`, `rootDocId?`): `Promise`<`string`\>
-
-#### Parameters
-
-| Name | Type |
-| :------ | :------ |
-| `keys` | `Record`<`string`, `string`\> |
-| `rootDocId?` | `string` |
-
-#### Returns
-
-`Promise`<`string`\>
-
-#### Implementation of
-
-DidStore.updateSidDocument

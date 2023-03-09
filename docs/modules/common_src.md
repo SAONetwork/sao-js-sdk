@@ -20,7 +20,13 @@ ___
 
 ### GenerateDataId
 
-▸ **GenerateDataId**(): `any`
+▸ **GenerateDataId**(`seed`): `any`
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `seed` | `string` |
 
 #### Returns
 

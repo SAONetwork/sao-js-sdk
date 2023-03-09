@@ -4,15 +4,31 @@
 
 ## Methods
 
+### bind
+
+▸ **bind**(`param`): `Promise`<`void`\>
+
+#### Parameters
+
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `param` | [`BindingParam`](../modules/sid_src.md#bindingparam) |  |
+
+#### Returns
+
+`Promise`<`void`\>
+
+___
+
 ### getSidProvider
 
 ▸ **getSidProvider**(`did?`): `Promise`<`SidProvider`\>
 
 #### Parameters
 
-| Name | Type |
-| :------ | :------ |
-| `did?` | `string` |
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `did?` | `string` |  |
 
 #### Returns
 
@@ -32,24 +48,30 @@ ___
 
 ### setAccountProvider
 
-▸ **setAccountProvider**(`accountProvider`, `did?`): `Promise`<`void`\>
+▸ **setAccountProvider**(`accountProvider`, `did?`): `Promise`<[`BindingParam`](../modules/sid_src.md#bindingparam)\>
 
 #### Parameters
 
-| Name | Type |
-| :------ | :------ |
-| `accountProvider` | `AccountProvider` |
-| `did?` | `string` |
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `accountProvider` | `AccountProvider` |  |
+| `did?` | `string` |  |
 
 #### Returns
 
-`Promise`<`void`\>
+`Promise`<[`BindingParam`](../modules/sid_src.md#bindingparam)\>
 
 ___
 
 ### unbind
 
-▸ **unbind**(): `Promise`<`void`\>
+▸ **unbind**(`accountId?`): `Promise`<`void`\>
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `accountId?` | `string` |
 
 #### Returns
 
@@ -63,9 +85,9 @@ ___
 
 #### Parameters
 
-| Name | Type |
-| :------ | :------ |
-| `did?` | `string` |
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `did?` | `string` |  |
 
 #### Returns
 
@@ -79,11 +101,11 @@ ___
 
 #### Parameters
 
-| Name | Type |
-| :------ | :------ |
-| `accountProvider` | `AccountProvider` |
-| `didStore` | `DidStore` |
-| `did?` | `string` |
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `accountProvider` | `AccountProvider` |  |
+| `didStore` | `DidStore` |  |
+| `did?` | `string` |  |
 
 #### Returns
 

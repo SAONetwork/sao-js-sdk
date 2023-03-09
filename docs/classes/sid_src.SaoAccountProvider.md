@@ -75,13 +75,14 @@ ___
 
 ### newSaoAccountProvider
 
-▸ `Static` **newSaoAccountProvider**(`signer`): `Promise`<[`SaoAccountProvider`](sid_src.SaoAccountProvider.md)\>
+▸ `Static` **newSaoAccountProvider**(`signer`, `chainId`): `Promise`<[`SaoAccountProvider`](sid_src.SaoAccountProvider.md)\>
 
 #### Parameters
 
 | Name | Type |
 | :------ | :------ |
 | `signer` | `OfflineDirectSigner` |
+| `chainId` | `string` |
 
 #### Returns
 
