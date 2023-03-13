@@ -21,7 +21,7 @@
     "lerna": "^6.0.3",
     "lint-staged": "^13.1.0",
     "prettier": "2.8.1",
-    "@saonetwork/saochain-ts-client": "^0.0.1",
+    "@saonetwork/saochain-ts-client": "^0.0.4",
     "typedoc": "^0.22.11",
     "typedoc-plugin-markdown": "^3.11.12",
     "typescript": "^4.9.3"
