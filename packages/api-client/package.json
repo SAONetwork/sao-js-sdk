@@ -1,6 +1,6 @@
 {
   "name": "@saonetwork/api-client",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "sao api client",
   "type": "module",
   "main": "dist/index.js",
