@@ -103,7 +103,7 @@ export class SidProvider {
   }
 
   async addAccountAuth(accountId: string, accountSecret: Uint8Array): Promise<AccountAuth> {
-    this.recoverKeychain();
+    await this.recoverKeychain();
     return this.keychain.add(accountId, accountSecret);
   }
 
