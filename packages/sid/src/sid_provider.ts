@@ -51,6 +51,7 @@ export class SidProvider {
     console.log("binding proof generated");
 
     await didStore.binding(getSidIdentifier(keychain.did), keys, bindingProof, accountAuth);
+    console.log("binding complete");
 
     return new SidProvider(keychain, did, didStore, accountProvider);
   }
