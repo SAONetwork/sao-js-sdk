@@ -46,17 +46,10 @@ export class SidProvider {
     // proofs
     const did = keychain.did;
 
-    let flag = true;
-    setTimeout(() => {
-      if (flag) {
-        throw new Error("biding proof generate timeout.");
-      }
-    }, 7000);
+    asleep(5000);
 
-    asleep(2000);
     console.log("start binding proof generated");
     const bindingProof = await accountProvider.generateBindingProof(did, timestamp);
-    flag = false;
     console.log("binding proof generated");
 
     await didStore.binding(getSidIdentifier(keychain.did), keys, bindingProof, accountAuth);
