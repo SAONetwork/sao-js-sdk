@@ -50,7 +50,7 @@ export class SidProvider {
 
     console.log("start binding proof generated");
     const bindingProof = await accountProvider.generateBindingProof(did, timestamp);
-    console.log("binding proof generated");
+    console.log("complete binding proof generated");
 
     await didStore.binding(getSidIdentifier(keychain.did), keys, bindingProof, accountAuth);
 
