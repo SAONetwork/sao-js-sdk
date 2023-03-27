@@ -1,6 +1,6 @@
 import { Keychain } from "./keychain";
 import { AccountProvider } from "./account_provider";
-import { accountSecretToDid, generateAccountSecret, getSidIdentifier, toJWS, toStableObject } from "./utils";
+import { accountSecretToDid, asleep, generateAccountSecret, getSidIdentifier, toJWS, toStableObject } from "./utils";
 import { createJWS } from "another-did-jwt";
 import { AuthenticateParam, CreateJWSParam, JWS } from "./types";
 import { DidStore } from "./did_store";
@@ -51,8 +51,9 @@ export class SidProvider {
       if (flag) {
         throw new Error("biding proof generate timeout.");
       }
-    }, 5000);
+    }, 7000);
 
+    asleep(2000);
     console.log("start binding proof generated");
     const bindingProof = await accountProvider.generateBindingProof(did, timestamp);
     flag = false;

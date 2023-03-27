@@ -134,3 +134,9 @@ export function getSidIdentifier(did: string): string {
 export const getBindMessage = (did: string, timestamp: number): string => {
   return `Link this account to your did: ${did}\nTimestamp: ${timestamp.toString(10)}`;
 };
+
+export const asleep = (ms: number) => {
+  const timestamp = new Date().getTime();
+  const end = timestamp + ms;
+  while (new Date().getTime() <= end) {} // eslint-disable-line
+};
