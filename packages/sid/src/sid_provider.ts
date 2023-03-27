@@ -41,17 +41,24 @@ export class SidProvider {
     // account auth
     const account = await accountProvider.accountId();
     const accountSecret = await generateAccountSecret(accountProvider);
-    console.log("generateAccountSecret finish");
     const accountAuth = await keychain.add(account.toString(), accountSecret);
-    console.log("account auth added");
 
     // proofs
     const did = keychain.did;
+
+    let flag = true;
+    setTimeout(() => {
+      if (flag) {
+        throw new Error("biding proof generate timeout.");
+      }
+    }, 5000);
+
+    console.log("start binding proof generated");
     const bindingProof = await accountProvider.generateBindingProof(did, timestamp);
+    flag = false;
     console.log("binding proof generated");
 
     await didStore.binding(getSidIdentifier(keychain.did), keys, bindingProof, accountAuth);
-    console.log("binding complete");
 
     return new SidProvider(keychain, did, didStore, accountProvider);
   }
