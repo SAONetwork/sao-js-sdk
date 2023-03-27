@@ -89,7 +89,7 @@ export class SidManager {
     const rootDocId = getSidIdentifier(did);
     const timestamp = Date.now();
     const accountSecret = await generateAccountSecret(this.accountProvider);
-    const accountAuth = await this.sidProviders[did].keychain.add(accountId, accountSecret);
+    const accountAuth = await this.sidProviders[did].addAccountAuth(accountId, accountSecret);
     const proof = await this.accountProvider.generateBindingProof(did, timestamp);
     return {
       rootDocId,
