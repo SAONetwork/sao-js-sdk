@@ -50,7 +50,7 @@ export class SidProvider {
     const account = await accountProvider.accountId();
     const accountSecret = await generateAccountSecret(accountProvider);
 
-    anothersleep(5000);
+    await anothersleep(5000);
 
     const accountAuth = await keychain.add(account.toString(), accountSecret);
 
