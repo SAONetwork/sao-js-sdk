@@ -1,6 +1,6 @@
 {
   "name": "@saonetwork/model",
-  "version": "0.0.12",
+  "version": "0.0.13",
   "description": "sao model management",
   "type": "module",
   "main": "dist/index.js",
@@ -24,7 +24,7 @@
   "dependencies": {
     "@saonetwork/api-client": "^0.0.4",
     "@saonetwork/common": "^0.0.2",
-    "@saonetwork/sid": "^0.0.12",
+    "@saonetwork/sid": "^0.0.13",
     "fast-json-patch": "3.1.1"
   },
   "jest": {
