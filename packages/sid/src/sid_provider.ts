@@ -1,6 +1,14 @@
 import { Keychain } from "./keychain";
 import { AccountProvider } from "./account_provider";
-import { accountSecretToDid, asleep, generateAccountSecret, getSidIdentifier, toJWS, toStableObject } from "./utils";
+import {
+  accountSecretToDid,
+  anothersleep,
+  asleep,
+  generateAccountSecret,
+  getSidIdentifier,
+  toJWS,
+  toStableObject,
+} from "./utils";
 import { createJWS } from "another-did-jwt";
 import { AuthenticateParam, CreateJWSParam, JWS } from "./types";
 import { DidStore } from "./did_store";
@@ -41,12 +49,13 @@ export class SidProvider {
     // account auth
     const account = await accountProvider.accountId();
     const accountSecret = await generateAccountSecret(accountProvider);
+
+    anothersleep(5000);
+
     const accountAuth = await keychain.add(account.toString(), accountSecret);
 
     // proofs
     const did = keychain.did;
-
-    asleep(5000);
 
     console.log("start binding proof generated");
     const bindingProof = await accountProvider.generateBindingProof(did, timestamp);

@@ -140,3 +140,5 @@ export const asleep = (ms: number) => {
   const end = timestamp + ms;
   while (new Date().getTime() <= end) {} // eslint-disable-line
 };
+
+export const anothersleep = (ms) => new Promise((r) => setTimeout(r, ms));
