@@ -159,8 +159,8 @@ export class SidManager {
    */
   async updatePaymentAddress(did?: string): Promise<void> {
     const accountId = await this.accountProvider.accountId();
-    if (!accountId.toString().startsWith("cosmos:sao")) {
-      throw new Error(`only cosmos:sao account can be used for payment`);
+    if (!accountId.toString().startsWith("cosmos")) {
+      throw new Error(`only cosmos account can be used for payment`);
     }
 
     if (!did) {
