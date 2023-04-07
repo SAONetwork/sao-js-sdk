@@ -29,9 +29,14 @@ export class SidManager {
    * @param did did string
    * @returns sid manager
    */
-  static async createManager(accountProvider: AccountProvider, didStore: DidStore, did?: string): Promise<SidManager> {
+  static async createManager(
+    accountProvider: AccountProvider,
+    didStore: DidStore,
+    did?: string,
+    lazy?: true
+  ): Promise<SidManager> {
     const manager = new SidManager(accountProvider, didStore);
-    await manager.prepareSidProvider(did);
+    await manager.prepareSidProvider(did, lazy);
     return manager;
   }
 
@@ -41,9 +46,9 @@ export class SidManager {
    * @param accountProvider account provider to set
    * @param did
    */
-  async setAccountProvider(accountProvider: AccountProvider, did?: string): Promise<BindingParam | null> {
+  async setAccountProvider(accountProvider: AccountProvider, did?: string, lazy?: true): Promise<BindingParam | null> {
     this.accountProvider = accountProvider;
-    return await this.prepareSidProvider(did);
+    return await this.prepareSidProvider(did, lazy);
   }
 
   private async prepareSidProvider(did?: string, lazy = true): Promise<BindingParam | null> {
