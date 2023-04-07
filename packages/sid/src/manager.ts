@@ -32,11 +32,11 @@ export class SidManager {
   static async createManager(
     accountProvider: AccountProvider,
     didStore: DidStore,
-    did?: string,
-    lazy?: true
+    lazy = true,
+    did?: string
   ): Promise<SidManager> {
     const manager = new SidManager(accountProvider, didStore);
-    await manager.prepareSidProvider(did, lazy);
+    await manager.prepareSidProvider(lazy, did);
     return manager;
   }
 
@@ -46,12 +46,12 @@ export class SidManager {
    * @param accountProvider account provider to set
    * @param did
    */
-  async setAccountProvider(accountProvider: AccountProvider, did?: string, lazy?: true): Promise<BindingParam | null> {
+  async setAccountProvider(accountProvider: AccountProvider, lazy = true, did?: string): Promise<BindingParam | null> {
     this.accountProvider = accountProvider;
-    return await this.prepareSidProvider(did, lazy);
+    return await this.prepareSidProvider(lazy, did);
   }
 
-  private async prepareSidProvider(did?: string, lazy = true): Promise<BindingParam | null> {
+  private async prepareSidProvider(lazy?: boolean, did?: string): Promise<BindingParam | null> {
     const account = await this.accountProvider.accountId();
     const bindingDid = await this.didStore.getDid(account.toString());
 
@@ -122,7 +122,7 @@ export class SidManager {
     const bindingDid = await this.didStore.getDid(accountId);
     if (bindingDid) {
       if (!this.sidProviders[bindingDid]) {
-        await this.prepareSidProvider(null, false);
+        await this.prepareSidProvider(false, null);
       }
       await this.sidProviders[bindingDid].keychain.remove(accountId);
       delete this.sidProviders[bindingDid];
