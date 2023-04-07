@@ -2,7 +2,7 @@
 import { AccountProvider } from "./account_provider";
 import { SidProvider } from "./sid_provider";
 import { DidStore } from "./did_store";
-import { generateAccountSecret, isSid, getSidIdentifier } from "./utils";
+import { generateAccountSecret, isSid, getSidIdentifier, anothersleep } from "./utils";
 import { BindingParam } from "./types";
 
 /**
@@ -94,6 +94,7 @@ export class SidManager {
     const rootDocId = getSidIdentifier(did);
     const timestamp = Date.now();
     const accountSecret = await generateAccountSecret(this.accountProvider);
+    await anothersleep(5000);
     const accountAuth = await this.sidProviders[did].addAccountAuth(accountId, accountSecret);
     const proof = await this.accountProvider.generateBindingProof(did, timestamp);
     return {
