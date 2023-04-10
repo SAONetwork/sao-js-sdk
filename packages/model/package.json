@@ -25,6 +25,12 @@
     "@saonetwork/api-client": "^0.0.4",
     "@saonetwork/common": "^0.0.2",
     "@saonetwork/sid": "^0.0.16",
+    "@libp2p/webtransport": "^1.0.3",
+    "@multiformats/multiaddr": "^11.0.5",
+    "cids": "^1.1.9",
+    "it-all": "^2.0.0",
+    "it-pipe": "^2.0.4",
+    "multihashing-async": "^2.1.4",
     "fast-json-patch": "3.1.1"
   },
   "jest": {

@@ -6,14 +6,15 @@
 
 ### constructor
 
-• **new ModelManager**(`config`, `sidManager`)
+• **new ModelManager**(`config`, `sidManager`, `defaultModelConfig?`)
 
 #### Parameters
 
-| Name | Type |
-| :------ | :------ |
-| `config` | [`ModelProviderConfig`](../modules/model_src.md#modelproviderconfig) |
-| `sidManager` | `SidManager` |
+| Name | Type | Default value |
+| :------ | :------ | :------ |
+| `config` | [`ModelProviderConfig`](../modules/model_src.md#modelproviderconfig) | `undefined` |
+| `sidManager` | `SidManager` | `undefined` |
+| `defaultModelConfig` | [`ModelConfig`](../modules/model_src.md#modelconfig) | `DefaultModelConfig` |
 
 ## Methods
 
@@ -50,6 +51,30 @@ ___
 
 ___
 
+### createFile
+
+▸ **createFile**<`T`\>(`def`, `modelConfig?`, `ownerDid?`): `Promise`<`string`\>
+
+#### Type parameters
+
+| Name |
+| :------ |
+| `T` |
+
+#### Parameters
+
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `def` | [`FileDef`](../modules/model_src.md#filedef)<`T`\> |  |
+| `modelConfig` | [`ModelConfig`](../modules/model_src.md#modelconfig) |  |
+| `ownerDid?` | `string` |  |
+
+#### Returns
+
+`Promise`<`string`\>
+
+___
+
 ### createModel
 
 ▸ **createModel**<`T`\>(`def`, `modelConfig?`, `ownerDid?`): `Promise`<`string`\>
@@ -62,11 +87,11 @@ ___
 
 #### Parameters
 
-| Name | Type | Default value | Description |
-| :------ | :------ | :------ | :------ |
-| `def` | [`ModelDef`](../modules/model_src.md#modeldef)<`T`\> | `undefined` |  |
-| `modelConfig` | [`ModelConfig`](../modules/model_src.md#modelconfig) | `defaultModelConfig` |  |
-| `ownerDid?` | `string` | `undefined` |  |
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `def` | [`ModelDef`](../modules/model_src.md#modeldef)<`T`\> |  |
+| `modelConfig` | [`ModelConfig`](../modules/model_src.md#modelconfig) |  |
+| `ownerDid?` | `string` |  |
 
 #### Returns
 
@@ -179,18 +204,37 @@ ___
 
 ___
 
+### loadModelFileContent
+
+▸ **loadModelFileContent**(`keyword`, `keywordType?`, `ownerDid?`, `groupId?`): `Promise`<`ArrayBufferLike`\>
+
+#### Parameters
+
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `keyword` | `string` |  |
+| `keywordType?` | `number` |  |
+| `ownerDid?` | `string` |  |
+| `groupId?` | `string` |  |
+
+#### Returns
+
+`Promise`<`ArrayBufferLike`\>
+
+___
+
 ### renewModel
 
 ▸ **renewModel**(`dataIds`, `modelConfig?`, `isPublish?`, `ownerDid?`): `Promise`<`string`\>
 
 #### Parameters
 
-| Name | Type | Default value | Description |
-| :------ | :------ | :------ | :------ |
-| `dataIds` | `string`[] | `undefined` | - |
-| `modelConfig` | [`ModelConfig`](../modules/model_src.md#modelconfig) | `defaultModelConfig` |  |
-| `isPublish?` | ``true`` | `undefined` |  |
-| `ownerDid?` | `string` | `undefined` |  |
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `dataIds` | `string`[] | - |
+| `modelConfig` | [`ModelConfig`](../modules/model_src.md#modelconfig) |  |
+| `isPublish?` | ``true`` |  |
+| `ownerDid?` | `string` |  |
 
 #### Returns
 
@@ -210,11 +254,11 @@ ___
 
 #### Parameters
 
-| Name | Type | Default value | Description |
-| :------ | :------ | :------ | :------ |
-| `def` | [`ModelDef`](../modules/model_src.md#modeldef)<`T`\> | `undefined` |  |
-| `modelConfig` | [`ModelConfig`](../modules/model_src.md#modelconfig) | `defaultModelConfig` |  |
-| `ownerDid?` | `string` | `undefined` |  |
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `def` | [`ModelDef`](../modules/model_src.md#modeldef)<`T`\> |  |
+| `modelConfig` | [`ModelConfig`](../modules/model_src.md#modelconfig) |  |
+| `ownerDid?` | `string` |  |
 
 #### Returns
 
@@ -239,3 +283,23 @@ ___
 #### Returns
 
 `Promise`<`string`\>
+
+___
+
+### uploadFileChunk
+
+▸ **uploadFileChunk**(`buffer`, `address`, `peerInfo`, `chunkId`, `totalChunks`): `Promise`<{ `cid`: `string` ; `contentLength`: `number`  }\>
+
+#### Parameters
+
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `buffer` | `ArrayBuffer` |  |
+| `address` | `string` |  |
+| `peerInfo` | `any` |  |
+| `chunkId` | `number` |  |
+| `totalChunks` | `number` |  |
+
+#### Returns
+
+`Promise`<{ `cid`: `string` ; `contentLength`: `number`  }\>

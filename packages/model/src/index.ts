@@ -1,5 +1,6 @@
 import {
   BuildModelCreateReqParams,
+  BuildModelCreateFileReqParams,
   BuildModelLoadReqParams,
   BuildGetNodeAddressReqParams,
   BuildModelUpdateReqParams,
@@ -174,6 +175,34 @@ export class ModelProvider {
       throw new Error("unknown error");
     }
   }
+
+    /**
+   * create a file data model.
+   *
+   * @param query query proposal for file data model validation.
+   * @param clientProposal requst proposal to create a file data model.
+   * @param orderId store message order id.
+   * @param content data model content.
+   * @returns the created data model.
+   */
+    async createFile(
+      query: QueryMetadataProposal,
+      clientProposal: ClientOrderProposal,
+      orderId: number
+    ): Promise<Model> {
+      const res = await this.nodeApiClient.jsonRpcApi(BuildModelCreateFileReqParams(query, clientProposal, orderId));
+  
+      if (res.data.result) {
+        const model = new Model(res.data.result.DataId, res.data.result.Alias);
+        model.setCid(res.data.result.Cid);
+  
+        return model;
+      } else if (res.data.error) {
+        throw new Error(res.data.error.message);
+      } else {
+        throw new Error("unknown error");
+      }
+    }
 
   /**
    * update a data model.

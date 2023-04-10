@@ -38,6 +38,24 @@
 
 ___
 
+### createFile
+
+▸ **createFile**(`query`, `clientProposal`, `orderId`): `Promise`<[`Model`](model_src.Model.md)\>
+
+#### Parameters
+
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `query` | `QueryMetadataProposal` |  |
+| `clientProposal` | `ClientOrderProposal` |  |
+| `orderId` | `number` |  |
+
+#### Returns
+
+`Promise`<[`Model`](model_src.Model.md)\>
+
+___
+
 ### getGroupId
 
 ▸ **getGroupId**(): `string`

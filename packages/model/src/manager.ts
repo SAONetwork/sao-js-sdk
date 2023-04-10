@@ -12,9 +12,19 @@ import {
   ClientOrderProposal,
 } from "@saonetwork/api-client";
 import { SidManager } from "@saonetwork/sid";
-import { ModelConfig, ModelDef, ModelProviderConfig } from "./types";
+import { ModelConfig, ModelDef, FileDef, ModelProviderConfig } from "./types";
 import { CalculateCid, GenerateDataId, stringToUint8Array } from "@saonetwork/common";
 import { ModelProvider } from ".";
+import { encodeArrayBuffer, decodeArrayBuffer } from "./utils";
+import { webTransport } from "@libp2p/webtransport";
+import { EventEmitter } from "@libp2p/interfaces/events";
+import { UpgraderEvents } from "@libp2p/interface-transport";
+import { multiaddr } from "@multiformats/multiaddr";
+import CID from "cids";
+import multihashing from "multihashing-async";
+import { pipe } from "it-pipe";
+import all from "it-all";
+import { fromString as uint8ArrayFromString } from "uint8arrays/from-string";
 
 const DefaultModelConfig: ModelConfig = {
   duration: 365 * 60 * 60 * 24,
@@ -203,6 +213,79 @@ export class ModelManager {
   }
 
   /**
+   * create a data model.
+   *
+   * @param def data model defination.
+   * @param modelConfig data model configuration.
+   * @param ownerDid DID string, optional.
+   * @returns the created data model.
+   */
+  async createFile<T>(
+    def: FileDef<T>,
+    modelConfig: ModelConfig = this.defaultModelConfig,
+    ownerDid?: string
+  ): Promise<string> {
+    let provider = this.defaultModelProvider;
+    if (ownerDid !== undefined) {
+      provider = this.getModelProvider(ownerDid);
+    }
+
+    const dataId = GenerateDataId(provider.getOwnerSid() + provider.getGroupId());
+    const proposal: SaoTypes.Proposal = {
+      owner: ownerDid || provider.getOwnerSid(),
+      provider: provider.getNodeAddress(),
+      groupId: provider.getGroupId(),
+      duration: modelConfig.duration,
+      replica: modelConfig.replica,
+      timeout: modelConfig.timeout,
+      alias: def.filename,
+      dataId,
+      commitId: dataId,
+      tags: def.tags,
+      cid: def.cid,
+      rule: def.rule,
+      extendInfo: def.extendInfo,
+      size: def.size,
+      operation: 0,
+    };
+
+    const sidProvider = await this.sidManager.getSidProvider();
+    if (sidProvider === null) {
+      throw new Error("failed to get sid provider");
+    }
+
+    const clientProposal = await sidProvider.createJWS({
+      payload: u8a.toString(SaoTypes.Proposal.encode(SaoTypes.Proposal.fromPartial(proposal)).finish(), "base64url"),
+    });
+
+    if (!provider.validate(proposal)) {
+      throw new Error("invalid provider");
+    }
+
+    const query = await this.buildQueryRequest(provider, {
+      owner: proposal.owner,
+      keyword: proposal.dataId,
+      groupId: def.groupId || provider.getGroupId(),
+      lastValidHeight: 0,
+      gateway: "",
+    });
+
+    const clientOrderProposal: ClientOrderProposal = {
+      Proposal: proposal,
+      JwsSignature: clientProposal.signatures[0],
+    };
+
+    let orderId = 0;
+    if (modelConfig.isPublish) {
+      orderId = await provider.store(clientOrderProposal);
+    }
+
+    const model = await provider.createFile(query, clientOrderProposal, orderId);
+
+    return model.dataId;
+  }
+
+  /**
    * update a data model.
    *
    * @param def data model defination.
@@ -292,6 +375,39 @@ export class ModelManager {
     const model = await provider.update(query, clientOrderProposal, orderId, Array.from(dataBytes));
 
     return model.dataId;
+  }
+
+  /**
+   * load file content in a data model.
+   *
+   * @param keyword keyword to search the data model.
+   * @param keywordType keyword type: 0, 1 - data-id; 2 - alias.
+   * @param ownerDid DID string, optional.
+   * @param groupId group id string, optional.
+   * @returns the data model.
+   */
+  async loadModelFileContent(
+    keyword: string,
+    keywordType?: number,
+    ownerDid?: string,
+    groupId?: string
+  ): Promise<ArrayBufferLike> {
+    let provider = this.defaultModelProvider;
+    if (ownerDid !== undefined) {
+      provider = this.getModelProvider(ownerDid);
+    }
+
+    const query = await this.buildQueryRequest(provider, {
+      owner: ownerDid || provider.getOwnerSid(),
+      keyword,
+      keywordType: keywordType || 1,
+      groupId: groupId || provider.getGroupId(),
+      lastValidHeight: 0,
+      gateway: "",
+    });
+
+    const model = await provider.load(query);
+    return decodeArrayBuffer(String(model.content));
   }
 
   /**
@@ -532,5 +648,89 @@ export class ModelManager {
     await provider.terminate(request, isPublish);
 
     return;
+  }
+
+  /**
+   * Uploads a file chunk to a peer using WebTransport protocol.
+   * @param {ArrayBuffer} buffer - The file chunk data
+   * @param {string} address - The multiaddr of the peer
+   * @param {any} peerInfo - The peer ID and public key of the peer
+   * @param {number} chunkId - The sequential number of the file chunk
+   * @param {number} totalChunks - The total number of file chunks
+   * @returns {Promise<{ contentLength: number; cid: string }>} A promise that resolves with the content length and CID of the file chunk or rejects with an error
+   */
+  async uploadFileChunk(
+    buffer: ArrayBuffer,
+    address: string,
+    peerInfo: any,
+    chunkId: number,
+    totalChunks: number
+  ): Promise<{ contentLength: number; cid: string }> {
+    const content = encodeArrayBuffer(buffer);
+    const encoder = new TextEncoder();
+    const contentHash = await multihashing(encoder.encode(content), "sha2-256");
+    const contentCid = new CID(0, "dag-pb", contentHash);
+    const bytes = encoder.encode(content);
+
+    console.log("Content[" + 0 + "], CID: " + contentCid.toString() + ", length: ", bytes.length);
+    // create an instance of the Upgrader class with the params
+    const upgrader = new SaoUpgrader(
+      uint8ArrayFromString(
+        JSON.stringify({
+          jsonrpc: "2.0",
+          method: "Sao.Upload",
+          params: [
+            JSON.stringify({
+              ChunkId: chunkId,
+              TotalLength: content.length,
+              TotalChunks: totalChunks,
+              ChunkCid: contentCid.toString(),
+              Cid: contentCid.toString(),
+              Content: Array.from(bytes),
+            }),
+          ],
+          id: 1,
+        })
+      )
+    );
+    const addr = multiaddr(address);
+
+    const transport = webTransport()({ peerId: peerInfo });
+
+    const conn = await transport.dial(addr, { upgrader });
+    try {
+      await conn.close();
+    } catch (error) {
+      // block of code to handle the error
+      console.error(error); // log the error
+    }
+    return { contentLength: content.length, cid: contentCid.toString() };
+  }
+}
+
+class SaoUpgrader extends EventEmitter<UpgraderEvents> {
+  params: any;
+  constructor(params: any) {
+    super();
+    this.params = params;
+  }
+
+  // Upgrade an outbound connection
+  async upgradeOutbound(maConn: any, opts: any) {
+    const mux = await opts.muxerFactory.createStreamMuxer();
+    const s = await mux.newStream();
+    console.log("stream created, ", s.stat);
+    await pipe([this.params], s);
+    await s.closeWrite();
+    const values = await pipe(s, all);
+    console.log(values);
+    await s.close();
+    console.log("stream closed");
+    return maConn;
+  }
+
+  // Upgrade an inbound connection
+  async upgradeInbound(maConn: any, opts: any) {
+    return maConn;
   }
 }

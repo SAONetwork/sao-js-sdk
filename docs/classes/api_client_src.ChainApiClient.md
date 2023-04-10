@@ -135,6 +135,23 @@ ___
 
 ___
 
+### GetOrders
+
+▸ **GetOrders**(`did`, `status`): `Promise`<`any`\>
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `did` | `string` |
+| `status` | `number`[] |
+
+#### Returns
+
+`Promise`<`any`\>
+
+___
+
 ### GetTx
 
 ▸ **GetTx**(`transactionHash`): `Promise`<`any`\>
