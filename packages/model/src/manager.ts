@@ -655,6 +655,8 @@ export class ModelManager {
    * @param {ArrayBuffer} buffer - The file chunk data
    * @param {string} address - The multiaddr of the peer
    * @param {any} peerInfo - The peer ID and public key of the peer
+   * @param {number} chunkId - The sequential number of the file chunk
+   * @param {number} totalChunks - The total number of file chunks
    * @returns {Promise<{ contentLength: number; cid: string }>} A promise that resolves with the content length and CID of the file chunk or rejects with an error
    */
   async uploadFileChunk(

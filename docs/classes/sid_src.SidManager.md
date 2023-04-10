@@ -48,14 +48,15 @@ ___
 
 ### setAccountProvider
 
-▸ **setAccountProvider**(`accountProvider`, `did?`): `Promise`<[`BindingParam`](../modules/sid_src.md#bindingparam)\>
+▸ **setAccountProvider**(`accountProvider`, `lazy?`, `did?`): `Promise`<[`BindingParam`](../modules/sid_src.md#bindingparam)\>
 
 #### Parameters
 
-| Name | Type | Description |
-| :------ | :------ | :------ |
-| `accountProvider` | `AccountProvider` |  |
-| `did?` | `string` |  |
+| Name | Type | Default value | Description |
+| :------ | :------ | :------ | :------ |
+| `accountProvider` | `AccountProvider` | `undefined` |  |
+| `lazy` | `boolean` | `true` | - |
+| `did?` | `string` | `undefined` |  |
 
 #### Returns
 
@@ -97,15 +98,16 @@ ___
 
 ### createManager
 
-▸ `Static` **createManager**(`accountProvider`, `didStore`, `did?`): `Promise`<[`SidManager`](sid_src.SidManager.md)\>
+▸ `Static` **createManager**(`accountProvider`, `didStore`, `lazy?`, `did?`): `Promise`<[`SidManager`](sid_src.SidManager.md)\>
 
 #### Parameters
 
-| Name | Type | Description |
-| :------ | :------ | :------ |
-| `accountProvider` | `AccountProvider` |  |
-| `didStore` | `DidStore` |  |
-| `did?` | `string` |  |
+| Name | Type | Default value | Description |
+| :------ | :------ | :------ | :------ |
+| `accountProvider` | `AccountProvider` | `undefined` |  |
+| `didStore` | `DidStore` | `undefined` |  |
+| `lazy` | `boolean` | `true` | - |
+| `did?` | `string` | `undefined` |  |
 
 #### Returns
 

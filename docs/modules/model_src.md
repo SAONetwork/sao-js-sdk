@@ -8,6 +8,31 @@
 
 ## Type Aliases
 
+### FileDef
+
+Ƭ **FileDef**<`T`\>: `Object`
+
+#### Type parameters
+
+| Name |
+| :------ |
+| `T` |
+
+#### Type declaration
+
+| Name | Type |
+| :------ | :------ |
+| `cid?` | `string` |
+| `dataId?` | `string` |
+| `extendInfo?` | `string` |
+| `filename?` | `string` |
+| `groupId?` | `string` |
+| `rule?` | `string` |
+| `size?` | `number` \| ``0`` |
+| `tags?` | `string`[] \| [] |
+
+___
+
 ### ModelConfig
 
 Ƭ **ModelConfig**: `Object`
