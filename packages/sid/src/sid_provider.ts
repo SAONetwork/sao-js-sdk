@@ -1,9 +1,18 @@
 import { Keychain } from "./keychain";
 import { AccountProvider } from "./account_provider";
-import { accountSecretToDid, generateAccountSecret, getSidIdentifier, toJWS, toStableObject } from "./utils";
+import {
+  accountSecretToDid,
+  anothersleep,
+  asleep,
+  generateAccountSecret,
+  getSidIdentifier,
+  toJWS,
+  toStableObject,
+} from "./utils";
 import { createJWS } from "another-did-jwt";
 import { AuthenticateParam, CreateJWSParam, JWS } from "./types";
 import { DidStore } from "./did_store";
+import { AccountAuth } from "@saonetwork/api-client";
 
 /**
  * sid did provider
@@ -40,11 +49,18 @@ export class SidProvider {
     // account auth
     const account = await accountProvider.accountId();
     const accountSecret = await generateAccountSecret(accountProvider);
+
+    console.log("account secret generated. wait 5s");
+    await anothersleep(5000);
+
     const accountAuth = await keychain.add(account.toString(), accountSecret);
 
     // proofs
     const did = keychain.did;
+
+    console.log("start binding proof generated");
     const bindingProof = await accountProvider.generateBindingProof(did, timestamp);
+    console.log("complete binding proof generated");
 
     await didStore.binding(getSidIdentifier(keychain.did), keys, bindingProof, accountAuth);
 
@@ -96,6 +112,11 @@ export class SidProvider {
       const seed = await accountDid.decryptJWE(accountAuth.accountEncryptedSeed);
       this.keychain = await Keychain.load(this.didStore, seed, this.sid);
     }
+  }
+
+  async addAccountAuth(accountId: string, accountSecret: Uint8Array): Promise<AccountAuth> {
+    await this.recoverKeychain();
+    return this.keychain.add(accountId, accountSecret);
   }
 
   /**
