@@ -17,6 +17,8 @@ import { CalculateCid, GenerateDataId, stringToUint8Array } from "@saonetwork/co
 import { ModelProvider } from ".";
 import { encodeArrayBuffer, decodeArrayBuffer } from "./utils";
 import { webTransport } from "@libp2p/webtransport";
+import { EventEmitter } from "@libp2p/interfaces/events";
+import { UpgraderEvents } from "@libp2p/interface-transport";
 import { multiaddr } from "@multiformats/multiaddr";
 import CID from "cids";
 import multihashing from "multihashing-async";
@@ -669,42 +671,26 @@ export class ModelManager {
     const bytes = encoder.encode(content);
 
     console.log("Content[" + 0 + "], CID: " + contentCid.toString() + ", length: ", bytes.length);
-    const upgrader = {
-      upgradeOutbound: async (maConn: any, opts: any) => {
-        const mux = await opts.muxerFactory.createStreamMuxer();
-        const s = await mux.newStream();
-        console.log("stream created, ", s.stat);
-        await pipe(
-          [
-            uint8ArrayFromString(
-              JSON.stringify({
-                jsonrpc: "2.0",
-                method: "Sao.Upload",
-                params: [
-                  JSON.stringify({
-                    ChunkId: chunkId,
-                    TotalLength: content.length,
-                    TotalChunks: totalChunks,
-                    ChunkCid: contentCid.toString(),
-                    Cid: contentCid.toString(),
-                    Content: Array.from(bytes),
-                  }),
-                ],
-                id: 1,
-              })
-            ),
+    // create an instance of the Upgrader class with the params
+    const upgrader = new SaoUpgrader(
+      uint8ArrayFromString(
+        JSON.stringify({
+          jsonrpc: "2.0",
+          method: "Sao.Upload",
+          params: [
+            JSON.stringify({
+              ChunkId: chunkId,
+              TotalLength: content.length,
+              TotalChunks: totalChunks,
+              ChunkCid: contentCid.toString(),
+              Cid: contentCid.toString(),
+              Content: Array.from(bytes),
+            }),
           ],
-          s
-        );
-        await s.closeWrite();
-        const values = await pipe(s, all);
-        // console.log(JSON.parse(toString(values)));
-        console.log(values);
-        await s.close();
-        console.log("stream closed");
-        maConn;
-      },
-    };
+          id: 1,
+        })
+      )
+    );
     const addr = multiaddr(address);
 
     const transport = webTransport()({ peerId: peerInfo });
@@ -717,5 +703,32 @@ export class ModelManager {
       console.error(error); // log the error
     }
     return { contentLength: content.length, cid: contentCid.toString() };
+  }
+}
+
+class SaoUpgrader extends EventEmitter<UpgraderEvents> {
+  params: any;
+  constructor(params: any) {
+    super();
+    this.params = params;
+  }
+
+  // Upgrade an outbound connection
+  async upgradeOutbound(maConn: any, opts: any) {
+    const mux = await opts.muxerFactory.createStreamMuxer();
+    const s = await mux.newStream();
+    console.log("stream created, ", s.stat);
+    await pipe([this.params], s);
+    await s.closeWrite();
+    const values = await pipe(s, all);
+    console.log(values);
+    await s.close();
+    console.log("stream closed");
+    return maConn;
+  }
+
+  // Upgrade an inbound connection
+  async upgradeInbound(maConn: any, opts: any) {
+    return maConn;
   }
 }
