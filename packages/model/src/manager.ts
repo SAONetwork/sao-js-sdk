@@ -246,7 +246,7 @@ export class ModelManager {
       rule: def.rule,
       extendInfo: def.extendInfo,
       size: def.size,
-      operation: 0,
+      operation: modelConfig.operation,
     };
 
     const sidProvider = await this.sidManager.getSidProvider();
@@ -436,6 +436,34 @@ export class ModelManager {
 
     const model = await provider.load(query);
     return model.cast();
+  }
+
+  /**
+   * load a data Id By Alias.
+   *
+   * @param alias alias to search the data model.
+   * @param keywordType keyword type: 0, 1 - data-id; 2 - alias.
+   * @param ownerDid DID string, optional.
+   * @param groupId group id string, optional.
+   * @returns the data model.
+   */
+  async loadDataId(alias: string, ownerDid?: string, groupId?: string): Promise<string> {
+    let provider = this.defaultModelProvider;
+    if (ownerDid !== undefined) {
+      provider = this.getModelProvider(ownerDid);
+    }
+
+    const query = await this.buildQueryRequest(provider, {
+      owner: ownerDid || provider.getOwnerSid(),
+      keyword: alias,
+      keywordType: 2,
+      groupId: groupId || provider.getGroupId(),
+      lastValidHeight: 0,
+      gateway: "",
+    });
+
+    const model = await provider.load(query);
+    return model.dataId;
   }
 
   /**
