@@ -1,6 +1,6 @@
 {
   "name": "@saonetwork/sid",
-  "version": "0.0.16",
+  "version": "0.0.17",
   "description": "sao did that support binds multiple wallets",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
