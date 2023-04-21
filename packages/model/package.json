@@ -24,9 +24,9 @@
   "dependencies": {
     "@libp2p/webtransport": "^1.0.3",
     "@multiformats/multiaddr": "^11.0.5",
-    "@saonetwork/api-client": "^0.0.4",
+    "@saonetwork/api-client": "^0.0.5",
     "@saonetwork/common": "^0.0.2",
-    "@saonetwork/sid": "^0.0.16",
+    "@saonetwork/sid": "^0.0.17",
     "cids": "^1.1.9",
     "fast-json-patch": "3.1.1",
     "it-all": "^2.0.0",
