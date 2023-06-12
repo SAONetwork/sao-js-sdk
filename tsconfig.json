@@ -6,6 +6,7 @@
       "baseUrl": ".",
       "typeRoots": ["./node_modules/@types"],
       "paths": {
+        "@saonetwork/sidproxy": ["packages/sidproxy/src"],
         "@saonetwork/common": ["packages/common/src"],
         "@saonetwork/api-client": ["packages/api-client/src"],
         "@saonetwork/model": ["packages/model/src"],

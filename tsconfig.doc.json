@@ -5,6 +5,7 @@
     "./packages/common/src",
     "./packages/model/src",
     "./packages/sid/src",
+    "./packages/sidproxy/src",
   ],
   "compilerOptions": {
     "jsx": "preserve",
@@ -19,7 +20,8 @@
       "./packages/common/src/index.ts",
       "./packages/model/src/index.ts",
       "./packages/api-client/src/index.ts",
-      "./packages/sid/src/index.ts"
+      "./packages/sid/src/index.ts",
+      "./packages/sidproxy/src/index.ts"
     ],
     "disableSources": true,
     "excludeExternals": true,
