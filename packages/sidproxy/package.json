@@ -1,0 +1,73 @@
+{
+  "name": "@saonetwork/sidproxy",
+  "version": "0.0.1",
+  "description": "",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "exports": {
+    ".": "./dist/index.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build:clean": "del dist",
+    "build:js": "swc src -d ./dist --config-file ../../.swcrc",
+    "build:types": "tsc --emitDeclarationOnly --skipLibCheck",
+    "build": "yarn build:clean && yarn build:types && yarn build:js",
+    "format": "prettier --write \"src/**/*.ts\"",
+    "lint": "eslint --fix --ignore-pattern \"src/**/*.test.[jt]s\" \"src/**/*.[jt]s\"",
+    "test": "yarn node --experimental-vm-modules $(yarn bin jest)"
+  },
+  "lint-staged": {
+    "*.{js,ts}": [
+      "yarn format",
+      "yarn lint",
+      "git add"
+    ]
+  },
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/",
+    "access": "public"
+  },
+  "dependencies": {
+    "@saonetwork/sid": "0.0.0",
+    "rxjs": "^7.8.1"
+  },
+  "devDependencies": {
+    "@types/react": "^17.0.38",
+    "@types/react-dom": "^17.0.11"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:SaoNetwork/saonetwork.git",
+    "directory": "packages/sid"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "echo \"hello\"; return 1"
+    }
+  },
+  "jest": {
+    "moduleDirectories": [
+      "node_modules",
+      "src"
+    ],
+    "extensionsToTreatAsEsm": [
+      ".ts"
+    ],
+    "moduleNameMapper": {
+      "^(\\.{1,2}/.*)\\.js$": "$1"
+    },
+    "transformIgnorePatterns": [],
+    "transform": {
+      "^.+\\.tsx?$": [
+        "@swc/jest",
+        {
+          "root": "../.."
+        }
+      ]
+    }
+  }
+}
