@@ -13,6 +13,7 @@ export class SidProxy {
   }
 
   private initIframe = (url): HTMLIFrameElement => {
+    console.log("initiframe");
     const iframe = document.createElement('iframe');
     iframe.src = url
     // @ts-ignore
