@@ -26,6 +26,7 @@ export class SidProxy {
   }
 
   async setAccountProvider(accountProvider: SaoAccountProvider): Promise<void> {
+    console.log("set account provider");
     this.accountProvider = accountProvider;
     this.accountId = (await this.accountProvider.accountId()).toString();
   }
