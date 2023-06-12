@@ -2,6 +2,10 @@ import { fromEvent } from 'rxjs';
 import { tap, filter, map} from 'rxjs/operators';
 
 export class SidProxyServer {
+  constructor() {
+
+  }
+
   start(target) {
     // start message listener to handle auth/create jws
     const source = fromEvent<MessageEvent>(target, 'message');
