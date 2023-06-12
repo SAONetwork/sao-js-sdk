@@ -6,7 +6,7 @@ export class SidProxyServer {
 
   }
 
-  start(target) {
+  Start(target) {
     // start message listener to handle auth/create jws
     const source = fromEvent<MessageEvent>(target, 'message');
     source.pipe(map(message => {
