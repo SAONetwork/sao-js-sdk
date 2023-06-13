@@ -3,7 +3,7 @@ import { tap, filter, map} from 'rxjs/operators';
 
 export class SidProxyServer {
   constructor() {
-
+    console.log("init sid proxy server");
   }
 
   Start(target) {
