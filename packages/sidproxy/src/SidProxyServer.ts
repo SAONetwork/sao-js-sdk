@@ -4,7 +4,9 @@ import { AccountProvider , SaoAccountProvider, DidStore, AuthenticateParam, Crea
 
 /**
  * {
- *     "method": "authenticate"/"createJWS"
+ *     "Method": "authenticate"/"createJWS"
+ *     "Id": "",
+ *     "Data": ""
  * }
  */
 export class SidProxyServer {
