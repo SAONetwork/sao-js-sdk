@@ -5,6 +5,13 @@ import { tap, filter, map} from 'rxjs/operators';
 const HIDE_IFRAME_STYLE = 'position: fixed; width:0; height:0; border:0; border:none !important'
 const IFRAME_URL = "";
 
+/**
+ * {
+ *     "Method": "authenticate"/"createJWS"
+ *     "Id": "",
+ *     "Data": ""
+ * }
+ */
 export class SidProxy {
   iframe: HTMLIFrameElement
   accountProvider: AccountProvider | undefined
