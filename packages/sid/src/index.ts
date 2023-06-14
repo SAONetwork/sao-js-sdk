@@ -5,5 +5,4 @@ export { SaoKeplrAccountProvider } from "./account_provider_sao_keplr";
 export { EthAccountProvider } from "./account_provider_eth";
 export { AccountProvider } from "./account_provider";
 export { DidStore } from "./did_store";
-
 export * from "./types";
