@@ -1,6 +1,6 @@
 {
   "name": "@saonetwork/model",
-  "version": "0.0.19",
+  "version": "0.0.20",
   "description": "sao model management",
   "type": "module",
   "main": "dist/index.js",
@@ -26,7 +26,7 @@
     "@multiformats/multiaddr": "^11.0.5",
     "@saonetwork/api-client": "^0.0.5",
     "@saonetwork/common": "^0.0.2",
-    "@saonetwork/sid": "^0.0.18",
+    "@saonetwork/sid": "^0.0.19",
     "cids": "^1.1.9",
     "fast-json-patch": "3.1.1",
     "it-all": "^2.0.0",

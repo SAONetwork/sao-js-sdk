@@ -1,6 +1,6 @@
 {
   "name": "@saonetwork/sidproxy",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -32,9 +32,9 @@
     "access": "public"
   },
   "dependencies": {
+    "@saonetwork/saochain-ts-client": "^0.0.5",
     "@saonetwork/sid": "0.0.0",
-    "rxjs": "^7.8.1",
-    "@saonetwork/saochain-ts-client": "^0.0.5"
+    "rxjs": "^7.8.1"
   },
   "devDependencies": {
     "@types/react": "^17.0.38",
