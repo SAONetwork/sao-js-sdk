@@ -1,7 +1,5 @@
 import {DidProvider, DidManager, CreateJWSParam, JWS} from "@saonetwork/sid";
-import {Secp256k1Provider} from "key-did-provider-secp256k1";
 import {ES256KSigner, createJWS} from "another-did-jwt";
-import {DID} from "dids";
 import stringify from 'fast-json-stable-stringify'
 
 export function toStableObject(obj: Record<string, any>): Record<string, any> {

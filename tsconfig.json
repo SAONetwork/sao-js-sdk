@@ -9,7 +9,8 @@
         "@saonetwork/common": ["packages/common/src"],
         "@saonetwork/api-client": ["packages/api-client/src"],
         "@saonetwork/model": ["packages/model/src"],
-        "@saonetwork/sid": ["packages/sid/src"]
+        "@saonetwork/sid": ["packages/sid/src"],
+        "@saonetwork/sao-client-js": ["packages/sao-client-js/src"]
       }
     }
 }

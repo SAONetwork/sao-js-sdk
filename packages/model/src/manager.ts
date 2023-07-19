@@ -18,7 +18,9 @@ import { ModelProvider } from ".";
 import { encodeArrayBuffer, decodeArrayBuffer } from "./utils";
 import { webTransport } from "@libp2p/webtransport";
 import { EventEmitter } from "@libp2p/interfaces/events";
-import { UpgraderEvents } from "@libp2p/interface-transport";
+import { ListenerEvents } from "@libp2p/interface-transport";
+import { generateKeyPair} from  '@libp2p/crypto/keys';
+import { peerIdFromKeys} from '@libp2p/peer-id';
 import { multiaddr } from "@multiformats/multiaddr";
 import CID from "cids";
 import multihashing from "multihashing-async";
@@ -408,7 +410,7 @@ export class ModelManager {
     });
 
     const model = await provider.load(query);
-    return decodeArrayBuffer(String(model.content));
+    return u8a.fromString(String(model.content), "base64");
   }
 
   /**
@@ -696,7 +698,7 @@ export class ModelManager {
     chunkId: number,
     totalChunks: number
   ): Promise<{ contentLength: number; cid: string }> {
-    const content = encodeArrayBuffer(buffer);
+    const content = u8a.toString(new Uint8Array(buffer),"base64");
     const encoder = new TextEncoder();
     const contentHash = await multihashing(encoder.encode(content), "sha2-256");
     const contentCid = new CID(0, "dag-pb", contentHash);
@@ -723,10 +725,25 @@ export class ModelManager {
         })
       )
     );
+    // if (address == "") {
+    //   const addrStr = await this.defaultModelProvider.getPeerInfo();
+    //   address = addrStr.split(",").filter((value, index, array) => {
+    //     return value.includes("udp") && !value.includes("127.0.0.1")
+    //   }).pop()
+    // }
     const addr = multiaddr(address);
-
+    // // const webTransport = new WebTransport("http://127.0.0.1:5154/")
+    // console.log(addr)
+    // console.log(addr.stringTuples())
+    // if (peerInfo == null) {
+    //   const privkey = await generateKeyPair('Ed25519')
+    //   // const pubkey = await (await this.didManager.GetProvider()).getPeerInfo()
+    //   peerInfo = await peerIdFromKeys(
+    //     privkey.public.bytes, privkey.bytes)
+    // }
+    // console.log(peerInfo)
     const transport = webTransport()({ peerId: peerInfo });
-
+    // console.log(transport)
     const conn = await transport.dial(addr, { upgrader });
     try {
       await conn.close();
@@ -738,7 +755,7 @@ export class ModelManager {
   }
 }
 
-class SaoUpgrader extends EventEmitter<UpgraderEvents> {
+class SaoUpgrader extends EventEmitter<ListenerEvents> {
   params: any;
   constructor(params: any) {
     super();
