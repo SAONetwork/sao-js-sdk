@@ -34,3 +34,11 @@ export type BindingParam = {
   proof: DidTxTypes.BindingProof;
   accountAuth: AccountAuth;
 };
+
+export interface DidProvider{
+  createJWS(param: CreateJWSParam): Promise<JWS>
+}
+
+export interface DidManager{
+  GetProvider(did?: string): Promise<DidProvider | null>;
+}

@@ -10,14 +10,14 @@ import {
   toStableObject,
 } from "./utils";
 import { createJWS } from "another-did-jwt";
-import { AuthenticateParam, CreateJWSParam, JWS } from "./types";
+import { AuthenticateParam, CreateJWSParam, JWS, DidProvider } from "./types";
 import { DidStore } from "./did_store";
 import { AccountAuth } from "@saonetwork/api-client";
 
 /**
  * sid did provider
  */
-export class SidProvider {
+export class SidProvider implements DidProvider{
   keychain: Keychain | null;
   sid: string;
   didStore: DidStore;

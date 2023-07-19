@@ -1,0 +1,50 @@
+{
+  "name": "@saonetwork/sao-client-js",
+  "version": "0.0.1",
+  "description": "sao client js sdk",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build:clean": "del dist",
+    "build:js": "swc src -d ./dist --config-file ../../.swcrc",
+    "build:types": "tsc --emitDeclarationOnly --skipLibCheck",
+    "build": "yarn build:clean && yarn build:types && yarn build:js",
+    "test": "yarn node --experimental-vm-modules $(yarn bin jest)",
+    "format": "npx prettier --write \"src/**/*.ts\"",
+    "lint": "eslint --fix --ignore-pattern \"src/**/*.test.[jt]s\" \"src/**/*.[jt]s\""
+  },
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/",
+    "access": "public"
+  },
+  "dependencies": {
+    "fs": "^0.0.1-security",
+    "jose": "^4.14.4",
+    "@saonetwork/model": "^0.0.18"
+  },
+  "jest": {
+    "moduleDirectories": [
+      "node_modules",
+      "src"
+    ],
+    "extensionsToTreatAsEsm": [
+      ".ts"
+    ],
+    "moduleNameMapper": {
+      "^(\\.{1,2}/.*)\\.js$": "$1"
+    },
+    "transform": {
+      "^.+\\.(t|j)s$": [
+        "@swc/jest",
+        {
+          "root": "../.."
+        }
+      ]
+    }
+  },
+  "gitHead": "fb06c7e9a0e1eb5bf4cb3fb017cf070b5dcca01e"
+}

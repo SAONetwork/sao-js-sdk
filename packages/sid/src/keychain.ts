@@ -20,6 +20,7 @@ import { getResolver } from "key-did-resolver";
 import stringify from "fast-json-stable-stringify";
 import { Hash } from "@saonetwork/common";
 import { getSidIdentifier } from "./utils";
+import {ResolverRegistry} from "did-resolver";
 
 export interface KeySeries {
   /**
@@ -225,7 +226,7 @@ export class Keychain {
 
     const allAccountAuths = await this.didStore.getAllAccountAuth(this.did);
     if (Object.keys(allAccountAuths).length > 0) {
-      const accountDid = new DID({ resolver: getResolver() });
+      const accountDid = new DID({ resolver: getResolver() as ResolverRegistry });
       const updateAccountAuths = [];
       const removeAccountAuths = [];
       for (let i = 0; i < Object.values(allAccountAuths).length; i++) {
