@@ -245,7 +245,7 @@ export class ChainApiClient {
       // TODO: estimate gas
       fee: {
         amount: [],
-        gas: "400000",
+        gas: `${(updateAccountAuth.length * 2 + 2).toString(10)}00000`,
       },
     });
     return txResult;

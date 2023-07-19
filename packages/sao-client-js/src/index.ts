@@ -1,3 +1,3 @@
 export * from "./record";
-export * from "./nodeapi";
+export * from "./sao_client_api";
 export * from "./kid";
