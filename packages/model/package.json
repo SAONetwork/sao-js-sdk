@@ -1,6 +1,6 @@
 {
   "name": "@saonetwork/model",
-  "version": "0.0.18",
+  "version": "0.0.19",
   "description": "sao model management",
   "type": "module",
   "main": "dist/index.js",
