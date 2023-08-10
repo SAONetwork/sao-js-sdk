@@ -63,7 +63,9 @@ export class Model {
   }
 
   cast(): any {
-    return JSON.parse(String(this.content));
+    const contentBase64 = String(this.content);
+    const contentDecoded = window.atob(contentBase64);
+    return JSON.parse(contentDecoded);
   }
 
   toString(): string {
