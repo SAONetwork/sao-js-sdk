@@ -16,15 +16,6 @@ import { ModelConfig, ModelDef, FileDef, ModelProviderConfig } from "./types";
 import { CalculateCid, GenerateDataId, stringToUint8Array } from "@saonetwork/common";
 import { ModelProvider } from ".";
 import { decodeArrayBuffer } from "./utils";
-import { webTransport } from "@libp2p/webtransport";
-import { EventEmitter } from "@libp2p/interfaces/events";
-import { UpgraderEvents } from "@libp2p/interface-transport";
-import { multiaddr } from "@multiformats/multiaddr";
-import CID from "cids";
-import multihashing from "multihashing-async";
-import { pipe } from "it-pipe";
-import all from "it-all";
-import { fromString as uint8ArrayFromString } from "uint8arrays/from-string";
 
 const DefaultModelConfig: ModelConfig = {
   duration: 365 * 60 * 60 * 24,
