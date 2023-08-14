@@ -1,6 +1,6 @@
 {
   "name": "@saonetwork/model",
-  "version": "0.0.24",
+  "version": "0.0.26",
   "description": "sao model management",
   "type": "module",
   "main": "dist/index.js",
@@ -52,5 +52,5 @@
       ]
     }
   },
-  "gitHead": "b3392acf2bfcb03f5365681cbed3993944410843"
+  "gitHead": "63b14fe5ea77e3d7262adb9ae61fe090b69e34f4"
 }
