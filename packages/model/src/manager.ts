@@ -15,7 +15,7 @@ import { SidManager } from "@saonetwork/sid";
 import { ModelConfig, ModelDef, FileDef, ModelProviderConfig } from "./types";
 import { CalculateCid, GenerateDataId, stringToUint8Array } from "@saonetwork/common";
 import { ModelProvider } from ".";
-import { encodeArrayBuffer, decodeArrayBuffer } from "./utils";
+import { decodeArrayBuffer } from "./utils";
 import { webTransport } from "@libp2p/webtransport";
 import { EventEmitter } from "@libp2p/interfaces/events";
 import { UpgraderEvents } from "@libp2p/interface-transport";
@@ -39,7 +39,11 @@ export class ModelManager {
   private modelProviders: Record<string, ModelProvider>;
   private sidManager: SidManager;
 
-  constructor(config: ModelProviderConfig, sidManager: SidManager, defaultModelConfig: ModelConfig = DefaultModelConfig) {
+  constructor(
+    config: ModelProviderConfig,
+    sidManager: SidManager,
+    defaultModelConfig: ModelConfig = DefaultModelConfig
+  ) {
     const nodeApiClient = GetNodeApiClient({
       baseURL: config.nodeApiUrl,
       headers: {
@@ -676,89 +680,5 @@ export class ModelManager {
     await provider.terminate(request, isPublish);
 
     return;
-  }
-
-  /**
-   * Uploads a file chunk to a peer using WebTransport protocol.
-   * @param {ArrayBuffer} buffer - The file chunk data
-   * @param {string} address - The multiaddr of the peer
-   * @param {any} peerInfo - The peer ID and public key of the peer
-   * @param {number} chunkId - The sequential number of the file chunk
-   * @param {number} totalChunks - The total number of file chunks
-   * @returns {Promise<{ contentLength: number; cid: string }>} A promise that resolves with the content length and CID of the file chunk or rejects with an error
-   */
-  async uploadFileChunk(
-    buffer: ArrayBuffer,
-    address: string,
-    peerInfo: any,
-    chunkId: number,
-    totalChunks: number
-  ): Promise<{ contentLength: number; cid: string }> {
-    const content = encodeArrayBuffer(buffer);
-    const encoder = new TextEncoder();
-    const contentHash = await multihashing(encoder.encode(content), "sha2-256");
-    const contentCid = new CID(0, "dag-pb", contentHash);
-    const bytes = encoder.encode(content);
-
-    console.log("Content[" + 0 + "], CID: " + contentCid.toString() + ", length: ", bytes.length);
-    // create an instance of the Upgrader class with the params
-    const upgrader = new SaoUpgrader(
-      uint8ArrayFromString(
-        JSON.stringify({
-          jsonrpc: "2.0",
-          method: "Sao.Upload",
-          params: [
-            JSON.stringify({
-              ChunkId: chunkId,
-              TotalLength: content.length,
-              TotalChunks: totalChunks,
-              ChunkCid: contentCid.toString(),
-              Cid: contentCid.toString(),
-              Content: Array.from(bytes),
-            }),
-          ],
-          id: 1,
-        })
-      )
-    );
-    const addr = multiaddr(address);
-
-    const transport = webTransport()({ peerId: peerInfo });
-
-    const conn = await transport.dial(addr, { upgrader });
-    try {
-      await conn.close();
-    } catch (error) {
-      // block of code to handle the error
-      console.error(error); // log the error
-    }
-    return { contentLength: content.length, cid: contentCid.toString() };
-  }
-}
-
-class SaoUpgrader extends EventEmitter<UpgraderEvents> {
-  params: any;
-  constructor(params: any) {
-    super();
-    this.params = params;
-  }
-
-  // Upgrade an outbound connection
-  async upgradeOutbound(maConn: any, opts: any) {
-    const mux = await opts.muxerFactory.createStreamMuxer();
-    const s = await mux.newStream();
-    console.log("stream created, ", s.stat);
-    await pipe([this.params], s);
-    await s.closeWrite();
-    const values = await pipe(s, all);
-    console.log(values);
-    await s.close();
-    console.log("stream closed");
-    return maConn;
-  }
-
-  // Upgrade an inbound connection
-  async upgradeInbound(maConn: any, opts: any) {
-    return maConn;
   }
 }
