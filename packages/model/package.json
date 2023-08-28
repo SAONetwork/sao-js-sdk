@@ -22,11 +22,15 @@
     "access": "public"
   },
   "dependencies": {
+    "@libp2p/webtransport": "^1.0.3",
     "@saonetwork/api-client": "^0.0.5",
     "@saonetwork/common": "^0.0.2",
     "@saonetwork/sid": "^0.0.17",
     "cids": "^1.1.9",
-    "fast-json-patch": "3.1.1"
+    "fast-json-patch": "3.1.1",
+    "it-all": "^2.0.0",
+    "it-pipe": "^2.0.4",
+    "multihashing-async": "^2.1.4"
   },
   "jest": {
     "moduleDirectories": [
