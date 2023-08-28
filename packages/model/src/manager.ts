@@ -694,14 +694,10 @@ export class ModelManager {
     chunkId: number,
     totalChunks: number
   ): Promise<{ contentLength: number; cid: string }> {
-    const content = encodeArrayBuffer(buffer);
-    const encoder = new TextEncoder();
-    const contentHash = await multihashing(encoder.encode(content), "sha2-256");
+    // No more base64 encoding, using ArrayBuffer directly
+    const contentHash = await multihashing(new Uint8Array(buffer), "sha2-256");
     const contentCid = new CID(0, "dag-pb", contentHash);
-    const bytes = encoder.encode(content);
-
-    console.log("Content[" + 0 + "], CID: " + contentCid.toString() + ", length: ", bytes.length);
-    // create an instance of the Upgrader class with the params
+    console.log(`Content[0], CID: ${contentCid.toString()}, length: ${buffer.byteLength}`);
     const upgrader = new SaoUpgrader(
       uint8ArrayFromString(
         JSON.stringify({
@@ -710,29 +706,28 @@ export class ModelManager {
           params: [
             JSON.stringify({
               ChunkId: chunkId,
-              TotalLength: content.length,
+              TotalLength: buffer.byteLength,
               TotalChunks: totalChunks,
               ChunkCid: contentCid.toString(),
               Cid: contentCid.toString(),
-              Content: Array.from(bytes),
+              Content: Array.from(new Uint8Array(buffer)),
             }),
           ],
           id: 1,
         })
       )
     );
+
     const addr = multiaddr(address);
-
     const transport = webTransport()({ peerId: peerInfo });
-
     const conn = await transport.dial(addr, { upgrader });
+
     try {
       await conn.close();
     } catch (error) {
-      // block of code to handle the error
-      console.error(error); // log the error
+      console.error(error);
     }
-    return { contentLength: content.length, cid: contentCid.toString() };
+    return { contentLength: buffer.byteLength, cid: contentCid.toString() };
   }
 }
 
