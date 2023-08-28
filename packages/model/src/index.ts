@@ -17,6 +17,7 @@ import {
   OrderRenewProposal,
   OrderTerminateProposal,
 } from "@saonetwork/api-client";
+import { OfflineSigner } from "@cosmjs/proto-signing";
 
 export class Model {
   dataId: string;
@@ -99,6 +100,10 @@ export class ModelProvider {
   async init() {
     const res = await this.nodeApiClient.jsonRpcApi(BuildGetNodeAddressReqParams());
     this.nodeAddress = res.data.result;
+  }
+
+  public setSigner(signer: OfflineSigner): void {
+    this.chainApiClient.setSigner(signer);
   }
 
   /**

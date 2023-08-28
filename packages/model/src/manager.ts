@@ -12,6 +12,7 @@ import {
   ClientOrderProposal,
 } from "@saonetwork/api-client";
 import { SidManager } from "@saonetwork/sid";
+import { KidManager } from "@saonetwork/kid";
 import { ModelConfig, ModelDef, FileDef, ModelProviderConfig } from "./types";
 import { CalculateCid, GenerateDataId, stringToUint8Array } from "@saonetwork/common";
 import { ModelProvider } from ".";
@@ -29,10 +30,12 @@ export class ModelManager {
   private defaultModelProvider: ModelProvider;
   private modelProviders: Record<string, ModelProvider>;
   private sidManager: SidManager;
+  private kidManager: KidManager;
 
   constructor(
     config: ModelProviderConfig,
     sidManager: SidManager,
+    kidManager: KidManager,
     defaultModelConfig: ModelConfig = DefaultModelConfig
   ) {
     const nodeApiClient = GetNodeApiClient({
@@ -55,6 +58,7 @@ export class ModelManager {
     this.modelProviders[config.ownerDid] = this.defaultModelProvider;
 
     this.sidManager = sidManager;
+    this.kidManager = kidManager;
   }
 
   /**
@@ -105,7 +109,7 @@ export class ModelManager {
    * @param provider data model provider.
    * @param proposal query proposal.
    */
-  async buildQueryRequest(provider: ModelProvider, proposal: SaoTypes.QueryProposal) {
+  async buildQueryRequest(provider: ModelProvider, proposal: SaoTypes.QueryProposal, useKidManager = false) {
     const lastHeight: number = await provider.getLatestHeight();
     const lastValidHeight: number = 200 + lastHeight;
     const peerInfo: string = await provider.getPeerInfo();
@@ -113,12 +117,13 @@ export class ModelManager {
     proposal.lastValidHeight = lastValidHeight;
     proposal.gateway = peerInfo;
 
-    const sidProvider = await this.sidManager.getSidProvider();
-    if (sidProvider === null) {
-      throw new Error("failed to get sid provider");
+    const manager = useKidManager ? this.kidManager : this.sidManager;
+    const didProvider = await manager.getDidProvider();
+    if (didProvider === null) {
+      throw new Error("failed to get did provider");
     }
 
-    const clientProposal = await sidProvider.createJWS({
+    const clientProposal = await didProvider.createJWS({
       payload: u8a.toString(
         SaoTypes.QueryProposal.encode(SaoTypes.QueryProposal.fromPartial(proposal)).finish(),
         "base64url"
@@ -171,7 +176,7 @@ export class ModelManager {
       operation: modelConfig.operation,
     };
 
-    const sidProvider = await this.sidManager.getSidProvider();
+    const sidProvider = await this.sidManager.getDidProvider();
     if (sidProvider === null) {
       throw new Error("failed to get sid provider");
     }
@@ -244,7 +249,7 @@ export class ModelManager {
       operation: modelConfig.operation,
     };
 
-    const sidProvider = await this.sidManager.getSidProvider();
+    const sidProvider = await this.sidManager.getDidProvider();
     if (sidProvider === null) {
       throw new Error("failed to get sid provider");
     }
@@ -345,7 +350,7 @@ export class ModelManager {
       operation: modelConfig.operation,
     };
 
-    const sidProvider = await this.sidManager.getSidProvider();
+    const sidProvider = await this.sidManager.getDidProvider();
     if (sidProvider === null) {
       throw new Error("failed to get sid provider");
     }
@@ -414,7 +419,13 @@ export class ModelManager {
    * @param groupId group id string, optional.
    * @returns the data model.
    */
-  async loadModel<T>(keyword: string, keywordType?: number, ownerDid?: string, groupId?: string): Promise<T> {
+  async loadModel<T>(
+    keyword: string,
+    keywordType?: number,
+    ownerDid?: string,
+    groupId?: string,
+    useKidManager = false
+  ): Promise<T> {
     let provider = this.defaultModelProvider;
     if (ownerDid !== undefined) {
       provider = this.getModelProvider(ownerDid);
@@ -427,6 +438,7 @@ export class ModelManager {
       groupId: groupId || provider.getGroupId(),
       lastValidHeight: 0,
       gateway: "",
+      useKidManager,
     });
 
     const model = await provider.load(query);
@@ -442,7 +454,7 @@ export class ModelManager {
    * @param groupId group id string, optional.
    * @returns the data model.
    */
-  async loadDataId(alias: string, ownerDid?: string, groupId?: string): Promise<string> {
+  async loadDataId(alias: string, ownerDid?: string, groupId?: string, useKidManager = false): Promise<string> {
     let provider = this.defaultModelProvider;
     if (ownerDid !== undefined) {
       provider = this.getModelProvider(ownerDid);
@@ -455,6 +467,7 @@ export class ModelManager {
       groupId: groupId || provider.getGroupId(),
       lastValidHeight: 0,
       gateway: "",
+      useKidManager,
     });
 
     const model = await provider.load(query);
@@ -476,7 +489,8 @@ export class ModelManager {
     commitId: string,
     keywordType?: number,
     ownerDid?: string,
-    groupId?: string
+    groupId?: string,
+    useKidManager = false
   ): Promise<T> {
     let provider = this.defaultModelProvider;
     if (ownerDid !== undefined) {
@@ -491,6 +505,7 @@ export class ModelManager {
       commitId,
       lastValidHeight: 0,
       gateway: "",
+      useKidManager,
     });
 
     const model = await provider.load(query);
@@ -513,7 +528,8 @@ export class ModelManager {
     version: string,
     keywordType?: number,
     ownerDid?: string,
-    groupId?: string
+    groupId?: string,
+    useKidManager = false
   ): Promise<T> {
     let provider = this.defaultModelProvider;
     if (ownerDid !== undefined) {
@@ -528,6 +544,7 @@ export class ModelManager {
       version,
       lastValidHeight: 0,
       gateway: "",
+      useKidManager,
     });
 
     const model = await provider.load(query);
@@ -563,7 +580,7 @@ export class ModelManager {
       readwriteDids,
     };
 
-    const sidProvider = await this.sidManager.getSidProvider();
+    const sidProvider = await this.sidManager.getDidProvider();
     if (sidProvider === null) {
       throw new Error("failed to get sid provider");
     }
@@ -611,7 +628,7 @@ export class ModelManager {
       data: dataIds,
     };
 
-    const sidProvider = await this.sidManager.getSidProvider();
+    const sidProvider = await this.sidManager.getDidProvider();
     if (sidProvider === null) {
       throw new Error("failed to get sid provider");
     }
@@ -651,7 +668,7 @@ export class ModelManager {
       dataId,
     };
 
-    const sidProvider = await this.sidManager.getSidProvider();
+    const sidProvider = await this.sidManager.getDidProvider();
     if (sidProvider === null) {
       throw new Error("failed to get sid provider");
     }

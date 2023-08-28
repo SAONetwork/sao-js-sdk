@@ -372,4 +372,8 @@ export class ChainApiClient {
     });
     return txResult;
   }
+
+  public setSigner(signer: OfflineSigner): void {
+    this.signer = signer;
+  }
 }

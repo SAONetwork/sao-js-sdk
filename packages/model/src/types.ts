@@ -10,6 +10,7 @@ export type ModelProviderConfig = {
   nodeApiUrl: string;
   nodeApiToken: string;
   platformId: string;
+  kidSigner: OfflineSigner;
 };
 
 export type ModelDef<T> = {

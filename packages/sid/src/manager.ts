@@ -144,7 +144,7 @@ export class SidManager {
    * @param did sid
    * @returns
    */
-  async getSidProvider(did?: string): Promise<SidProvider | null> {
+  async getDidProvider(did?: string): Promise<SidProvider | null> {
     if (did) {
       return this.sidProviders[did];
     } else {

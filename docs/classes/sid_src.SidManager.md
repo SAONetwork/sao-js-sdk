@@ -20,9 +20,9 @@
 
 ___
 
-### getSidProvider
+### getDidProvider
 
-▸ **getSidProvider**(`did?`): `Promise`<`SidProvider`\>
+▸ **getDidProvider**(`did?`): `Promise`<`SidProvider`\>
 
 #### Parameters
 
