@@ -9,7 +9,9 @@
         "@saonetwork/common": ["packages/common/src"],
         "@saonetwork/api-client": ["packages/api-client/src"],
         "@saonetwork/model": ["packages/model/src"],
-        "@saonetwork/sid": ["packages/sid/src"]
+        "@saonetwork/sid": ["packages/sid/src"],
+        "@saonetwork/kid": ["packages/kid/src"],
+        "@saonetwork/toolkits": ["packages/toolkits/src"],
       }
     }
 }

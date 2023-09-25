@@ -9,6 +9,7 @@ import stringify from "fast-json-stable-stringify";
 import { JWS } from "./types";
 import { JWE } from "did-jwt";
 import { Hash } from "@saonetwork/common";
+import {ResolverRegistry} from "did-resolver";
 
 const multicodecPubkeyTable: Record<string, number> = {
   secp256k1: 0xe7,
@@ -39,7 +40,7 @@ export async function generateAccountSecret(accountProvider: AccountProvider): P
 export async function accountSecretToDid(accountSecret: Uint8Array): Promise<DID> {
   const accountDid = new DID({
     // TODO: replace with sao's ed25519 provider.
-    resolver: getKeyResolver(),
+    resolver: getKeyResolver() as ResolverRegistry,
     provider: new Ed25519Provider(accountSecret),
   });
   await accountDid.authenticate();

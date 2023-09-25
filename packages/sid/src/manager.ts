@@ -3,12 +3,12 @@ import { AccountProvider } from "./account_provider";
 import { SidProvider } from "./sid_provider";
 import { DidStore } from "./did_store";
 import { generateAccountSecret, isSid, getSidIdentifier, anothersleep } from "./utils";
-import { BindingParam } from "./types";
+import {BindingParam, DidManager} from "./types";
 
 /**
  * Sid manager which can manage a list of accounts and sid
  */
-export class SidManager {
+export class SidManager implements DidManager{
   private didStore: DidStore;
   // current account provider
   private accountProvider: AccountProvider;
@@ -144,7 +144,7 @@ export class SidManager {
    * @param did sid
    * @returns
    */
-  async getSidProvider(did?: string): Promise<SidProvider | null> {
+  async GetProvider(did?: string): Promise<SidProvider | null> {
     if (did) {
       return this.sidProviders[did];
     } else {

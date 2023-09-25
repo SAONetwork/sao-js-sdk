@@ -11,7 +11,7 @@ import {
   OrderTerminateProposal,
   ClientOrderProposal,
 } from "@saonetwork/api-client";
-import { SidManager } from "@saonetwork/sid";
+import { DidManager } from "@saonetwork/sid";
 import { ModelConfig, ModelDef, FileDef, ModelProviderConfig } from "./types";
 import { CalculateCid, GenerateDataId, stringToUint8Array } from "@saonetwork/common";
 import { ModelProvider } from ".";
@@ -24,17 +24,14 @@ const DefaultModelConfig: ModelConfig = {
   operation: 1,
   isPublish: false,
 };
+
 export class ModelManager {
   private defaultModelConfig: ModelConfig;
   private defaultModelProvider: ModelProvider;
   private modelProviders: Record<string, ModelProvider>;
-  private sidManager: SidManager;
+  private didManager: DidManager;
 
-  constructor(
-    config: ModelProviderConfig,
-    sidManager: SidManager,
-    defaultModelConfig: ModelConfig = DefaultModelConfig
-  ) {
+  constructor(config: ModelProviderConfig, didManager: DidManager, defaultModelConfig: ModelConfig = DefaultModelConfig) {
     const nodeApiClient = GetNodeApiClient({
       baseURL: config.nodeApiUrl,
       headers: {
@@ -54,7 +51,7 @@ export class ModelManager {
     this.modelProviders = {};
     this.modelProviders[config.ownerDid] = this.defaultModelProvider;
 
-    this.sidManager = sidManager;
+    this.didManager = didManager;
   }
 
   /**
@@ -113,12 +110,12 @@ export class ModelManager {
     proposal.lastValidHeight = lastValidHeight;
     proposal.gateway = peerInfo;
 
-    const sidProvider = await this.sidManager.getSidProvider();
-    if (sidProvider === null) {
-      throw new Error("failed to get sid provider");
+    const didProvider = await this.didManager.GetProvider();
+    if (didProvider === null) {
+      throw new Error("failed to get did provider");
     }
 
-    const clientProposal = await sidProvider.createJWS({
+    const clientProposal = await didProvider.createJWS({
       payload: u8a.toString(
         SaoTypes.QueryProposal.encode(SaoTypes.QueryProposal.fromPartial(proposal)).finish(),
         "base64url"
@@ -171,12 +168,12 @@ export class ModelManager {
       operation: modelConfig.operation,
     };
 
-    const sidProvider = await this.sidManager.getSidProvider();
-    if (sidProvider === null) {
-      throw new Error("failed to get sid provider");
+    const didProvider = await this.didManager.GetProvider();
+    if (didProvider === null) {
+      throw new Error("failed to get did provider");
     }
 
-    const clientProposal = await sidProvider.createJWS({
+    const clientProposal = await didProvider.createJWS({
       payload: u8a.toString(SaoTypes.Proposal.encode(SaoTypes.Proposal.fromPartial(proposal)).finish(), "base64url"),
     });
 
@@ -244,12 +241,12 @@ export class ModelManager {
       operation: modelConfig.operation,
     };
 
-    const sidProvider = await this.sidManager.getSidProvider();
-    if (sidProvider === null) {
-      throw new Error("failed to get sid provider");
+    const didProvider = await this.didManager.GetProvider();
+    if (didProvider === null) {
+      throw new Error("failed to get did provider");
     }
 
-    const clientProposal = await sidProvider.createJWS({
+    const clientProposal = await didProvider.createJWS({
       payload: u8a.toString(SaoTypes.Proposal.encode(SaoTypes.Proposal.fromPartial(proposal)).finish(), "base64url"),
     });
 
@@ -345,11 +342,11 @@ export class ModelManager {
       operation: modelConfig.operation,
     };
 
-    const sidProvider = await this.sidManager.getSidProvider();
-    if (sidProvider === null) {
-      throw new Error("failed to get sid provider");
+    const didProvider = await this.didManager.GetProvider();
+    if (didProvider === null) {
+      throw new Error("failed to get did provider");
     }
-    const clientProposal = await sidProvider.createJWS({
+    const clientProposal = await didProvider.createJWS({
       payload: u8a.toString(SaoTypes.Proposal.encode(SaoTypes.Proposal.fromPartial(proposal)).finish(), "base64url"),
     });
 
@@ -428,6 +425,7 @@ export class ModelManager {
       lastValidHeight: 0,
       gateway: "",
     });
+    console.log(query)
 
     const model = await provider.load(query);
     return model.cast();
@@ -563,12 +561,12 @@ export class ModelManager {
       readwriteDids,
     };
 
-    const sidProvider = await this.sidManager.getSidProvider();
-    if (sidProvider === null) {
-      throw new Error("failed to get sid provider");
+    const didProvider = await this.didManager.GetProvider();
+    if (didProvider === null) {
+      throw new Error("failed to get did provider");
     }
 
-    const permissionProposal = await sidProvider.createJWS({
+    const permissionProposal = await didProvider.createJWS({
       payload: u8a.toString(
         SaoTypes.PermissionProposal.encode(SaoTypes.PermissionProposal.fromPartial(proposal)).finish(),
         "base64url"
@@ -611,12 +609,12 @@ export class ModelManager {
       data: dataIds,
     };
 
-    const sidProvider = await this.sidManager.getSidProvider();
-    if (sidProvider === null) {
-      throw new Error("failed to get sid provider");
+    const didProvider = await this.didManager.GetProvider();
+    if (didProvider === null) {
+      throw new Error("failed to get did provider");
     }
 
-    const renewProposal = await sidProvider.createJWS({
+    const renewProposal = await didProvider.createJWS({
       payload: u8a.toString(
         SaoTypes.RenewProposal.encode(SaoTypes.RenewProposal.fromPartial(proposal)).finish(),
         "base64url"
@@ -651,12 +649,12 @@ export class ModelManager {
       dataId,
     };
 
-    const sidProvider = await this.sidManager.getSidProvider();
-    if (sidProvider === null) {
-      throw new Error("failed to get sid provider");
+    const didProvider = await this.didManager.GetProvider();
+    if (didProvider === null) {
+      throw new Error("failed to get did provider");
     }
 
-    const terminateProposal = await sidProvider.createJWS({
+    const terminateProposal = await didProvider.createJWS({
       payload: u8a.toString(
         SaoTypes.TerminateProposal.encode(SaoTypes.TerminateProposal.fromPartial(proposal)).finish(),
         "base64url"
