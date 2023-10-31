@@ -145,3 +145,18 @@ export const BuildModelUpdatePermissionReqParams = (req: any) => {
 
   return request;
 };
+
+export const BuildBindingParams = (rootDocId: string, keys: any, accountAuth: any, proof: any) => {
+  const request: JsonRpcRequest = Object.create(null);
+
+  request.id = 0;
+  request.jsonrpc = "2.0";
+  request.method = "Sao.DidBindingProof";
+  request.params = [];
+  request.params.push(rootDocId);
+  request.params.push(keys);
+  request.params.push(accountAuth);
+  request.params.push(proof);
+
+  return request;
+};

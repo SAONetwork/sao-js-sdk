@@ -41,16 +41,19 @@ export class ChainApiClient {
     console.log("rpc url: ", rpc);
     console.log("prefix: ", addressPrefix);
 
-    this.client = new Client(
-      {
-        apiURL: api,
-        rpcURL: rpc,
-        prefix: addressPrefix,
-      },
-      config.signer
-    );
+    if (config.signer != undefined) {
+      this.client = new Client(
+        {
+          apiURL: api,
+          rpcURL: rpc,
+          prefix: addressPrefix,
+        },
+        config.signer
+      );
 
-    this.signer = config.signer;
+      this.signer = config.signer;
+    }
+
     this.didClient = DidTypes.queryClient({ addr: api });
     this.nodeClient = NodeTypes.queryClient({ addr: api });
     this.saoClient = SaoTypes.queryClient({ addr: api });

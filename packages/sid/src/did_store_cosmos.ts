@@ -2,8 +2,16 @@ import { DidStore } from "./did_store";
 import { OfflineSigner } from "@cosmjs/proto-signing";
 import { JWE } from "another-did-jwt";
 import LRUCache from "lru-cache";
-import { AccountAuth, ChainApiClient } from "@saonetwork/api-client";
+import {
+  AccountAuth,
+  ChainApiClient,
+  CreateRequestClient,
+  SaoNodeAPISchema,
+  BuildBindingParams,
+  BindingProofV1,
+} from "@saonetwork/api-client";
 import { DidTxTypes } from "@saonetwork/saochain-ts-client";
+import stringify from "fast-json-stable-stringify";
 
 const DefaultLruOptions = {
   max: 20,
@@ -13,15 +21,23 @@ const BindingCacheKey = "binding";
 
 export class CosmosDidStore implements DidStore {
   private chainApiClient: ChainApiClient;
+  private nodeApiClient: CreateRequestClient<SaoNodeAPISchema>;
   private cache: Record<string, LRUCache<string, any>>;
 
-  constructor(signer: OfflineSigner, apiURL?: string, rpcURL?: string, prefix?: string) {
+  constructor(
+    signer?: OfflineSigner,
+    apiURL?: string,
+    rpcURL?: string,
+    prefix?: string,
+    nodeApiClient?: CreateRequestClient<SaoNodeAPISchema>
+  ) {
     this.chainApiClient = new ChainApiClient({
       apiURL,
       rpcURL,
       prefix,
-      signer: signer,
+      signer,
     });
+    this.nodeApiClient = nodeApiClient;
     this.cache = {};
   }
 
@@ -31,6 +47,47 @@ export class CosmosDidStore implements DidStore {
     proof: DidTxTypes.BindingProof,
     accountAuth: AccountAuth
   ): Promise<void> {
+    if (this.nodeApiClient != undefined) {
+      const pubkeys = [];
+      Object.keys(keys).forEach((k) => {
+        pubkeys.push({
+          name: k,
+          value: keys[k],
+        });
+      });
+      const accountDid = accountAuth.accountDid;
+      const accountEncryptedSeed = stringify(accountAuth.accountEncryptedSeed);
+      const sidEncryptedAccount = stringify(accountAuth.sidEncryptedAccount);
+      const bindingProof = {
+        message: proof.message,
+        signature: proof.signature,
+        account: proof.accountId,
+        did: proof.did,
+        timestamp: proof.timestamp,
+        // TODO:
+        version: BindingProofV1,
+      };
+      const res = await this.nodeApiClient.jsonRpcApi(
+        BuildBindingParams(
+          rootDocId,
+          pubkeys,
+          {
+            accountDid: accountDid,
+            accountEncryptedSeed: accountEncryptedSeed,
+            sidEncryptedAccount: sidEncryptedAccount,
+          },
+          bindingProof
+        )
+      );
+      if (res.data.result) {
+        this.getCache(BindingCacheKey).set(proof.accountId, proof.did);
+        return;
+      } else if (res.data.error) {
+        throw new Error(res.data.error.message);
+      } else {
+        throw new Error("unknown error");
+      }
+    }
     const txResult = await this.chainApiClient.Binding(rootDocId, keys, proof, accountAuth);
     if (txResult.code != 0) {
       throw new Error(`bind account ${proof.accountId} -> did ${proof.did} failed.`);
@@ -64,7 +121,7 @@ export class CosmosDidStore implements DidStore {
       if (err.response.status === 404) {
         return null;
       } else {
-        throw new Error("failed to query did for accountid: " + accountId + ", !!!" + err.response.status);
+        throw new Error("failed to query did for accountid: " + accountId + ", !!!" + err);
       }
     }
   }

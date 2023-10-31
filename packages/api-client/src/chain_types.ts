@@ -8,7 +8,7 @@ export type ChainApiClientConfig = {
   apiURL: string;
   rpcURL: string;
   prefix: string;
-  signer: OfflineSigner;
+  signer?: OfflineSigner;
 };
 
 export type AccountAuth = {
