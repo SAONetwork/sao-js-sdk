@@ -32,6 +32,8 @@ export async function chainSwitch(chainName: string, useEth = false, def?: any) 
     nodeApiUrl: nodeApi,
     nodeApiToken: def?.nodeApiToken ?? "TOKEN",
     platformId: def?.platformId ?? "DEFAULT_PLATFORM_ID",
+    paymentApiUrl: def?.paymentApiUrl,
+    paymentApiToken: def?.paymentApiToken,
   };
   const defaultModelConfig = {
     duration: def?.duration ?? 365 * 60 * 60 * 24,
@@ -133,7 +135,7 @@ export async function NewEthSidManager(
   modelConfig: ModelConfig,
   chainApi: string,
   chainRpc: string
-): Promise<{ sidManager; modelManager }> {
+): Promise<{ sidManager: SidManager; modelManager: ModelManager }> {
   if (window.ethereum) {
     try {
       const accountProvider = await EthAccountProvider.new(window.ethereum!);

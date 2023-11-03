@@ -16,6 +16,7 @@ import {
   UpdatePermissionProposal,
   OrderRenewProposal,
   OrderTerminateProposal,
+  BuildStoreProposalParams,
 } from "@saonetwork/api-client";
 
 export class Model {
@@ -78,18 +79,21 @@ export class ModelProvider {
   private groupId: string;
   private nodeAddress: string;
   private nodeApiClient: CreateRequestClient<SaoNodeAPISchema>;
+  private paymentApiClient: CreateRequestClient<SaoNodeAPISchema>;
   private chainApiClient: ChainApiClient;
 
   public constructor(
     ownerSid: string,
     groupId: string,
     nodeApiClient: CreateRequestClient<SaoNodeAPISchema>,
-    chainApiClient: ChainApiClient
+    chainApiClient: ChainApiClient,
+    paymentApiClient?: CreateRequestClient<SaoNodeAPISchema>
   ) {
     this.ownerSid = ownerSid;
     this.groupId = groupId;
     this.nodeApiClient = nodeApiClient;
     this.chainApiClient = chainApiClient;
+    this.paymentApiClient = paymentApiClient;
   }
 
   /**
@@ -193,11 +197,11 @@ export class ModelProvider {
       orderId: number
     ): Promise<Model> {
       const res = await this.nodeApiClient.jsonRpcApi(BuildModelCreateFileReqParams(query, clientProposal, orderId));
-  
+
       if (res.data.result) {
         const model = new Model(res.data.result.DataId, res.data.result.Alias);
         model.setCid(res.data.result.Cid);
-  
+
         return model;
       } else if (res.data.error) {
         throw new Error(res.data.error.message);
@@ -359,6 +363,21 @@ export class ModelProvider {
       } else {
         throw new Error("unknown error");
       }
+    }
+  }
+
+  async storeProposal(clientProposal: ClientOrderProposal) {
+    if (clientProposal.Proposal.paymentDid == "") {
+      throw new Error("only the order proposals with payment did need to be stored in the payment gateway");
+    }
+    const res = await this.paymentApiClient.jsonRpcApi(BuildStoreProposalParams(clientProposal));
+    console.log(res);
+    if (res.data.result) {
+      return res.data.result;
+    } else if (res.data.error) {
+      throw new Error(res.data.error.message);
+    } else {
+      throw new Error("unknown error");
     }
   }
 }

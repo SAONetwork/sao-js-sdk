@@ -160,3 +160,15 @@ export const BuildBindingParams = (rootDocId: string, keys: any, accountAuth: an
 
   return request;
 };
+
+export const BuildStoreProposalParams = (proposal) => {
+  const request: JsonRpcRequest = Object.create(null);
+
+  request.id = 0;
+  request.jsonrpc = "2.0";
+  request.method = "Sao.StoreProposal";
+  request.params = [];
+  request.params.push(proposal);
+
+  return request;
+};
