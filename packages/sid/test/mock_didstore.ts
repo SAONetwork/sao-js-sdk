@@ -1,6 +1,6 @@
 import { DidStore } from "../src/did_store";
 import { AccountAuth, Binding } from "@saonetwork/api-client";
-import { DidTxTypes } from "@saonetwork/saochain-ts-client";
+import { DidTxTypes } from "./../ts-client/dist/entry";
 
 function guid() {
   return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {

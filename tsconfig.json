@@ -11,6 +11,7 @@
         "@saonetwork/model": ["packages/model/src"],
         "@saonetwork/sid": ["packages/sid/src"],
         "@saonetwork/toolkits": ["packages/toolkits/src"],
+        "@saonetwork/sampleapp": ["packages/sampleapp/src"]
       }
     }
 }

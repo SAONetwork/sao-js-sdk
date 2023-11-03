@@ -16,6 +16,12 @@ import { ModelConfig, ModelDef, FileDef, ModelProviderConfig } from "./types";
 import { CalculateCid, GenerateDataId, stringToUint8Array } from "@saonetwork/common";
 import { ModelProvider } from ".";
 import { decodeArrayBuffer } from "./utils";
+import { webTransport } from "@libp2p/webtransport";
+import { EventEmitter } from "@libp2p/interfaces/events";
+import { UpgraderEvents } from "@libp2p/interface-transport";
+import { multiaddr } from "@multiformats/multiaddr";
+import { pipe } from "it-pipe";
+import all from "it-all";
 
 const DefaultModelConfig: ModelConfig = {
   duration: 365 * 60 * 60 * 24,
@@ -31,13 +37,27 @@ export class ModelManager {
   private modelProviders: Record<string, ModelProvider>;
   private didManager: DidManager;
 
-  constructor(config: ModelProviderConfig, didManager: DidManager, defaultModelConfig: ModelConfig = DefaultModelConfig) {
+  constructor(
+    config: ModelProviderConfig,
+    didManager: DidManager,
+    defaultModelConfig: ModelConfig = DefaultModelConfig
+  ) {
     const nodeApiClient = GetNodeApiClient({
       baseURL: config.nodeApiUrl,
       headers: {
         Authorization: "Bearer " + config.nodeApiToken,
       },
     });
+
+    let paymentApiClient = undefined;
+    if (config.paymentApiUrl != "") {
+      paymentApiClient = GetNodeApiClient({
+        baseURL: config.paymentApiUrl,
+        headers: {
+          Authorization: "Bearer " + config.paymentApiToken,
+        },
+      });
+    }
 
     const chainApiClient = new ChainApiClient({
       apiURL: config.chainApiUrl,
@@ -47,7 +67,13 @@ export class ModelManager {
     });
 
     this.defaultModelConfig = defaultModelConfig;
-    this.defaultModelProvider = new ModelProvider(config.ownerDid, config.platformId, nodeApiClient, chainApiClient);
+    this.defaultModelProvider = new ModelProvider(
+      config.ownerDid,
+      config.platformId,
+      nodeApiClient,
+      chainApiClient,
+      paymentApiClient
+    );
     this.modelProviders = {};
     this.modelProviders[config.ownerDid] = this.defaultModelProvider;
 
@@ -166,6 +192,7 @@ export class ModelManager {
       extendInfo: def.extendInfo,
       size: dataBytes.length,
       operation: modelConfig.operation,
+      paymentDid: def.paymentDid,
     };
 
     const didProvider = await this.didManager.GetProvider();
@@ -239,6 +266,7 @@ export class ModelManager {
       extendInfo: def.extendInfo,
       size: def.size,
       operation: modelConfig.operation,
+      paymentDid: def.paymentDid,
     };
 
     const didProvider = await this.didManager.GetProvider();
@@ -425,7 +453,6 @@ export class ModelManager {
       lastValidHeight: 0,
       gateway: "",
     });
-    console.log(query)
 
     const model = await provider.load(query);
     return model.cast();
@@ -669,5 +696,155 @@ export class ModelManager {
     await provider.terminate(request, isPublish);
 
     return;
+  }
+
+  /**
+   * store proposal
+   *
+   *    * @param def data model defination.
+   *    * @param modelConfig data model configuration.
+   *    * @param ownerDid DID string, optional.
+   *    * @returns the stored proposal cid.
+   *    */
+  async storeProposal<T>(
+    def: FileDef<T>,
+    modelConfig: ModelConfig = this.defaultModelConfig,
+    ownerDid?: string
+  ): Promise<string> {
+    let provider = this.defaultModelProvider;
+    if (ownerDid !== undefined) {
+      provider = this.getModelProvider(ownerDid);
+    }
+
+    const dataId = GenerateDataId(provider.getOwnerSid() + provider.getGroupId());
+    const proposal: SaoTypes.Proposal = {
+      owner: ownerDid || provider.getOwnerSid(),
+      provider: provider.getNodeAddress(),
+      groupId: provider.getGroupId(),
+      duration: modelConfig.duration,
+      replica: modelConfig.replica,
+      timeout: modelConfig.timeout,
+      alias: def.filename,
+      dataId,
+      commitId: dataId,
+      tags: def.tags,
+      cid: def.cid,
+      rule: def.rule,
+      extendInfo: def.extendInfo,
+      size: def.size,
+      operation: modelConfig.operation,
+      paymentDid: def.paymentDid,
+    };
+
+    const didProvider = await this.didManager.GetProvider();
+    if (didProvider === null) {
+      throw new Error("failed to get did provider");
+    }
+    const clientProposal = await didProvider.createJWS({
+      payload: u8a.toString(SaoTypes.Proposal.encode(SaoTypes.Proposal.fromPartial(proposal)).finish(), "base64url"),
+    });
+
+    if (!provider.validate(proposal)) {
+      throw new Error("invalid provider");
+    }
+
+    const clientOrderProposal: ClientOrderProposal = {
+      Proposal: proposal,
+      JwsSignature: clientProposal.signatures[0],
+    };
+
+    return await provider.storeProposal(clientOrderProposal);
+  }
+
+  /**
+   * Uploads a file chunk to a peer using WebTransport protocol.
+   * @param {ArrayBuffer} buffer - The file chunk data
+   * @param {string} address - The multiaddr of the peer
+   * @param {any} peerInfo - The peer ID and public key of the peer
+   * @param {number} chunkId - The sequential number of the file chunk
+   * @param {number} totalChunks - The total number of file chunks
+   * @returns {Promise<{ contentLength: number; cid: string }>} A promise that resolves with the content length and CID of the file chunk or rejects with an error
+   */
+  async uploadFileChunk(
+    buffer: ArrayBuffer,
+    peerInfo: any,
+    address = "",
+    chunkId = 0,
+    totalChunks = 1
+  ): Promise<{ contentLength: number; cid: string }> {
+    const content = new Uint8Array(buffer);
+    const contentCid = await CalculateCid(new Uint8Array(buffer));
+
+    console.log("Content[" + 0 + "], CID: " + contentCid.toString() + ", length: ", content.length);
+    // create an instance of the Upgrader class with the params
+    const upgrader = new SaoUpgrader(
+      u8a.fromString(
+        JSON.stringify({
+          jsonrpc: "2.0",
+          method: "Sao.Upload",
+          params: [
+            JSON.stringify({
+              ChunkId: chunkId,
+              TotalLength: content.length,
+              TotalChunks: totalChunks,
+              ChunkCid: contentCid.toString(),
+              Cid: contentCid.toString(),
+              Content: Array.from(content),
+            }),
+          ],
+          id: 1,
+        })
+      )
+    );
+
+    if (address == "") {
+      const addrStr = await this.defaultModelProvider.getPeerInfo();
+      address = addrStr
+        .split(",")
+        .filter((value, index, array) => {
+          return value.includes("webtransport") && !value.includes("127.0.0.1");
+        })
+        .pop();
+    }
+
+    const addr = multiaddr(address);
+
+    const transport = webTransport()({ peerId: peerInfo });
+
+    const conn = await transport.dial(addr, { upgrader });
+    try {
+      await conn.close();
+    } catch (error) {
+      // block of code to handle the error
+      console.error(error); // log the error
+    }
+    return { contentLength: content.length, cid: contentCid.toString() };
+  }
+}
+
+class SaoUpgrader extends EventEmitter<UpgraderEvents> {
+  params: any;
+  constructor(params: any) {
+    super();
+    this.params = params;
+  }
+
+  // Upgrade an outbound connection
+  async upgradeOutbound(maConn: any, opts: any) {
+    const mux = await opts.muxerFactory.createStreamMuxer();
+    const s = await mux.newStream();
+    console.log("stream created, ", s.stat);
+    await pipe([this.params], s);
+    await s.closeWrite();
+    const values = await pipe(s, all);
+    console.log(values);
+    await s.close();
+    console.log("stream closed");
+    return maConn;
+  }
+
+  // Upgrade an inbound connection
+  async upgradeInbound(maConn: any, opts: any) {
+    return maConn;
   }
 }

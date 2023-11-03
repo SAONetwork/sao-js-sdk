@@ -10,6 +10,8 @@ export type ModelProviderConfig = {
   nodeApiUrl: string;
   nodeApiToken: string;
   platformId: string;
+  paymentApiUrl?: string;
+  paymentApiToken?: string;
 };
 
 export type ModelDef<T> = {
@@ -20,6 +22,7 @@ export type ModelDef<T> = {
   tags?: string[] | [];
   rule?: string | undefined;
   extendInfo?: string | undefined;
+  paymentDid?: string | undefined;
 };
 
 export type FileDef<T> = {
@@ -31,6 +34,7 @@ export type FileDef<T> = {
   rule?: string | undefined;
   extendInfo?: string | undefined;
   size?: number | 0;
+  paymentDid?: string | undefined;
 };
 
 export type ModelConfig = {

@@ -1,4 +1,4 @@
-import { DidTxTypes } from "@saonetwork/saochain-ts-client";
+import { DidTxTypes } from "../../ts-client/dist/entry";
 import { JWE } from "another-did-jwt";
 import { AccountAuth } from "@saonetwork/api-client";
 

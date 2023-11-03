@@ -1,6 +1,6 @@
 import { AccountId } from "caip";
 import { AccountProvider } from "./account_provider";
-import { DidTxTypes } from "@saonetwork/saochain-ts-client";
+import { DidTxTypes } from "../../ts-client/dist/entry";
 import { Keplr } from "@keplr-wallet/types";
 
 import { getBindMessage } from "./utils";

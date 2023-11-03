@@ -1,4 +1,4 @@
-import { SaoTypes, DidTxTypes } from "@saonetwork/saochain-ts-client";
+import { SaoTypes, DidTxTypes } from "../../ts-client/dist/entry";
 import { AccountAuth } from "@saonetwork/api-client";
 
 /**

@@ -10,7 +10,7 @@ import {
   BuildBindingParams,
   BindingProofV1,
 } from "@saonetwork/api-client";
-import { DidTxTypes } from "@saonetwork/saochain-ts-client";
+import { DidTxTypes } from "../../ts-client/dist/entry";
 import stringify from "fast-json-stable-stringify";
 
 const DefaultLruOptions = {
