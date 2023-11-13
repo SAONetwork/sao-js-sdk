@@ -26,6 +26,7 @@
   "dependencies": {
     "@aws-crypto/sha256-browser": "^2.0.2",
     "@cosmjs/proto-signing": "^0.29.4",
+    "@metamask/providers": "^14.0.0",
     "@types/varint": "^6.0.1",
     "axios": "0.27.2",
     "caip": "^1.1.0",

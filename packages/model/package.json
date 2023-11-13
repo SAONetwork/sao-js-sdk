@@ -1,6 +1,6 @@
 {
   "name": "@saonetwork/model",
-  "version": "0.0.27",
+  "version": "0.0.28",
   "description": "sao model management",
   "type": "module",
   "main": "dist/index.js",
@@ -22,11 +22,15 @@
     "access": "public"
   },
   "dependencies": {
-    "@saonetwork/api-client": "^0.0.5",
+    "@libp2p/webtransport": "^1.0.3",
+    "@multiformats/multiaddr": "^12.1.10",
+    "@saonetwork/api-client": "^0.0.6",
     "@saonetwork/common": "^0.0.2",
-    "@saonetwork/sid": "^0.0.17",
+    "@saonetwork/sid": "^0.0.23",
     "cids": "^1.1.9",
-    "fast-json-patch": "3.1.1"
+    "fast-json-patch": "3.1.1",
+    "it-all": "^3.0.3",
+    "it-pipe": "^3.0.1"
   },
   "jest": {
     "moduleDirectories": [
