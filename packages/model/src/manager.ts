@@ -67,6 +67,7 @@ export class ModelManager {
     });
 
     this.defaultModelConfig = defaultModelConfig;
+    this.fullfillDefaultModelConfig();
     this.defaultModelProvider = new ModelProvider(
       config.ownerDid,
       config.platformId,
@@ -180,9 +181,9 @@ export class ModelManager {
       owner: ownerDid || provider.getOwnerSid(),
       provider: provider.getNodeAddress(),
       groupId: provider.getGroupId(),
-      duration: modelConfig.duration,
-      replica: modelConfig.replica,
-      timeout: modelConfig.timeout,
+      duration: modelConfig.duration ?? this.defaultModelConfig.duration,
+      replica: modelConfig.replica ?? this.defaultModelConfig.replica,
+      timeout: modelConfig.timeout ?? this.defaultModelConfig.timeout,
       alias: def.alias,
       dataId,
       commitId: dataId,
@@ -191,7 +192,7 @@ export class ModelManager {
       rule: def.rule,
       extendInfo: def.extendInfo,
       size: dataBytes.length,
-      operation: modelConfig.operation,
+      operation: modelConfig.operation ?? this.defaultModelConfig.operation,
       paymentDid: def.paymentDid,
     };
 
@@ -222,7 +223,7 @@ export class ModelManager {
     };
 
     let orderId = 0;
-    if (modelConfig.isPublish) {
+    if (modelConfig.isPublish ?? this.defaultModelConfig.isPublish) {
       orderId = await provider.store(clientOrderProposal);
     }
 
@@ -254,9 +255,9 @@ export class ModelManager {
       owner: ownerDid || provider.getOwnerSid(),
       provider: provider.getNodeAddress(),
       groupId: provider.getGroupId(),
-      duration: modelConfig.duration,
-      replica: modelConfig.replica,
-      timeout: modelConfig.timeout,
+      duration: modelConfig.duration ?? this.defaultModelConfig.duration,
+      replica: modelConfig.replica ?? this.defaultModelConfig.replica,
+      timeout: modelConfig.timeout ?? this.defaultModelConfig.timeout,
       alias: def.filename,
       dataId,
       commitId: dataId,
@@ -265,7 +266,7 @@ export class ModelManager {
       rule: def.rule,
       extendInfo: def.extendInfo,
       size: def.size,
-      operation: modelConfig.operation,
+      operation: modelConfig.operation ?? this.defaultModelConfig.operation,
       paymentDid: def.paymentDid,
     };
 
@@ -296,7 +297,7 @@ export class ModelManager {
     };
 
     let orderId = 0;
-    if (modelConfig.isPublish) {
+    if (modelConfig.isPublish ?? this.defaultModelConfig.isPublish) {
       orderId = await provider.store(clientOrderProposal);
     }
 
@@ -356,9 +357,9 @@ export class ModelManager {
       owner: ownerDid || provider.getOwnerSid(),
       provider: provider.getNodeAddress(),
       groupId: provider.getGroupId(),
-      duration: modelConfig.duration,
-      replica: modelConfig.replica,
-      timeout: modelConfig.timeout,
+      duration: modelConfig.duration ?? this.defaultModelConfig.duration,
+      replica: modelConfig.replica ?? this.defaultModelConfig.replica,
+      timeout: modelConfig.timeout ?? this.defaultModelConfig.timeout,
       alias: originModel.alias,
       dataId: originModel.dataId,
       commitId: originModel.commitId + "|" + GenerateDataId(provider.getOwnerSid() + provider.getGroupId()),
@@ -367,7 +368,7 @@ export class ModelManager {
       rule: originModel.rule,
       extendInfo: originModel.extendInfo,
       size: targetDataBytes.length,
-      operation: modelConfig.operation,
+      operation: modelConfig.operation ?? this.defaultModelConfig.operation,
     };
 
     const didProvider = await this.didManager.GetProvider();
@@ -388,7 +389,7 @@ export class ModelManager {
     };
 
     let orderId = 0;
-    if (modelConfig.isPublish) {
+    if (modelConfig.isPublish ?? this.defaultModelConfig.isPublish) {
       orderId = await provider.store(clientOrderProposal);
     }
 
@@ -631,8 +632,8 @@ export class ModelManager {
 
     const proposal: SaoTypes.RenewProposal = {
       owner: ownerDid || provider.getOwnerSid(),
-      duration: modelConfig.duration,
-      timeout: modelConfig.timeout,
+      duration: modelConfig.duration ?? this.defaultModelConfig.duration,
+      timeout: modelConfig.timeout ?? this.defaultModelConfig.timeout,
       data: dataIds,
     };
 
@@ -721,9 +722,9 @@ export class ModelManager {
       owner: ownerDid || provider.getOwnerSid(),
       provider: provider.getNodeAddress(),
       groupId: provider.getGroupId(),
-      duration: modelConfig.duration,
-      replica: modelConfig.replica,
-      timeout: modelConfig.timeout,
+      duration: modelConfig.duration ?? this.defaultModelConfig.duration,
+      replica: modelConfig.replica ?? this.defaultModelConfig.replica,
+      timeout: modelConfig.timeout ?? this.defaultModelConfig.timeout,
       alias: def.filename,
       dataId,
       commitId: dataId,
@@ -732,7 +733,7 @@ export class ModelManager {
       rule: def.rule,
       extendInfo: def.extendInfo,
       size: def.size,
-      operation: modelConfig.operation,
+      operation: modelConfig.operation ?? this.defaultModelConfig.operation,
       paymentDid: def.paymentDid,
     };
 
@@ -819,6 +820,14 @@ export class ModelManager {
       console.error(error); // log the error
     }
     return { contentLength: content.length, cid: contentCid.toString() };
+  }
+
+  fullfillDefaultModelConfig() {
+    this.defaultModelConfig.replica = this.defaultModelConfig.replica ?? DefaultModelConfig.replica;
+    this.defaultModelConfig.duration = this.defaultModelConfig.duration ?? DefaultModelConfig.duration;
+    this.defaultModelConfig.timeout = this.defaultModelConfig.timeout ?? DefaultModelConfig.timeout;
+    this.defaultModelConfig.isPublish = this.defaultModelConfig.isPublish ?? DefaultModelConfig.isPublish;
+    this.defaultModelConfig.operation = this.defaultModelConfig.operation ?? DefaultModelConfig.operation;
   }
 }
 

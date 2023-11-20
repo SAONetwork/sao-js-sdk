@@ -38,9 +38,9 @@ export type FileDef<T> = {
 };
 
 export type ModelConfig = {
-  duration?: number | 365;
-  replica?: number | 3;
-  timeout?: number | 300;
-  operation?: number | 1;
-  isPublish?: boolean | false;
+  duration?: number;
+  replica?: number;
+  timeout?: number;
+  operation?: number;
+  isPublish?: boolean;
 };
