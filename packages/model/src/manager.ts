@@ -710,7 +710,7 @@ export class ModelManager {
     def: FileDef<T>,
     modelConfig: ModelConfig = this.defaultModelConfig,
     ownerDid?: string
-  ): Promise<string> {
+  ): Promise<{cid: string, dataId: string}> {
     let provider = this.defaultModelProvider;
     if (ownerDid !== undefined) {
       provider = this.getModelProvider(ownerDid);
@@ -753,7 +753,7 @@ export class ModelManager {
       JwsSignature: clientProposal.signatures[0],
     };
 
-    return await provider.storeProposal(clientOrderProposal);
+    return {cid: await provider.storeProposal(clientOrderProposal), dataId: dataId};
   }
 
   /**
