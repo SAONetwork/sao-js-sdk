@@ -711,7 +711,7 @@ export class ModelManager {
     def: FileDef<T>,
     modelConfig: ModelConfig = this.defaultModelConfig,
     ownerDid?: string
-  ): Promise<string> {
+  ): Promise<{ DataId: string; ProposalCid: string }> {
     let provider = this.defaultModelProvider;
     if (ownerDid !== undefined) {
       provider = this.getModelProvider(ownerDid);
