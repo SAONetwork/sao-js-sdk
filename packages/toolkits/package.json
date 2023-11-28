@@ -1,6 +1,6 @@
 {
   "name": "@saonetwork/toolkits",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "keywords": [
     "did"
   ],
@@ -27,7 +27,7 @@
     "@aws-crypto/sha256-browser": "^2.0.2",
     "@cosmjs/proto-signing": "^0.29.4",
     "@saonetwork/api-client": "0.0.6",
-    "@saonetwork/model": "0.0.29",
+    "@saonetwork/model": "0.0.30",
     "@saonetwork/sid": "0.0.23",
     "@types/varint": "^6.0.1",
     "axios": "0.27.2",

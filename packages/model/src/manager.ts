@@ -180,7 +180,7 @@ export class ModelManager {
     const proposal: SaoTypes.Proposal = {
       owner: ownerDid || provider.getOwnerSid(),
       provider: provider.getNodeAddress(),
-      groupId: provider.getGroupId(),
+      groupId: def.groupId ?? provider.getGroupId(),
       duration: modelConfig.duration ?? this.defaultModelConfig.duration,
       replica: modelConfig.replica ?? this.defaultModelConfig.replica,
       timeout: modelConfig.timeout ?? this.defaultModelConfig.timeout,
@@ -254,7 +254,7 @@ export class ModelManager {
     const proposal: SaoTypes.Proposal = {
       owner: ownerDid || provider.getOwnerSid(),
       provider: provider.getNodeAddress(),
-      groupId: provider.getGroupId(),
+      groupId: def.groupId ?? provider.getGroupId(),
       duration: modelConfig.duration ?? this.defaultModelConfig.duration,
       replica: modelConfig.replica ?? this.defaultModelConfig.replica,
       timeout: modelConfig.timeout ?? this.defaultModelConfig.timeout,
@@ -356,7 +356,7 @@ export class ModelManager {
     const proposal: SaoTypes.Proposal = {
       owner: ownerDid || provider.getOwnerSid(),
       provider: provider.getNodeAddress(),
-      groupId: provider.getGroupId(),
+      groupId: def.groupId ?? provider.getGroupId(),
       duration: modelConfig.duration ?? this.defaultModelConfig.duration,
       replica: modelConfig.replica ?? this.defaultModelConfig.replica,
       timeout: modelConfig.timeout ?? this.defaultModelConfig.timeout,
@@ -721,7 +721,7 @@ export class ModelManager {
     const proposal: SaoTypes.Proposal = {
       owner: ownerDid || provider.getOwnerSid(),
       provider: provider.getNodeAddress(),
-      groupId: provider.getGroupId(),
+      groupId: def.groupId ?? provider.getGroupId(),
       duration: modelConfig.duration ?? this.defaultModelConfig.duration,
       replica: modelConfig.replica ?? this.defaultModelConfig.replica,
       timeout: modelConfig.timeout ?? this.defaultModelConfig.timeout,
