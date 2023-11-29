@@ -23,6 +23,18 @@ export class PriceFeedsGoerli implements PriceFeedModel {
         }
 }
 
+export class PriceFeedsPolygon implements PriceFeedModel {
+
+    network = 5
+
+        MATIC_USD: PriceFeedItemModel = {
+            address: "0xab594600376ec9fd91f8e885dadf0ce036862de0",
+            name: "MATIC / USD",
+            assetName: "Matic",
+            feedType: "Crypto"
+        }
+}
+
 
 
 export async function GetNativeTokenPrice(provider: any, chainId: number) {
@@ -38,6 +50,9 @@ export async function GetNativeTokenPrice(provider: any, chainId: number) {
         case 56: 
             feeds = new PriceFeedsBSC()
             token = feeds.BNB_USD;break
+        case 137: 
+            feeds = new PriceFeedsPolygon()
+            token = feeds.MATIC_USD;break
         case 43114: 
             feeds = new PriceFeedsAVAX()
             token = feeds.AVAX_USD;
