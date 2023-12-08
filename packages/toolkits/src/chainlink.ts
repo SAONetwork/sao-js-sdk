@@ -25,7 +25,7 @@ export class PriceFeedsGoerli implements PriceFeedModel {
 
 export class PriceFeedsPolygon implements PriceFeedModel {
 
-    network = 5
+    network = 137
 
         MATIC_USD: PriceFeedItemModel = {
             address: "0xab594600376ec9fd91f8e885dadf0ce036862de0",
